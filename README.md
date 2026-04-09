@@ -124,6 +124,7 @@ Di chuyển vào thư mục backend và cài dependencies:
 ```bash
 cd server
 npm install
+npx prisma generate
 ```
 
 Tạo database bằng file wanderly.sql
