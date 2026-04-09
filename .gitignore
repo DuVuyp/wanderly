@@ -1,0 +1,41 @@
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment files (keep example files)
+server/.env
+server/.env.*
+!server/.env.example
+
+# Node.js dependencies
+server/node_modules/
+
+# Test & coverage artifacts
+server/coverage/
+server/.nyc_output/
+
+# Runtime / temp
+server/tmp/
+server/temp/
+server/.cache/
+
+# Build output
+server/dist/
+server/build/
+
+# Prisma generated files and local databases
+server/prisma/generated/
+server/prisma/*.db
+server/prisma/*.db-journal
+
+# Misc
+server/*.local

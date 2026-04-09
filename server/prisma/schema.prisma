@@ -1,0 +1,125 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+}
+
+model Booking_Details {
+  id               Int        @id(map: "PK__Booking___3213E83F278FBB78") @default(autoincrement())
+  booking_id       Int
+  room_type_id     Int
+  quantity         Int
+  price_at_booking Decimal    @db.Decimal(10, 2)
+  Bookings         Bookings   @relation(fields: [booking_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Details_Bookings")
+  Room_Types       Room_Types @relation(fields: [room_type_id], references: [id], onUpdate: NoAction, map: "FK_Details_RoomTypes")
+}
+
+model Bookings {
+  id              Int               @id(map: "PK__Bookings__3213E83FF800FF8F") @default(autoincrement())
+  user_id         Int
+  property_id     Int
+  check_in_date   DateTime          @db.Date
+  check_out_date  DateTime          @db.Date
+  total_price     Decimal           @db.Decimal(10, 2)
+  status          String            @db.VarChar(20)
+  created_at      DateTime?         @default(now(), map: "DF__Bookings__create__71D1E811") @db.DateTime
+  Booking_Details Booking_Details[]
+  Properties      Properties        @relation(fields: [property_id], references: [id], onUpdate: NoAction, map: "FK_Bookings_Properties")
+  Users           Users             @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "FK_Bookings_Users")
+}
+
+model Itineraries {
+  id                  Int                   @id(map: "PK__Itinerar__3213E83F501309AC") @default(autoincrement())
+  user_id             Int
+  title               String                @db.VarChar(255)
+  status              String                @default("draft", map: "DF__Itinerari__statu__5EBF139D") @db.VarChar(20)
+  start_date          DateTime?             @db.Date
+  end_date            DateTime?             @db.Date
+  created_at          DateTime?             @default(now(), map: "DF__Itinerari__creat__60A75C0F") @db.DateTime
+  Users               Users                 @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Itineraries_Users")
+  Itinerary_Locations Itinerary_Locations[]
+  Itinerary_Notes     Itinerary_Notes[]
+}
+
+model Itinerary_Locations {
+  id           Int         @id(map: "PK__Itinerar__3213E83F825C4D5D") @default(autoincrement())
+  itinerary_id Int
+  property_id  Int?
+  custom_name  String?     @db.VarChar(255)
+  latitude     Decimal     @db.Decimal(10, 8)
+  longitude    Decimal     @db.Decimal(11, 8)
+  visit_time   DateTime?   @db.DateTime
+  order_index  Int
+  created_at   DateTime?   @default(now(), map: "DF__Itinerary__creat__66603565") @db.DateTime
+  Itineraries  Itineraries @relation(fields: [itinerary_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Locations_Itineraries")
+  Properties   Properties? @relation(fields: [property_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Locations_Properties")
+
+  @@unique([itinerary_id, order_index], map: "UQ_Itinerary_Order")
+}
+
+model Itinerary_Notes {
+  id           Int         @id(map: "PK__Itinerar__3213E83F50730F07") @default(autoincrement())
+  itinerary_id Int
+  content      String      @db.NVarChar(Max)
+  is_checked   Boolean?    @default(false, map: "DF__Itinerary__is_ch__6C190EBB")
+  created_at   DateTime?   @default(now(), map: "DF__Itinerary__creat__6D0D32F4") @db.DateTime
+  Itineraries  Itineraries @relation(fields: [itinerary_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Notes_Itineraries")
+}
+
+model Properties {
+  id                  Int                   @id(map: "PK__Properti__3213E83F13B3526F") @default(autoincrement())
+  provider_id         Int
+  name                String                @db.VarChar(255)
+  property_type       String                @db.VarChar(50)
+  address             String                @db.NVarChar(Max)
+  latitude            Decimal               @db.Decimal(10, 8)
+  longitude           Decimal               @db.Decimal(11, 8)
+  check_in_time       DateTime              @db.Time
+  check_out_time      DateTime              @db.Time
+  created_at          DateTime?             @default(now(), map: "DF__Propertie__creat__5165187F") @db.DateTime
+  Bookings            Bookings[]
+  Itinerary_Locations Itinerary_Locations[]
+  Users               Users                 @relation(fields: [provider_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Properties_Users")
+  Room_Types          Room_Types[]
+}
+
+model Room_Types {
+  id              Int               @id(map: "PK__Room_Typ__3213E83FA41A4090") @default(autoincrement())
+  property_id     Int
+  name            String            @db.VarChar(255)
+  max_guests      Int
+  base_price      Decimal           @db.Decimal(10, 2)
+  total_quantity  Int
+  amenities       String?           @db.NVarChar(Max)
+  created_at      DateTime?         @default(now(), map: "DF__Room_Type__creat__5535A963") @db.DateTime
+  Booking_Details Booking_Details[]
+  Properties      Properties        @relation(fields: [property_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_RoomTypes_Properties")
+  Rooms           Rooms[]
+}
+
+model Rooms {
+  id           Int        @id(map: "PK__Rooms__3213E83FCE57D8B7") @default(autoincrement())
+  room_type_id Int
+  room_number  String     @db.VarChar(50)
+  status       String?    @default("available", map: "DF__Rooms__status__59063A47") @db.VarChar(20)
+  created_at   DateTime?  @default(now(), map: "DF__Rooms__created_a__5AEE82B9") @db.DateTime
+  Room_Types   Room_Types @relation(fields: [room_type_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Rooms_RoomTypes")
+}
+
+model Users {
+  id               Int           @id(map: "PK__Users__3213E83F4F33661C") @default(autoincrement())
+  email            String        @unique(map: "UQ__Users__AB6E6164F905A2D0") @db.VarChar(255)
+  password_hash    String        @db.VarChar(255)
+  role             String        @default("traveler", map: "DF__Users__role__4BAC3F29") @db.VarChar(20)
+  is_verified      Boolean?      @default(false, map: "DF__Users__is_verifi__4CA06362")
+  verify_token     String?       @db.VarChar(255)
+  reset_pass_token String?       @db.VarChar(255)
+  token_expiry     DateTime?     @db.DateTime
+  created_at       DateTime?     @default(now(), map: "DF__Users__created_a__4D94879B") @db.DateTime
+  full_name        String        @db.NVarChar(255)
+  Bookings         Bookings[]
+  Itineraries      Itineraries[]
+  Properties       Properties[]
+}

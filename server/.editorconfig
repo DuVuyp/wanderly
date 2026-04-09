@@ -1,0 +1,19 @@
+; Set this as the root .editorconfig for the project
+; Child .editorconfig files won't override when root=true
+root = true
+
+; Apply the rules below to all files (*)
+[*]
+; Use UTF-8 character encoding (recommended, widely supported)
+charset = utf-8
+; Use spaces for indentation; do not use tabs
+indent_style = space
+; Indent with 2 spaces per level
+indent_size = 2
+; Use LF (Unix) line endings. Note: Windows may use CRLF,
+; but LF helps keep consistency across OSes and avoid unnecessary diffs
+end_of_line = lf
+; Always add a final newline for better tool compatibility
+insert_final_newline = true
+; Automatically trim trailing whitespace on save
+trim_trailing_whitespace = true
