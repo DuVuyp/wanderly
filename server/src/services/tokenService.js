@@ -49,6 +49,43 @@ export const generateAuthTokens = async (user) => {
   }
 }
 
+export const verifyToken = (token, expectedType) => {
+  const secret = process.env.JWT_SECRET
+  if (!secret) {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'JWT_SECRET is not configured')
+  }
+
+  try {
+    const payload = jwt.verify(token, secret)
+
+    if (expectedType && payload.type !== expectedType) {
+      throw new ApiError(httpStatus.UNAUTHORIZED, 'Invalid token type')
+    }
+
+    return payload
+  } catch (error) {
+    if (error instanceof ApiError) throw error
+    if (error.name === 'TokenExpiredError') {
+      throw new ApiError(httpStatus.UNAUTHORIZED, 'Token has expired')
+    }
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Invalid token')
+  }
+}
+
+export const refreshAuthTokens = async (refreshToken) => {
+  const payload = verifyToken(refreshToken, 'REFRESH')
+
+  const user = await prisma.users.findUnique({
+    where: { id: payload.id },
+  })
+
+  if (!user) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'User not found')
+  }
+
+  return generateAuthTokens(user)
+}
+
 export const generateResetPasswordToken = async (user) => {
   const userId = requireUserId(user)
   const expires = moment().add(10, 'minutes')

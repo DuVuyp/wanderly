@@ -6,7 +6,7 @@ import prisma from '../config/prisma.js'
 
 const sanitizeUser = (user) => {
   if (!user) return user
-  const { password_hash, ...safeUser } = user
+  const { password_hash, verify_token, reset_pass_token, token_expiry, ...safeUser } = user
   return safeUser
 }
 

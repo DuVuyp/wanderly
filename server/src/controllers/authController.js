@@ -25,4 +25,31 @@ const loginUser = catchAsync(async (req, res) => {
   })
 })
 
-export { registerUser, loginUser }
+const getMe = catchAsync(async (req, res) => {
+  res.status(httpStatus.OK).json({
+    success: true,
+    message: 'User profile retrieved successfully',
+    data: req.user,
+  })
+})
+
+const refreshTokens = catchAsync(async (req, res) => {
+  const { refreshToken } = req.body
+  const tokens = await tokenService.refreshAuthTokens(refreshToken)
+  res.status(httpStatus.OK).json({
+    success: true,
+    message: 'Tokens refreshed successfully',
+    data: tokens,
+  })
+})
+
+const logoutUser = catchAsync(async (req, res) => {
+  // Stateless JWT — client-side handles token removal.
+  // In production, consider a token blacklist or DB-stored refresh tokens.
+  res.status(httpStatus.OK).json({
+    success: true,
+    message: 'Logged out successfully',
+  })
+})
+
+export { registerUser, loginUser, getMe, refreshTokens, logoutUser }

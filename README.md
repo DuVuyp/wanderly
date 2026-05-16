@@ -1,125 +1,220 @@
-﻿# Wanderly - Hướng dẫn làm việc nhóm
+# 📘 Wanderly - Sổ tay phát triển (Project Log)
 
-Tài liệu này dùng để cả nhóm thống nhất cách lấy code, code trên nhánh riêng, đẩy code lên GitHub và tạo Pull Request.
+## 1. Tổng quan dự án
 
-## 1. Lấy code mới nhất về máy (Đầu ngày làm việc)
-Nếu bạn chưa có thư mục dự án trên máy, hãy clone về:
+- **Tên ứng dụng:** Wanderly
+- **Mô tả:** Nền tảng du lịch cho phép người dùng tìm kiếm & đặt phòng khách sạn, lên lịch trình du lịch, và quản lý chỗ nghỉ (dành cho chủ nhà/provider).
+- **Đối tượng:** Khách du lịch (Traveler), Chủ khách sạn/Homestay (Provider), Quản trị viên (Admin).
+- **Kiến trúc:** Monorepo gồm 3 phần — `server/` (Backend API), `client/` (Giao diện người dùng), `admin/` (Giao diện quản trị).
 
-```bash
-git clone https://github.com/DuVuyp/wanderly.git
-cd wanderly
+---
+
+## 2. Công nghệ & Thư viện (Tech Stack)
+
+### Backend (`server/`)
+
+- **Runtime:** Node.js (>=20)
+- **Framework:** Express 5
+- **ORM:** Prisma (SQL Server)
+- **Xác thực:** JWT (jsonwebtoken), bcryptjs
+- **Validate:** Joi
+- **Upload ảnh:** Cloudinary, Multer
+- **Email:** Nodemailer
+- **Thanh toán (Dự kiến):** Stripe
+- **Monitoring (Dự kiến):** Sentry
+
+### Frontend Client (`client/`)
+
+- **Framework:** React 19 + Vite
+- **Routing:** React Router DOM v7
+- **Styling:** TailwindCSS 3
+- **HTTP Client:** Axios + React Query (TanStack)
+- **Form:** React Hook Form + Zod
+- **UI Icons:** Lucide React
+- **Toast:** Sonner
+
+### Frontend Admin (`admin/`)
+
+- **Framework:** React 19 + Vite
+- **Routing:** React Router DOM v7
+- **HTTP Client:** Axios + React Query (TanStack)
+- **Form:** React Hook Form + Zod
+- **UI Icons:** Lucide React
+
+---
+
+## 3. Cơ sở dữ liệu (Database Schema)
+
+Hệ thống sử dụng **SQL Server** với các bảng chính:
+
+```text
+Users              → Người dùng (traveler / provider / admin)
+Properties         → Khách sạn, Homestay, Resort, Villa (do Provider tạo)
+Room_Types         → Loại phòng trong mỗi Property
+Rooms              → Phòng cụ thể thuộc loại phòng
+Bookings           → Đơn đặt phòng (pending / confirmed / completed / cancelled)
+Booking_Details    → Chi tiết đơn đặt (loại phòng, số lượng, giá)
+Itineraries        → Lịch trình du lịch (draft / published / completed)
+Itinerary_Locations→ Các địa điểm trong lịch trình
+Itinerary_Notes    → Ghi chú trong lịch trình (checklist)
 ```
 
-Nếu đã có sẵn dự án, trước khi bắt đầu code bất cứ thứ gì, hãy đảm bảo bạn đang ở nhánh `main` và lấy code mới nhất mà các bạn khác vừa làm xong:
+**Roles trong hệ thống:**
+
+| Role       | Mô tả                                                             |
+| :--------- | :----------------------------------------------------------------- |
+| `traveler` | Người dùng thường — tìm kiếm, đặt phòng, lên lịch trình.         |
+| `provider` | Chủ khách sạn — quản lý Property, Room, xem đơn đặt phòng.       |
+| `admin`    | Quản trị viên — quản lý toàn bộ User, Property, Booking hệ thống. |
+
+---
+
+## 4. Kiến trúc thư mục
+
+```text
+wanderly/
+│
+├── server/                         # BACKEND API (Express + Prisma)
+│   ├── prisma/
+│   │   └── schema.prisma           # Định nghĩa model database
+│   ├── src/
+│   │   ├── config/                 # Cấu hình Prisma, env
+│   │   ├── constants/              # Hằng số (roles, status)
+│   │   ├── controllers/            # Xử lý request/response
+│   │   ├── middlewares/            # Auth, validate, error handler
+│   │   ├── routes/                 # Định nghĩa endpoint API
+│   │   ├── services/               # Business logic & thao tác DB
+│   │   ├── utils/                  # Hàm hỗ trợ (ApiError, catchAsync)
+│   │   ├── validations/            # Rule validate input (Joi)
+│   │   └── index.js                # Entry point
+│   └── wanderly.sql                # Script khởi tạo database
+│
+├── client/                         # FRONTEND NGƯỜI DÙNG (React + Vite)
+│   └── src/
+│       ├── api/                    # Axios client & API calls
+│       ├── pages/                  # Các trang (Login, Register, ...)
+│       ├── assets/                 # Ảnh, icon
+│       ├── App.jsx                 # Root component + Router
+│       └── main.jsx                # Entry point
+│
+├── admin/                          # FRONTEND QUẢN TRỊ (React + Vite)
+│   └── src/
+│       ├── assets/                 # Ảnh, icon
+│       ├── App.jsx                 # Root component
+│       └── main.jsx                # Entry point
+│
+└── README.md                       # File này
+```
+
+### Luồng code Backend
+
+Một request API đi theo luồng:
+
+`route → middleware (validate/auth) → controller → service → database (Prisma)`
+
+---
+
+## 5. Danh sách Chức năng
+
+### Nhóm cốt lõi (Core)
+
+- Đăng ký / Đăng nhập / Quản lý phiên (JWT Access + Refresh Token).
+- Quản lý Property (CRUD khách sạn, loại phòng, phòng) — dành cho Provider.
+- Tìm kiếm & Đặt phòng — dành cho Traveler.
+- Lên lịch trình du lịch (Itinerary) với bản đồ & ghi chú.
+- Quản trị toàn hệ thống — dành cho Admin.
+
+### Nhóm Mở rộng (Extended)
+
+- Đánh giá & Nhận xét (Review) khách sạn.
+- Upload ảnh khách sạn qua Cloudinary.
+- Thanh toán trực tuyến (Stripe).
+- Gửi email xác nhận / Reset mật khẩu (Nodemailer).
+- Dashboard thống kê cho Admin.
+
+---
+
+## 6. Quy trình làm việc nhóm (Team Workflow)
+
+Để đảm bảo hiệu suất và tránh xung đột mã nguồn (Merge Conflict) cho nhóm 4 người, toàn bộ thành viên cần tuân thủ nghiêm ngặt quy trình dưới đây.
+
+### 6.1. Quy tắc đặt tên (Naming Conventions)
+
+**1. Đặt tên Nhánh (Branch):**
+Luôn viết chữ thường, không dấu, dùng dấu gạch ngang `-` để nối từ.
+
+* Tính năng mới: `feature/ten-tinh-nang` (VD: `feature/property-crud`, `feature/booking-api`)
+* Sửa lỗi: `bugfix/ten-loi` (VD: `bugfix/login-token-expired`)
+* Cấu hình hệ thống: `config/ten-cau-hinh` (VD: `config/add-cloudinary`)
+
+**2. Viết lời nhắn Commit (Commit Message):**
+Bắt đầu bằng tiền tố phân loại, sau đó mô tả ngắn gọn.
+
+* `feat:` Thêm tính năng mới. (VD: `feat: Hoàn thành API quản lý Property`)
+* `fix:` Sửa lỗi. (VD: `fix: Sửa lỗi refresh token không hoạt động`)
+* `ui:` Cập nhật giao diện. (VD: `ui: Hoàn thành trang danh sách khách sạn`)
+* `refactor:` Viết lại code gọn hơn, không thay đổi chức năng.
+* `docs:` Cập nhật tài liệu.
+
+### 6.2. Vòng lặp công việc hàng ngày (Daily Routine)
+
+**Bước 1: Đồng bộ code (CỰC KỲ QUAN TRỌNG)**
 
 ```bash
 git checkout main
 git pull origin main
 ```
 
-## 2. Tạo nhánh riêng để làm việc
-Tuyệt đối không code trên `main`. Hãy tạo một nhánh mới. Tên nhánh nên thể hiện rõ bạn đang làm gì.
+**Bước 2: Tạo nhánh cá nhân để code**
 
 ```bash
-# Lệnh này vừa tạo nhánh mới vừa chuyển bạn sang nhánh đó luôn
-git checkout -b feature/ten-chuc-nang
-
-# Ví dụ:
-# git checkout -b feature/trang-dang-nhap
-# git checkout -b fix/loi-hien-thi-header
+git checkout -b feature/ten-task-cua-ban
 ```
 
-## 3. Code và lưu lại (Commit)
-Bây giờ bạn cứ mở code lên và làm việc bình thường. Khi làm xong một cụm tính năng nhỏ, hãy lưu lại:
+**Bước 3: Code và kiểm tra liên tục**
+
+* **Quy tắc Vàng:** Code bị lỗi đỏ màn hình / terminal thì tuyệt đối chưa được commit.
+* Thường xuyên chạy `npm run dev` để kiểm tra.
+* Chỉ sử dụng các constant, util đã khai báo trong `constants/`, `utils/`.
+
+**Bước 4: Lưu và Đẩy code lên cuối ngày**
 
 ```bash
-# 1. Kiểm tra xem file nào đã thay đổi
-git status
-
-# 2. Thêm tất cả các file đã thay đổi vào danh sách chuẩn bị lưu
 git add .
-
-# 3. Lưu lại với một lời nhắn rõ ràng (tiếng Việt hay Anh đều được)
-git commit -m "Hoàn thành giao diện trang đăng nhập"
+git commit -m "feat: Mô tả công việc đã làm hôm nay"
+git push -u origin feature/ten-task-cua-ban
 ```
 
-## 4. Cập nhật lại code trước khi đẩy (Rất quan trọng)
-Trong lúc bạn code nhánh của bạn, có thể các thành viên khác đã đẩy code mới lên `main`. Bạn cần kéo code đó về nhánh của mình để xem có bị xung đột (conflict) không.
+### 6.3. Quy trình Review và ghép code (Pull Request)
 
-```bash
-git pull origin main
-```
+1. **Người code:** Lên GitHub, tạo Pull Request từ nhánh `feature/...` hướng vào nhánh `main`.
+2. **Thông báo:** Nhắn vào group chat: *"Tôi đã tạo PR cho [mô tả], nhờ 1 bạn vào review!"*.
+3. **Người Review:**
+   * Xem các file code đã thay đổi.
+   * Chạy thử trên máy (nếu cần).
+   * Kiểm tra code có đúng chuẩn không, có file rác không.
+   * Ổn → **Approve** + **Merge**. Chưa ổn → Comment yêu cầu sửa.
+4. **Không tự Merge PR của chính mình.** Phải có ít nhất 1 người khác duyệt.
 
-Lưu ý:
-- Nếu không có lỗi gì, Git sẽ tự gộp code.
-- Nếu có chữ `CONFLICT`, bạn cần mở file lỗi lên, sửa bằng tay để giữ lại code đúng, sau đó chạy lại lệnh `git add .` và `git commit -m "Fix conflict"`.
+### 6.4. Xử lý sự cố (Merge Conflict)
 
-## 5. Đẩy nhánh của bạn lên GitHub
-Sau khi đảm bảo code chạy tốt và đã cập nhật code mới từ nhóm, bạn đẩy nhánh này lên GitHub:
+1. **Không xóa file hay xóa nhánh.**
+2. **Báo cáo:** Nhắn ngay vào group: *"Tôi bị conflict file ... với bạn ..."*.
+3. **Giải quyết:** Mở file trong VS Code, chọn Accept Current/Incoming Change, thảo luận rồi commit lại.
 
-```bash
-git push origin feature/ten-chuc-nang
-# Ví dụ: git push origin feature/trang-dang-nhap
-```
+### 6.5. Tiêu chuẩn hoàn thành một Task (Definition of Done)
 
-## 6. Tạo Pull Request (PR) - Gộp code vào dự án chung
-Phần này không dùng lệnh mà làm trên web:
-
-1. Lên trang GitHub của dự án. Bạn sẽ thấy một nút màu xanh lá cây tên là **Compare & pull request** vừa hiện ra. Nhấn vào đó.
-2. Viết vài dòng mô tả xem nhánh này bạn đã làm những gì.
-3. Nhấn **Create pull request**.
-
-Lúc này, nhóm sẽ cùng vào xem code của bạn (Code Review). Nếu mọi người đồng ý, người quản lý (hoặc chính bạn) sẽ nhấn nút **Merge pull request** để gộp chính thức vào nhánh `main`.
+- [ ] Ứng dụng chạy không lỗi ở Terminal (cả server lẫn client/admin).
+- [ ] API trả về đúng format JSON: `{ success, message, data }`.
+- [ ] UI responsive, không vỡ layout trên các kích thước màn hình.
+- [ ] Đã dọn dẹp `console.log()` debug và code rác.
+- [ ] Đã chạy `npm run lint` không có lỗi.
 
 ---
 
-## Giải thích cấu trúc thư mục (Backend)
-Dự án hiện tại có phần backend nằm trong thư mục `server/`.
+## 7. Hướng dẫn chạy dự án ở máy local
 
-### Tổng quan
-
-```text
-server/
-  prisma/
-    schema.prisma
-  src/
-    config/
-    constants/
-    controllers/
-    middlewares/
-    routes/
-    services/
-    utils/
-    validations/
-```
-
-### Ý nghĩa từng thư mục
-- `server/prisma/`: Chứa file schema database (`schema.prisma`) và migration (nếu có). Đây là nơi định nghĩa model bằng Prisma.
-- `server/src/index.js`: Điểm vào chính của server Express, nơi khởi tạo app, middleware và route.
-- `server/src/config/`: Các cấu hình dùng chung (ví dụ kết nối Prisma, env config...).
-- `server/src/constants/`: Hằng số toàn dự án (role, status, key cố định...).
-- `server/src/controllers/`: Xử lý request/response cho từng API. Controller nhận request, gọi service, trả kết quả.
-- `server/src/middlewares/`: Middleware dùng chung (xử lý lỗi, validate input, auth...).
-- `server/src/routes/`: Định nghĩa endpoint và map endpoint tới controller.
-- `server/src/services/`: Chứa business logic. Service thường giao tiếp database và xử lý nghiệp vụ.
-- `server/src/utils/`: Hàm hỗ trợ và class dùng chung (ví dụ: `ApiError`, `catchAsync`).
-- `server/src/validations/`: Rule validate dữ liệu đầu vào (thường dùng Joi).
-
-### Luồng code để dễ hiểu
-Một request API thường đi theo luồng:
-
-`route -> middleware (validate/auth) -> controller -> service -> database`
-
-Nói gọn:
-- Route: định nghĩa đường dẫn API.
-- Middleware: chặn lỗi/kiểm tra token/kiểm tra input.
-- Controller: xử lý đầu vào đầu ra cho API.
-- Service: chứa logic nghiệp vụ và thao tác DB.
-
----
-
-## Hướng dẫn chạy backend ở máy local
-Di chuyển vào thư mục backend và cài dependencies:
+### 7.1. Chạy Backend
 
 ```bash
 cd server
@@ -127,32 +222,160 @@ npm install
 npx prisma generate
 ```
 
-Tạo database bằng file wanderly.sql
-
-Chạy server ở chế độ phát triển:
+Tạo database bằng file `wanderly.sql`, cấu hình `.env` theo `.env.example`, sau đó:
 
 ```bash
 npm run dev
 ```
 
-Test:
+### 7.2. Chạy Frontend Client
 
 ```bash
-npm test
+cd client
+npm install
+npm run dev
 ```
 
-Lint:
+Client chạy tại `http://localhost:3000`.
+
+### 7.3. Chạy Frontend Admin
 
 ```bash
-npm run lint
+cd admin
+npm install
+npm run dev
 ```
 
-Prisma (nếu cần):
+Admin chạy tại `http://localhost:5173`.
 
-```bash
-npm run prisma:generate
-npm run prisma:migrate
-npm run prisma:studio
+---
+
+## Sprint 1: Tập trung xây dựng Backend API (Hoàn thành 80% Core tính năng)
+
+**Quy tắc chung cho toàn SPRINT 1:**
+
+* Trọng tâm của Sprint này là **chỉ làm việc trên thư mục `server/`**. Tạm thời chưa code giao diện trên `client/` và `admin/`.
+* Xây dựng toàn bộ các API nền tảng để phục vụ cho các Sprint sau.
+* Tuân thủ luồng: `route` → `middleware (auth, validate)` → `controller` → `service` → `Prisma (DB)`.
+* Dùng **Postman** hoặc phần mềm tương tự (Insomnia, Thunder Client) để test API trả về đúng JSON.
+* **Code bị lỗi (crash server) tuyệt đối không được push lên.**
+
+---
+
+### 👨‍💻 Thành viên 1: Lead / Authentication & User Management
+
+**Mục tiêu:** Đảm bảo hệ thống bảo mật, đăng nhập/đăng ký, quản lý token, và các API thao tác với thông tin người dùng hoạt động trơn tru.
+
+| Task (Việc cần làm) | Vị trí file cần thao tác | Hướng dẫn triển khai chi tiết |
+| :--- | :--- | :--- |
+| **1. Middleware Phân quyền (Role-based)** | `server/src/middlewares/authMiddleware.js` | Mở rộng hàm `auth()`. Cho phép truyền vào nhiều role, ví dụ `auth('admin')` hoặc `auth('provider', 'admin')`. Kiểm tra `req.user.role` từ token, nếu không khớp trả về lỗi HTTP 403 Forbidden. |
+| **2. API Quản lý User (Cho Admin)** | `server/src/controllers/userController.js`<br>`server/src/services/userService.js`<br>`server/src/routes/userRoutes.js` | **GET /api/users**: Lấy danh sách (hỗ trợ query `page`, `limit`). Dùng `prisma.users.findMany()`.<br>**GET /api/users/:id**: Lấy chi tiết một user.<br>**PUT /api/users/:id**: Cập nhật role (admin có thể cấp quyền provider).<br>**DELETE /api/users/:id**: Xóa user.<br>*Tất cả API này phải gắn middleware `auth('admin')`*. |
+| **3. API Cập nhật Profile cá nhân** | `server/src/controllers/userController.js`<br>`server/src/services/userService.js`<br>`server/src/routes/userRoutes.js` | **PUT /api/users/profile**: Cập nhật thông tin chính mình (tên, số điện thoại...). Lấy ID từ `req.user.id`.<br>**PUT /api/users/change-password**: So sánh mật khẩu cũ (dùng `bcrypt.compare`), hash mật khẩu mới và update DB. |
+| **4. Validation Schema** | `server/src/validations/userValidation.js` | Viết các schema Joi để chặn ngay dữ liệu lỗi từ đầu: `updateProfileSchema`, `changePasswordSchema` (yêu cầu pass dài ít nhất 8 ký tự, có số và chữ). |
+| **5. Seed Data (Tạo dữ liệu mẫu)** | `server/src/seed.js` (Tạo mới) | Viết script chạy `prisma.users.create` để tạo 1 tài khoản Admin (`admin@wanderly.com`), 2 Provider, và 5 Traveler với password mặc định là `123456`. |
+
+---
+
+### 👨‍💻 Thành viên 2: API Quản lý Cơ sở lưu trú (Property & Room)
+
+**Mục tiêu:** Viết các API cho Provider (chủ nhà) đăng bài, quản lý các khách sạn, homestay, định nghĩa loại phòng, và quản lý các phòng cụ thể.
+
+| Task (Việc cần làm) | Vị trí file cần thao tác | Hướng dẫn triển khai chi tiết |
+| :--- | :--- | :--- |
+| **1. CRUD Property (Khách sạn/Homestay)** | `server/src/controllers/propertyController.js`<br>`server/src/services/propertyService.js`<br>`server/src/routes/propertyRoutes.js` | **POST /api/properties**: Tạo mới. Lấy `provider_id` bằng `req.user.id`. Bắt buộc nhận `name`, `type`, `address`, `latitude`, `longitude`, `check_in_time`, `check_out_time`.<br>**GET /api/properties**: Lấy danh sách tài sản của mình (nếu gọi với role provider).<br>**PUT/DELETE**: Chỉ cho phép thao tác nếu `property.provider_id == req.user.id`. |
+| **2. CRUD Room Types (Loại phòng)** | `server/src/controllers/roomTypeController.js`<br>`server/src/services/roomTypeService.js`<br>`server/src/routes/roomTypeRoutes.js` | Định nghĩa các loại phòng (VD: Phòng đôi, Phòng gia đình).<br>**POST /api/properties/:propertyId/room-types**: Kiểm tra xem Property này có thuộc về `req.user` không trước khi tạo. Dữ liệu cần có: `name`, `max_guests`, `base_price`, `total_quantity`, `amenities` (có thể truyền dạng chuỗi JSON `["wifi", "tv"]`). |
+| **3. CRUD Rooms (Quản lý phòng vật lý)** | `server/src/controllers/roomController.js`<br>`server/src/services/roomService.js`<br>`server/src/routes/roomRoutes.js` | Sau khi có loại phòng (VD: 5 phòng đôi), cần tạo ID thực tế (VD: P101, P102).<br>**POST /api/room-types/:roomTypeId/rooms**: Tạo phòng cụ thể với `room_number`. Cập nhật trạng thái `available`, `maintenance`. |
+| **4. Validation Schema** | `server/src/validations/propertyValidation.js` | Viết schema Joi kiểm tra: Giá phòng phải > 0, số lượng người > 0, tọa độ vĩ độ (`latitude`) từ -90 đến 90, kinh độ (`longitude`) từ -180 đến 180. |
+
+---
+
+### 👨‍💻 Thành viên 3: API Đặt phòng (Booking) & Tìm kiếm (Search)
+
+**Mục tiêu:** Trọng tâm của hệ thống (phần khó nhất). Traveler phải có khả năng tìm kiếm khách sạn theo tiêu chí và thực hiện luồng đặt phòng.
+
+| Task (Việc cần làm) | Vị trí file cần thao tác | Hướng dẫn triển khai chi tiết |
+| :--- | :--- | :--- |
+| **1. API Tìm kiếm Khách sạn (Search)** | `server/src/controllers/searchController.js`<br>`server/src/services/searchService.js`<br>`server/src/routes/searchRoutes.js` | **GET /api/search**: Người dùng truyền query: `?location=DaNang&checkIn=...&checkOut=...&guests=2`.<br>**Logic phức tạp:** Dùng Prisma query để tìm các Property có địa chỉ chứa `location`, sau đó đếm số lượng Room đang rảnh (không trùng với bất kỳ Booking nào có trạng thái `confirmed` trong khoảng ngày đó). |
+| **2. API Xem chi tiết Property** | (Tương tự trên) | **GET /api/search/:propertyId**: Trả về chi tiết Property, kèm danh sách tất cả các Room_Types, và lọc ra MỖI loại phòng còn TRỐNG bao nhiêu phòng trong khoảng thời gian người dùng truyền vào. |
+| **3. API Đặt phòng (Booking)** | `server/src/controllers/bookingController.js`<br>`server/src/services/bookingService.js`<br>`server/src/routes/bookingRoutes.js` | **POST /api/bookings**: Traveler gửi danh sách giỏ hàng (VD: { room_type_id: 1, quantity: 2 }).<br>**Logic:** Dùng `Prisma Transaction` (DB Transaction) để đảm bảo: 1. Kiểm tra đủ phòng trống. 2. Tính `total_price` bằng `base_price * quantity * số đêm`. 3. Tạo record bảng `Bookings` (status: 'pending'). 4. Tạo record bảng `Booking_Details`. |
+| **4. API Quản lý Booking** | (Tương tự trên) | **GET /api/bookings/my-bookings**: Traveler lấy danh sách đơn của mình.<br>**GET /api/bookings/provider-bookings**: Provider lấy đơn đặt phòng thuộc khách sạn của họ.<br>**PUT /api/bookings/:id/status**: Provider có thể đổi thành `confirmed` hoặc `cancelled`. |
+
+---
+
+### 👨‍💻 Thành viên 4: API Lịch trình (Itinerary) & Upload Ảnh & Email
+
+**Mục tiêu:** Cung cấp tính năng giá trị gia tăng giúp Traveler lên kế hoạch du lịch cá nhân, hỗ trợ hệ thống upload ảnh và gửi email thông báo.
+
+| Task (Việc cần làm) | Vị trí file cần thao tác | Hướng dẫn triển khai chi tiết |
+| :--- | :--- | :--- |
+| **1. CRUD Lịch trình (Itinerary)** | `server/src/controllers/itineraryController.js`<br>`server/src/services/itineraryService.js`<br>`server/src/routes/itineraryRoutes.js` | **POST /api/itineraries**: Tạo một bảng kế hoạch mới (cần `title`, `start_date`, `end_date`). Gắn với `req.user.id`.<br>**GET /api/itineraries**: Trả về danh sách lịch trình của cá nhân. |
+| **2. API Quản lý Địa điểm (Locations)** | `server/src/controllers/itineraryController.js`<br>`server/src/services/itineraryService.js` | Thêm địa điểm vào lịch trình.<br>**POST /api/itineraries/:id/locations**: Người dùng có thể truyền `property_id` (nếu là khách sạn có trong hệ thống) HOẶC `custom_name`, `latitude`, `longitude` (nếu là quán ăn ngoài). Cần tính toán field `order_index` (thứ tự).<br>**PUT /api/itineraries/:id/locations/reorder**: Cập nhật lại thứ tự (`order_index`) của các điểm đến. |
+| **3. API Tích hợp Upload Ảnh** | `server/src/controllers/uploadController.js`<br>`server/src/services/uploadService.js`<br>`server/src/routes/uploadRoutes.js` | Cài đặt package `cloudinary`, `multer` (hoặc `express-fileupload`).<br>**POST /api/upload**: Nhận file từ `req.file`, đẩy lên server Cloudinary. Khi thành công, Cloudinary trả về 1 đường link URL (ví dụ: `https://res.cloudinary.com/...`). Controller trả URL này về cho Client. Thường dùng cho Upload ảnh Khách sạn hoặc Avatar. |
+| **4. Service Gửi Email tự động** | `server/src/services/emailService.js` | Cấu hình package `nodemailer` (Dùng tài khoản Gmail hoặc Mailtrap).<br>Viết hàm `sendBookingConfirmation(userEmail, bookingDetails)`: Khi Thành viên 3 gọi hàm này sau khi Đặt phòng thành công, gửi email tự động dạng HTML báo mã đơn phòng cho khách hàng. |
+
+---
+
+### LƯU Ý SPRINT 1. Quy chuẩn giao tiếp API
+
+**1. Format Response thống nhất:**
+
+Tất cả API response phải tuân thủ format sau để Frontend dễ dàng xử lý:
+
+```json
+// Thành công
+{
+  "success": true,
+  "message": "Mô tả hành động thành công",
+  "data": { ... } // Data có thể là object hoặc mảng
+}
+
+// Lỗi
+{
+  "success": false,
+  "message": "Lỗi không tìm thấy phòng trống",
+  "statusCode": 404
+}
 ```
 
-> Gợi ý: Team nên thống nhất mẫu commit message và quy tắc đặt tên nhánh để dễ review hơn.
+**2. TUYỆT ĐỐI KHÔNG gõ trực tiếp tên role vào code:**
+
+Sử dụng constant đã định nghĩa trong `server/src/constants/roles.js`:
+
+**❌ Code Sai:**
+
+```js
+if (req.user.role === 'admin') { ... }
+```
+
+**✅ Code Đúng:**
+
+```js
+import USER_ROLES from '../constants/roles.js'
+
+if (req.user.role === USER_ROLES.ADMIN) { ... }
+```
+
+**3. Cấu trúc Controller chuẩn:**
+
+Mọi controller đều phải dùng `catchAsync` để bọc hàm async nhằm tự động bắt lỗi mà không cần `try/catch` lặp lại nhiều lần:
+
+```js
+import catchAsync from '../utils/catchAsync.js'
+import * as myService from '../services/myService.js'
+
+const myAction = catchAsync(async (req, res) => {
+  const result = await myService.doSomething(req.body);
+  res.status(200).json({ success: true, message: 'Thành công', data: result });
+});
+
+export { myAction }
+```
+
+**4. Quy trình khi cần thêm Route mới:**
+
+1. Tạo file route trong `server/src/routes/`.
+2. Import và đăng ký route trong `server/src/index.js` (theo pattern `app.use('/api/...', myRoutes)`).
+3. **KHÔNG QUÊN** kiểm tra route trên Postman trước khi commit.
+4. Nhắn tin thông báo vào group chat để mọi người cùng cập nhật endpoint mới.
+
+> Gợi ý: Khi gặp bất kỳ vấn đề nào, hãy nhắn ngay vào group chat thay vì tự giải quyết một mình. Các hàm liên quan tới cơ sở dữ liệu (`Prisma`) rất mạnh mẽ nhưng nếu kẹt thì cần hỏi để dùng đúng cách. Teamwork là chìa khóa! 🚀
