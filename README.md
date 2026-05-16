@@ -319,20 +319,20 @@ Admin chạy tại `http://localhost:5173`.
 
 **1. Format Response thống nhất:**
 
-Tất cả API response phải tuân thủ format sau để Frontend dễ dàng xử lý:
+Tất cả API response phải tuân thủ format sau để Frontend dễ dàng xử lý. **Lưu ý: Trường `message` BẮT BUỘC phải viết bằng Tiếng Anh (English) để hệ thống đồng bộ.**
 
 ```json
 // Thành công
 {
   "success": true,
-  "message": "Mô tả hành động thành công",
+  "message": "Action completed successfully", // BẮT BUỘC BẰNG TIẾNG ANH
   "data": { ... } // Data có thể là object hoặc mảng
 }
 
 // Lỗi
 {
   "success": false,
-  "message": "Lỗi không tìm thấy phòng trống",
+  "message": "Room not found or no rooms available", // BẮT BUỘC BẰNG TIẾNG ANH
   "statusCode": 404
 }
 ```
@@ -365,7 +365,7 @@ import * as myService from '../services/myService.js'
 
 const myAction = catchAsync(async (req, res) => {
   const result = await myService.doSomething(req.body);
-  res.status(200).json({ success: true, message: 'Thành công', data: result });
+  res.status(200).json({ success: true, message: 'Action completed successfully', data: result });
 });
 
 export { myAction }
