@@ -262,56 +262,70 @@ Admin chạy tại `http://localhost:5173`.
 
 ---
 
-### 👨‍💻 Thành viên 1: Lead / Authentication & User Management
+### 👨‍💻 Thành viên 1: Lead / Authentication & Security
 
-**Mục tiêu:** Đảm bảo hệ thống bảo mật, đăng nhập/đăng ký, quản lý token, và các API thao tác với thông tin người dùng hoạt động trơn tru.
+**Mục tiêu:** Xây dựng nền tảng bảo mật cốt lõi cho hệ thống. Đảm bảo luồng đăng ký, đăng nhập và cấp phát token an toàn tuyệt đối. Mặc dù một số phần đã code nháp, vẫn cần chuẩn hóa lại.
 
 | Task (Việc cần làm) | Vị trí file cần thao tác | Hướng dẫn triển khai chi tiết |
 | :--- | :--- | :--- |
-| **1. Middleware Phân quyền (Role-based)** | `server/src/middlewares/authMiddleware.js` | Mở rộng hàm `auth()`. Cho phép truyền vào nhiều role, ví dụ `auth('admin')` hoặc `auth('provider', 'admin')`. Kiểm tra `req.user.role` từ token, nếu không khớp trả về lỗi HTTP 403 Forbidden. |
-| **2. API Quản lý User (Cho Admin)** | `server/src/controllers/userController.js`<br>`server/src/services/userService.js`<br>`server/src/routes/userRoutes.js` | **GET /api/users**: Lấy danh sách (hỗ trợ query `page`, `limit`). Dùng `prisma.users.findMany()`.<br>**GET /api/users/:id**: Lấy chi tiết một user.<br>**PUT /api/users/:id**: Cập nhật role (admin có thể cấp quyền provider).<br>**DELETE /api/users/:id**: Xóa user.<br>*Tất cả API này phải gắn middleware `auth('admin')`*. |
-| **3. API Cập nhật Profile cá nhân** | `server/src/controllers/userController.js`<br>`server/src/services/userService.js`<br>`server/src/routes/userRoutes.js` | **PUT /api/users/profile**: Cập nhật thông tin chính mình (tên, số điện thoại...). Lấy ID từ `req.user.id`.<br>**PUT /api/users/change-password**: So sánh mật khẩu cũ (dùng `bcrypt.compare`), hash mật khẩu mới và update DB. |
-| **4. Validation Schema** | `server/src/validations/userValidation.js` | Viết các schema Joi để chặn ngay dữ liệu lỗi từ đầu: `updateProfileSchema`, `changePasswordSchema` (yêu cầu pass dài ít nhất 8 ký tự, có số và chữ). |
-| **5. Seed Data (Tạo dữ liệu mẫu)** | `server/src/seed.js` (Tạo mới) | Viết script chạy `prisma.users.create` để tạo 1 tài khoản Admin (`admin@wanderly.com`), 2 Provider, và 5 Traveler với password mặc định là `123456`. |
+| **1. API Đăng ký & Đăng nhập (Auth)** | `server/src/controllers/authController.js`<br>`server/src/services/authService.js`<br>`server/src/routes/authRoutes.js` | **POST /api/auth/register**: Nhận `email`, `password`, `full_name`, `role`. Băm mật khẩu (bcrypt) trước khi lưu DB.<br>**POST /api/auth/login**: Kiểm tra mật khẩu, sinh ra `accessToken` và `refreshToken` (JWT). Trả thông tin user (trừ password) về cho client. |
+| **2. Quản lý Token (Refresh & Logout)** | `server/src/controllers/authController.js`<br>`server/src/services/authService.js` | **POST /api/auth/refresh-token**: Cấp lại `accessToken` mới khi token cũ hết hạn.<br>**POST /api/auth/logout**: Xóa token hoặc đưa vào blacklist (nếu có). |
+| **3. Middleware Xác thực (Auth)** | `server/src/middlewares/authMiddleware.js` | Viết hàm `authenticateToken` để kiểm tra Bearer Token ở header. Nếu hợp lệ, gán `req.user = decodedToken`. Nếu không, trả về HTTP 401 Unauthorized. |
+| **4. Middleware Phân quyền (Role-based)** | `server/src/middlewares/authMiddleware.js` | Viết hàm `authorizeRoles(...roles)`. Ví dụ `authorizeRoles('admin', 'provider')`. Kiểm tra `req.user.role` từ token, nếu không khớp trả về lỗi HTTP 403 Forbidden. |
+| **5. Validation Schema cho Auth** | `server/src/validations/authValidation.js` | Viết các schema Joi để kiểm tra dữ liệu đầu vào cho Login/Register (email phải đúng định dạng, password dài ít nhất 8 ký tự). |
 
 ---
 
-### 👨‍💻 Thành viên 2: API Quản lý Cơ sở lưu trú (Property & Room)
+### 👨‍💻 Thành viên 2: User Profile & Admin Management
+
+**Mục tiêu:** Xây dựng các API liên quan đến quản lý thông tin tài khoản cá nhân và các tính năng quản trị User dành riêng cho Admin.
+
+| Task (Việc cần làm) | Vị trí file cần thao tác | Hướng dẫn triển khai chi tiết |
+| :--- | :--- | :--- |
+| **1. API Quản lý User (Cho Admin)** | `server/src/controllers/userController.js`<br>`server/src/services/userService.js`<br>`server/src/routes/userRoutes.js` | **GET /api/users**: Lấy danh sách (hỗ trợ query phân trang `page`, `limit`).<br>**GET /api/users/:id**: Lấy chi tiết một user.<br>**PUT /api/users/:id/role**: Cập nhật role (admin có thể nâng cấp user thành provider).<br>**DELETE /api/users/:id**: Xóa user.<br>*Tất cả API này phải bọc qua middleware `authorizeRoles('admin')`*. |
+| **2. API Cập nhật Profile cá nhân** | `server/src/controllers/profileController.js`<br>`server/src/services/profileService.js`<br>`server/src/routes/profileRoutes.js` | **PUT /api/profile**: Cập nhật thông tin chính mình (tên, số điện thoại, avatar...). Lấy ID từ `req.user.id`. |
+| **3. API Đổi Mật Khẩu** | `server/src/controllers/profileController.js`<br>`server/src/services/profileService.js` | **PUT /api/profile/change-password**: Nhận `oldPassword` và `newPassword`. So sánh mật khẩu cũ bằng `bcrypt.compare`, nếu đúng thì hash mật khẩu mới và update DB. |
+| **4. Validation Schema cho User** | `server/src/validations/userValidation.js` | Joi schema chặn dữ liệu lỗi: `updateProfileSchema`, `changePasswordSchema`, `updateRoleSchema`. |
+| **5. Seed Data (Tạo dữ liệu mẫu)** | `server/src/seed.js` (Tạo script riêng) | Viết script chạy độc lập sử dụng `prisma` để tự động chèn 1 Admin (`admin@wanderly.com`), 2 Provider, và 5 Traveler với password mặc định là `123456`. Dùng để cấp data test cho cả team. |
+
+---
+
+### 👨‍💻 Thành viên 3: API Quản lý Cơ sở lưu trú (Property & Room)
 
 **Mục tiêu:** Viết các API cho Provider (chủ nhà) đăng bài, quản lý các khách sạn, homestay, định nghĩa loại phòng, và quản lý các phòng cụ thể.
 
 | Task (Việc cần làm) | Vị trí file cần thao tác | Hướng dẫn triển khai chi tiết |
 | :--- | :--- | :--- |
 | **1. CRUD Property (Khách sạn/Homestay)** | `server/src/controllers/propertyController.js`<br>`server/src/services/propertyService.js`<br>`server/src/routes/propertyRoutes.js` | **POST /api/properties**: Tạo mới. Lấy `provider_id` bằng `req.user.id`. Bắt buộc nhận `name`, `type`, `address`, `latitude`, `longitude`, `check_in_time`, `check_out_time`.<br>**GET /api/properties**: Lấy danh sách tài sản của mình (nếu gọi với role provider).<br>**PUT/DELETE**: Chỉ cho phép thao tác nếu `property.provider_id == req.user.id`. |
-| **2. CRUD Room Types (Loại phòng)** | `server/src/controllers/roomTypeController.js`<br>`server/src/services/roomTypeService.js`<br>`server/src/routes/roomTypeRoutes.js` | Định nghĩa các loại phòng (VD: Phòng đôi, Phòng gia đình).<br>**POST /api/properties/:propertyId/room-types**: Kiểm tra xem Property này có thuộc về `req.user` không trước khi tạo. Dữ liệu cần có: `name`, `max_guests`, `base_price`, `total_quantity`, `amenities` (có thể truyền dạng chuỗi JSON `["wifi", "tv"]`). |
+| **2. CRUD Room Types (Loại phòng)** | `server/src/controllers/roomTypeController.js`<br>`server/src/services/roomTypeService.js`<br>`server/src/routes/roomTypeRoutes.js` | Định nghĩa các loại phòng (VD: Phòng đôi, Phòng gia đình).<br>**POST /api/properties/:propertyId/room-types**: Kiểm tra xem Property này có thuộc về `req.user` không trước khi tạo. Dữ liệu cần có: `name`, `max_guests`, `base_price`, `total_quantity`, `amenities`. |
 | **3. CRUD Rooms (Quản lý phòng vật lý)** | `server/src/controllers/roomController.js`<br>`server/src/services/roomService.js`<br>`server/src/routes/roomRoutes.js` | Sau khi có loại phòng (VD: 5 phòng đôi), cần tạo ID thực tế (VD: P101, P102).<br>**POST /api/room-types/:roomTypeId/rooms**: Tạo phòng cụ thể với `room_number`. Cập nhật trạng thái `available`, `maintenance`. |
 | **4. Validation Schema** | `server/src/validations/propertyValidation.js` | Viết schema Joi kiểm tra: Giá phòng phải > 0, số lượng người > 0, tọa độ vĩ độ (`latitude`) từ -90 đến 90, kinh độ (`longitude`) từ -180 đến 180. |
 
 ---
 
-### 👨‍💻 Thành viên 3: API Đặt phòng (Booking) & Tìm kiếm (Search)
+### 👨‍💻 Thành viên 4: API Tìm kiếm (Search) & Đặt phòng (Booking)
 
-**Mục tiêu:** Trọng tâm của hệ thống (phần khó nhất). Traveler phải có khả năng tìm kiếm khách sạn theo tiêu chí và thực hiện luồng đặt phòng.
+**Mục tiêu:** Xử lý luồng cốt lõi của hệ thống du lịch. Logic đếm phòng trống và xử lý transaction khi người dùng chốt đặt phòng.
 
 | Task (Việc cần làm) | Vị trí file cần thao tác | Hướng dẫn triển khai chi tiết |
 | :--- | :--- | :--- |
-| **1. API Tìm kiếm Khách sạn (Search)** | `server/src/controllers/searchController.js`<br>`server/src/services/searchService.js`<br>`server/src/routes/searchRoutes.js` | **GET /api/search**: Người dùng truyền query: `?location=DaNang&checkIn=...&checkOut=...&guests=2`.<br>**Logic phức tạp:** Dùng Prisma query để tìm các Property có địa chỉ chứa `location`, sau đó đếm số lượng Room đang rảnh (không trùng với bất kỳ Booking nào có trạng thái `confirmed` trong khoảng ngày đó). |
-| **2. API Xem chi tiết Property** | (Tương tự trên) | **GET /api/search/:propertyId**: Trả về chi tiết Property, kèm danh sách tất cả các Room_Types, và lọc ra MỖI loại phòng còn TRỐNG bao nhiêu phòng trong khoảng thời gian người dùng truyền vào. |
-| **3. API Đặt phòng (Booking)** | `server/src/controllers/bookingController.js`<br>`server/src/services/bookingService.js`<br>`server/src/routes/bookingRoutes.js` | **POST /api/bookings**: Traveler gửi danh sách giỏ hàng (VD: { room_type_id: 1, quantity: 2 }).<br>**Logic:** Dùng `Prisma Transaction` (DB Transaction) để đảm bảo: 1. Kiểm tra đủ phòng trống. 2. Tính `total_price` bằng `base_price * quantity * số đêm`. 3. Tạo record bảng `Bookings` (status: 'pending'). 4. Tạo record bảng `Booking_Details`. |
-| **4. API Quản lý Booking** | (Tương tự trên) | **GET /api/bookings/my-bookings**: Traveler lấy danh sách đơn của mình.<br>**GET /api/bookings/provider-bookings**: Provider lấy đơn đặt phòng thuộc khách sạn của họ.<br>**PUT /api/bookings/:id/status**: Provider có thể đổi thành `confirmed` hoặc `cancelled`. |
+| **1. API Tìm kiếm Khách sạn (Search)** | `server/src/controllers/searchController.js`<br>`server/src/services/searchService.js`<br>`server/src/routes/searchRoutes.js` | **GET /api/search**: Người dùng truyền query: `?location=DaNang&checkIn=...&checkOut=...&guests=2`.<br>**Logic phức tạp:** Dùng Prisma query để tìm các Property theo địa chỉ, đếm số lượng Room đang rảnh (không trùng với bất kỳ Booking nào đang `confirmed` hoặc `pending` trong khoảng ngày đó). |
+| **2. API Xem chi tiết Property** | (Tương tự trên) | **GET /api/search/:propertyId**: Trả về chi tiết Property, danh sách Room_Types, và lọc ra MỖI loại phòng hiện còn TRỐNG bao nhiêu phòng theo thời gian check-in/out. |
+| **3. API Đặt phòng (Booking)** | `server/src/controllers/bookingController.js`<br>`server/src/services/bookingService.js`<br>`server/src/routes/bookingRoutes.js` | **POST /api/bookings**: Traveler gửi `property_id` và danh sách các loại phòng muốn đặt.<br>**Logic:** Dùng `Prisma Transaction` (chạy lệnh DB dạng đồng bộ) để: 1. Kiểm tra lại số phòng trống. 2. Tính `total_price`. 3. Ghi vào bảng `Bookings`. 4. Ghi vào `Booking_Details`. |
+| **4. API Quản lý Booking** | (Tương tự trên) | **GET /api/bookings/my-bookings**: Traveler lấy danh sách đơn của mình.<br>**GET /api/bookings/provider-bookings**: Provider lấy đơn đặt phòng thuộc khách sạn của họ.<br>**PUT /api/bookings/:id/status**: Đổi trạng thái (`confirmed` / `cancelled`). |
 
 ---
 
-### 👨‍💻 Thành viên 4: API Lịch trình (Itinerary) & Upload Ảnh & Email
+### 👨‍💻 Thành viên 5: API Lịch trình (Itinerary) & Upload Ảnh & Email
 
-**Mục tiêu:** Cung cấp tính năng giá trị gia tăng giúp Traveler lên kế hoạch du lịch cá nhân, hỗ trợ hệ thống upload ảnh và gửi email thông báo.
+**Mục tiêu:** Cung cấp tính năng lên kế hoạch chuyến đi (Itinerary), đồng thời lo các dịch vụ bên thứ 3 (Upload ảnh Cloudinary, gửi Email Nodemailer).
 
 | Task (Việc cần làm) | Vị trí file cần thao tác | Hướng dẫn triển khai chi tiết |
 | :--- | :--- | :--- |
-| **1. CRUD Lịch trình (Itinerary)** | `server/src/controllers/itineraryController.js`<br>`server/src/services/itineraryService.js`<br>`server/src/routes/itineraryRoutes.js` | **POST /api/itineraries**: Tạo một bảng kế hoạch mới (cần `title`, `start_date`, `end_date`). Gắn với `req.user.id`.<br>**GET /api/itineraries**: Trả về danh sách lịch trình của cá nhân. |
-| **2. API Quản lý Địa điểm (Locations)** | `server/src/controllers/itineraryController.js`<br>`server/src/services/itineraryService.js` | Thêm địa điểm vào lịch trình.<br>**POST /api/itineraries/:id/locations**: Người dùng có thể truyền `property_id` (nếu là khách sạn có trong hệ thống) HOẶC `custom_name`, `latitude`, `longitude` (nếu là quán ăn ngoài). Cần tính toán field `order_index` (thứ tự).<br>**PUT /api/itineraries/:id/locations/reorder**: Cập nhật lại thứ tự (`order_index`) của các điểm đến. |
-| **3. API Tích hợp Upload Ảnh** | `server/src/controllers/uploadController.js`<br>`server/src/services/uploadService.js`<br>`server/src/routes/uploadRoutes.js` | Cài đặt package `cloudinary`, `multer` (hoặc `express-fileupload`).<br>**POST /api/upload**: Nhận file từ `req.file`, đẩy lên server Cloudinary. Khi thành công, Cloudinary trả về 1 đường link URL (ví dụ: `https://res.cloudinary.com/...`). Controller trả URL này về cho Client. Thường dùng cho Upload ảnh Khách sạn hoặc Avatar. |
-| **4. Service Gửi Email tự động** | `server/src/services/emailService.js` | Cấu hình package `nodemailer` (Dùng tài khoản Gmail hoặc Mailtrap).<br>Viết hàm `sendBookingConfirmation(userEmail, bookingDetails)`: Khi Thành viên 3 gọi hàm này sau khi Đặt phòng thành công, gửi email tự động dạng HTML báo mã đơn phòng cho khách hàng. |
+| **1. CRUD Lịch trình (Itinerary)** | `server/src/controllers/itineraryController.js`<br>`server/src/services/itineraryService.js`<br>`server/src/routes/itineraryRoutes.js` | **POST /api/itineraries**: Tạo một bảng kế hoạch mới (cần `title`, `start_date`, `end_date`). Gắn với `req.user.id`.<br>**GET /api/itineraries**: Trả về danh sách lịch trình cá nhân.<br>**PUT/DELETE**: Sửa/Xóa lịch trình. |
+| **2. API Quản lý Địa điểm (Locations)** | `server/src/controllers/itineraryController.js`<br>`server/src/services/itineraryService.js` | **POST /api/itineraries/:id/locations**: Thêm địa điểm vào lịch trình. Truyền `property_id` (nếu là KS trong hệ thống) HOẶC `custom_name`, `latitude`, `longitude`. Tính toán field `order_index`.<br>**PUT /api/itineraries/:id/locations/reorder**: Đảo vị trí địa điểm. |
+| **3. API Tích hợp Upload Ảnh** | `server/src/controllers/uploadController.js`<br>`server/src/services/uploadService.js`<br>`server/src/routes/uploadRoutes.js` | Cài đặt package `cloudinary`, `multer`.<br>**POST /api/upload**: Nhận file từ `req.file` (form-data), đẩy lên Cloudinary, trả về URL (vd: `https://res.cloudinary.com/...`). Dùng chung cho upload Avatar, upload ảnh Khách sạn/Phòng. |
+| **4. Service Gửi Email tự động** | `server/src/services/emailService.js` | Cấu hình `nodemailer` (SMTP Gmail hoặc Mailtrap).<br>Viết hàm `sendBookingConfirmation(email, bookingData)`: Gửi email HTML hóa đơn khi khách đặt phòng thành công.<br>Viết hàm `sendWelcomeEmail(email, name)`: Gửi khi đăng ký thành công. (Thành viên 1 sẽ gọi hàm này). |
 
 ---
 
