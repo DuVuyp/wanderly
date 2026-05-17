@@ -41,6 +41,11 @@
 - **Form:** React Hook Form + Zod
 - **UI Icons:** Lucide React
 
+### Testing & QA (Kiểm thử)
+
+- **API Testing:** Postman (Dùng để test các endpoint Backend)
+- **E2E Testing:** Playwright (Dùng để test giao diện và luồng nghiệp vụ trên trình duyệt)
+
 ---
 
 ## 3. Cơ sở dữ liệu (Database Schema)
@@ -206,6 +211,8 @@ git push -u origin feature/ten-task-cua-ban
 
 - [ ] Ứng dụng chạy không lỗi ở Terminal (cả server lẫn client/admin).
 - [ ] API trả về đúng format JSON: `{ success, message, data }`.
+- [ ] **BẮT BUỘC:** Đã test các luồng API (thành công/thất bại) bằng **Postman**.
+- [ ] **BẮT BUỘC:** Đã test luồng giao diện người dùng (nếu có) tự động bằng **Playwright**.
 - [ ] UI responsive, không vỡ layout trên các kích thước màn hình.
 - [ ] Đã dọn dẹp `console.log()` debug và code rác.
 - [ ] Đã chạy `npm run lint` không có lỗi.
@@ -257,7 +264,7 @@ Admin chạy tại `http://localhost:5173`.
 * Trọng tâm của Sprint này là **chỉ làm việc trên thư mục `server/`**. Tạm thời chưa code giao diện trên `client/` và `admin/`.
 * Xây dựng toàn bộ các API nền tảng để phục vụ cho các Sprint sau.
 * Tuân thủ luồng: `route` → `middleware (auth, validate)` → `controller` → `service` → `Prisma (DB)`.
-* Dùng **Postman** hoặc phần mềm tương tự (Insomnia, Thunder Client) để test API trả về đúng JSON.
+* **BẮT BUỘC:** Dùng **Postman** để test toàn bộ endpoint API đảm bảo JSON đầu ra chính xác trước khi ghép vào Frontend. Sau này khi có UI sẽ dùng thêm **Playwright** để test luồng E2E.
 * **Code bị lỗi (crash server) tuyệt đối không được push lên.**
 
 ---
