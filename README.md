@@ -41,8 +41,10 @@
 - **Form:** React Hook Form + Zod
 - **UI Icons:** Lucide React
 
-### Testing & QA (Kiểm thử)
+### Quản lý dự án & Kiểm thử (Management & QA)
 
+- **Project Tracking:** Jira (Quản lý tiến độ vòng đời dự án, phân công Task, theo dõi Bug/Issue)
+- **Test Management:** TestRail (Thiết kế kịch bản kiểm thử (Test Cases), quản lý và đánh giá quá trình test)
 - **API Testing:** Postman (Dùng để test các endpoint Backend)
 - **E2E Testing:** Playwright (Dùng để test giao diện và luồng nghiệp vụ trên trình duyệt)
 
@@ -398,5 +400,31 @@ export { myAction }
 2. Import và đăng ký route trong `server/src/index.js` (theo pattern `app.use('/api/...', myRoutes)`).
 3. **KHÔNG QUÊN** kiểm tra route trên Postman trước khi commit.
 4. Nhắn tin thông báo vào group chat để mọi người cùng cập nhật endpoint mới.
+
+**5. Hướng dẫn Test API bằng Postman sau khi Code xong:**
+
+Để đảm bảo API hoạt động đúng trước khi báo cáo hoặc push code, mỗi thành viên **BẮT BUỘC** thực hiện các bước sau:
+1. **Khởi động Server:** Chạy lệnh `npm run dev` ở thư mục `server/`. Đảm bảo server đang chạy (thường là ở `http://localhost:5000`).
+2. **Quy tắc đặt tên request (bắt buộc):**
+    - Mỗi module là một folder (VD: `auth/`, `users/`, `bookings/`).
+    - Tên request trong folder chỉ là **action**.
+    - Ví dụ:
+       - Folder `auth/`: `login`, `register`, `refresh-token`, `logout`
+       - Folder `users/`: `list`, `detail`, `update-role`, `delete`
+       - Folder `bookings/`: `create`, `my-bookings`, `provider-bookings`, `update-status`
+    - URL luôn dùng biến: `{{BASE_URL}}/api/...`
+3. **Tạo Request mới trong Postman:**
+   - Chọn đúng phương thức HTTP (`GET`, `POST`, `PUT`, `DELETE`).
+   - Nhập đường dẫn API (VD: `{{BASE_URL}}/api/auth/login`).
+4. **Truyền Dữ liệu (Nếu là POST/PUT):**
+   - Chuyển sang tab **Body**, chọn **raw** và chọn định dạng **JSON**.
+   - Gõ dữ liệu test vào (VD: `{"email": "test@gmail.com", "password": "123"}`).
+5. **Gắn Token (Với các API yêu cầu đăng nhập/phân quyền):**
+   - Dùng biến `{{access_token}}` ở **Authorization** → **Bearer Token**.
+   - Sau khi chạy login, token tự cập nhật cho các request tiếp theo.
+6. **Gửi và Kiểm tra Response:**
+   - Nhấn **Send**.
+   - Kiểm tra kết quả trả về có đúng chuẩn `{ success, message, data }` chưa. (Lưu ý message tiếng Anh).
+   - **ĐẶC BIỆT:** Phải tự cố tình test các luồng lỗi (VD: gửi thiếu field, gửi sai ID, test user không đủ quyền) để xem HTTP Status Code có trả đúng mã lỗi (`400`, `401`, `403`, `404`) không, và server có bị crash không.
 
 > Gợi ý: Khi gặp bất kỳ vấn đề nào, hãy nhắn ngay vào group chat thay vì tự giải quyết một mình. Các hàm liên quan tới cơ sở dữ liệu (`Prisma`) rất mạnh mẽ nhưng nếu kẹt thì cần hỏi để dùng đúng cách. Teamwork là chìa khóa! 🚀
