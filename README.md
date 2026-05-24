@@ -259,86 +259,89 @@ Admin chạy tại `http://localhost:5173`.
 
 ---
 
-## Sprint 1: Tập trung xây dựng Backend API (Hoàn thành 80% Core tính năng)
+## Phân công công việc (Sprint 2 - API & UI)
 
-**Quy tắc chung cho toàn SPRINT 1:**
+**Quy tắc chung cho toàn SPRINT 2:**
 
-* Trọng tâm của Sprint này là **chỉ làm việc trên thư mục `server/`**. Tạm thời chưa code giao diện trên `client/` và `admin/`.
-* Xây dựng toàn bộ các API nền tảng để phục vụ cho các Sprint sau.
-* Tuân thủ luồng: `route` → `middleware (auth, validate)` → `controller` → `service` → `Prisma (DB)`.
-* **BẮT BUỘC:** Dùng **Postman** để test toàn bộ endpoint API đảm bảo JSON đầu ra chính xác trước khi ghép vào Frontend. Sau này khi có UI sẽ dùng thêm **Playwright** để test luồng E2E.
-* **Code bị lỗi (crash server) tuyệt đối không được push lên.**
+* Trọng tâm của Sprint này là hoàn thiện tính năng Full-stack (Cả Backend API và Frontend UI).
+* Không yêu cầu viết Playwright / Test tự động.
+* Tuân thủ luồng Backend: `route` → `middleware (auth, validate)` → `controller` → `service` → `Prisma (DB)`.
+* Tuân thủ luồng Frontend: `React Router` → `Pages` → `Axios Call API` → `Render UI`.
+* **BẮT BUỘC:** Dùng **Postman** để test toàn bộ endpoint API đảm bảo JSON đầu ra chính xác trước khi ghép vào Frontend.
+* **Code bị lỗi (crash server/màn hình trắng) tuyệt đối không được push lên.**
 
 ---
 
-### 👨‍💻 Thành viên 1: Lead / Authentication & Security
+### 👨‍💻 Thành viên 1: Đăng ký / Đăng nhập (Auth)
 
-**Mục tiêu:** Xây dựng nền tảng bảo mật cốt lõi cho hệ thống. Đảm bảo luồng đăng ký, đăng nhập và cấp phát token an toàn tuyệt đối. Mặc dù một số phần đã code nháp, vẫn cần chuẩn hóa lại.
+**Mục tiêu:** Xây dựng nền tảng bảo mật và luồng đăng nhập, điều hướng người dùng cơ bản.
 
 | Task (Việc cần làm) | Vị trí file cần thao tác | Hướng dẫn triển khai chi tiết |
 | :--- | :--- | :--- |
-| **1. API Đăng ký & Đăng nhập (Auth)** | `server/src/controllers/authController.js`<br>`server/src/services/authService.js`<br>`server/src/routes/authRoutes.js` | **POST /api/auth/register**: Nhận `email`, `password`, `full_name`, `role`. Băm mật khẩu (bcrypt) trước khi lưu DB.<br>**POST /api/auth/login**: Kiểm tra mật khẩu, sinh ra `accessToken` và `refreshToken` (JWT). Trả thông tin user (trừ password) về cho client. |
-| **2. Quản lý Token (Refresh & Logout)** | `server/src/controllers/authController.js`<br>`server/src/services/authService.js` | **POST /api/auth/refresh-token**: Cấp lại `accessToken` mới khi token cũ hết hạn.<br>**POST /api/auth/logout**: Xóa token hoặc đưa vào blacklist (nếu có). |
-| **3. Middleware Xác thực (Auth)** | `server/src/middlewares/authMiddleware.js` | Viết hàm `authenticateToken` để kiểm tra Bearer Token ở header. Nếu hợp lệ, gán `req.user = decodedToken`. Nếu không, trả về HTTP 401 Unauthorized. |
-| **4. Middleware Phân quyền (Role-based)** | `server/src/middlewares/authMiddleware.js` | Viết hàm `authorizeRoles(...roles)`. Ví dụ `authorizeRoles('admin', 'provider')`. Kiểm tra `req.user.role` từ token, nếu không khớp trả về lỗi HTTP 403 Forbidden. |
-| **5. Validation Schema cho Auth** | `server/src/validations/authValidation.js` | Viết các schema Joi để kiểm tra dữ liệu đầu vào cho Login/Register (email phải đúng định dạng, password dài ít nhất 8 ký tự). |
+| **1. Cập nhật Backend API Auth** | `server/src/controllers/authController.js`<br>`server/src/services/authService.js`<br>`server/src/routes/authRoutes.js` | **POST /api/auth/register**: Đã có sẵn nhưng cần đảm bảo validate password `>= 8` ký tự, check trùng email.<br>**POST /api/auth/login**: Đã có sẵn, cần test kĩ trường hợp sai email/password. |
+| **2. Quản lý phiên Backend** | `server/src/controllers/authController.js` | **POST /api/auth/refresh-token**: Xử lý cấp lại token mới.<br>**POST /api/auth/logout**: API cho phép đăng xuất. |
+| **3. Frontend: Giao diện Đăng ký** | `client/src/pages/Register.jsx` | Đã có UI, cần kiểm tra logic gọi `register` API qua axios, validate form (pass >= 8 ký tự, báo lỗi đúng). |
+| **4. Frontend: Giao diện Đăng nhập** | `client/src/pages/Login.jsx` | Đã có UI, xử lý gọi `login` API, lưu `accessToken`, `refreshToken`, `user` vào `localStorage`. |
+| **5. Điều hướng sau Đăng nhập** | `client/src/App.jsx`<br>`client/src/components/...` | Đọc thông tin role trong `localStorage.user`. Nếu role `traveler` → điều hướng vào trang chủ tìm khách sạn. Nếu `provider` → trang quản lý property. Xử lý nút Đăng xuất trên thanh điều hướng. |
 
 ---
 
-### 👨‍💻 Thành viên 2: User Profile & Admin Management
+### 👨‍💻 Thành viên 2: Quản lý hồ sơ cá nhân
 
-**Mục tiêu:** Xây dựng các API liên quan đến quản lý thông tin tài khoản cá nhân và các tính năng quản trị User dành riêng cho Admin.
+**Mục tiêu:** Xây dựng tính năng cho phép người dùng tự cập nhật thông tin và đổi mật khẩu.
 
 | Task (Việc cần làm) | Vị trí file cần thao tác | Hướng dẫn triển khai chi tiết |
 | :--- | :--- | :--- |
-| **1. API Quản lý User (Cho Admin)** | `server/src/controllers/userController.js`<br>`server/src/services/userService.js`<br>`server/src/routes/userRoutes.js` | **GET /api/users**: Lấy danh sách (hỗ trợ query phân trang `page`, `limit`).<br>**GET /api/users/:id**: Lấy chi tiết một user.<br>**PUT /api/users/:id/role**: Cập nhật role (admin có thể nâng cấp user thành provider).<br>**DELETE /api/users/:id**: Xóa user.<br>*Tất cả API này phải bọc qua middleware `authorizeRoles('admin')`*. |
-| **2. API Cập nhật Profile cá nhân** | `server/src/controllers/profileController.js`<br>`server/src/services/profileService.js`<br>`server/src/routes/profileRoutes.js` | **PUT /api/profile**: Cập nhật thông tin chính mình (tên, số điện thoại, avatar...). Lấy ID từ `req.user.id`. |
-| **3. API Đổi Mật Khẩu** | `server/src/controllers/profileController.js`<br>`server/src/services/profileService.js` | **PUT /api/profile/change-password**: Nhận `oldPassword` và `newPassword`. So sánh mật khẩu cũ bằng `bcrypt.compare`, nếu đúng thì hash mật khẩu mới và update DB. |
-| **4. Validation Schema cho User** | `server/src/validations/userValidation.js` | Joi schema chặn dữ liệu lỗi: `updateProfileSchema`, `changePasswordSchema`, `updateRoleSchema`. |
-| **5. Seed Data (Tạo dữ liệu mẫu)** | `server/src/seed.js` (Tạo script riêng) | Viết script chạy độc lập sử dụng `prisma` để tự động chèn 1 Admin (`admin@wanderly.com`), 2 Provider, và 5 Traveler với password mặc định là `123456`. Dùng để cấp data test cho cả team. |
+| **1. Backend: API Upload Ảnh** | `server/src/controllers/uploadController.js`<br>`server/src/services/uploadService.js`<br>`server/src/routes/uploadRoutes.js` | Cài `cloudinary`, `multer`. **POST /api/upload**: Nhận form-data, upload lên Cloudinary, trả về URL. Có chặn upload file không phải ảnh hoặc file quá lớn. |
+| **2. Backend: API Profile** | `server/src/controllers/profileController.js`<br>`server/src/services/profileService.js`<br>`server/src/routes/profileRoutes.js` | **PUT /api/profile**: Cập nhật thông tin (tên, sđt, avatar...). Lấy ID từ `req.user.id`. **PUT /api/profile/change-password**: So sánh `oldPassword`, hash `newPassword` (>= 8 kí tự). |
+| **3. Frontend: Trang Hồ sơ (UI)** | `client/src/pages/Profile.jsx` | Xây dựng giao diện hiển thị thông tin user. Lấy thông tin từ `req.user.id` (thông qua API `GET /api/auth/me` đã có). Ngăn không cho xem/sửa người khác. |
+| **4. Frontend: Form cập nhật** | `client/src/pages/Profile.jsx` | Form thay đổi Avatar (gọi API upload, hiển thị preview). Form sửa Tên/SĐT. |
+| **5. Frontend: Đổi mật khẩu** | `client/src/pages/ChangePassword.jsx` | Giao diện nhập mật khẩu cũ/mới. Validate mật khẩu mới >= 8 ký tự. Đổi thành công thì đăng xuất tự động hoặc cập nhật lại phiên. |
 
 ---
 
-### 👨‍💻 Thành viên 3: API Quản lý Cơ sở lưu trú (Property & Room)
+### 👨‍💻 Thành viên 3: Quản lý cơ sở lưu trú (Provider)
 
-**Mục tiêu:** Viết các API cho Provider (chủ nhà) đăng bài, quản lý các khách sạn, homestay, định nghĩa loại phòng, và quản lý các phòng cụ thể.
+**Mục tiêu:** Tính năng dành riêng cho chủ nhà (Provider) để đăng tin và quản lý phòng.
 
 | Task (Việc cần làm) | Vị trí file cần thao tác | Hướng dẫn triển khai chi tiết |
 | :--- | :--- | :--- |
-| **1. CRUD Property (Khách sạn/Homestay)** | `server/src/controllers/propertyController.js`<br>`server/src/services/propertyService.js`<br>`server/src/routes/propertyRoutes.js` | **POST /api/properties**: Tạo mới. Lấy `provider_id` bằng `req.user.id`. Bắt buộc nhận `name`, `type`, `address`, `latitude`, `longitude`, `check_in_time`, `check_out_time`.<br>**GET /api/properties**: Lấy danh sách tài sản của mình (nếu gọi với role provider).<br>**PUT/DELETE**: Chỉ cho phép thao tác nếu `property.provider_id == req.user.id`. |
-| **2. CRUD Room Types (Loại phòng)** | `server/src/controllers/roomTypeController.js`<br>`server/src/services/roomTypeService.js`<br>`server/src/routes/roomTypeRoutes.js` | Định nghĩa các loại phòng (VD: Phòng đôi, Phòng gia đình).<br>**POST /api/properties/:propertyId/room-types**: Kiểm tra xem Property này có thuộc về `req.user` không trước khi tạo. Dữ liệu cần có: `name`, `max_guests`, `base_price`, `total_quantity`, `amenities`. |
-| **3. CRUD Rooms (Quản lý phòng vật lý)** | `server/src/controllers/roomController.js`<br>`server/src/services/roomService.js`<br>`server/src/routes/roomRoutes.js` | Sau khi có loại phòng (VD: 5 phòng đôi), cần tạo ID thực tế (VD: P101, P102).<br>**POST /api/room-types/:roomTypeId/rooms**: Tạo phòng cụ thể với `room_number`. Cập nhật trạng thái `available`, `maintenance`. |
-| **4. Validation Schema** | `server/src/validations/propertyValidation.js` | Viết schema Joi kiểm tra: Giá phòng phải > 0, số lượng người > 0, tọa độ vĩ độ (`latitude`) từ -90 đến 90, kinh độ (`longitude`) từ -180 đến 180. |
+| **1. Backend: API Properties** | `server/src/controllers/propertyController.js`<br>`server/src/services/propertyService.js`<br>`server/src/routes/propertyRoutes.js` | **POST, GET, PUT, DELETE /api/properties**: Quản lý khách sạn/resort. Bắt buộc nhận tọa độ (-90 đến 90 cho lat, -180 đến 180 cho lng), tên, địa chỉ. Provider không sửa được của người khác. |
+| **2. Backend: API Room Types** | `server/src/controllers/roomTypeController.js`<br>`server/src/services/...` | **POST /api/properties/:propertyId/room-types**: Tạo loại phòng (đơn, đôi). Ràng buộc `max_guests` > 0, `base_price` > 0. |
+| **3. Backend: API Rooms** | `server/src/controllers/roomController.js`<br>`server/src/services/...` | **POST /api/room-types/:roomTypeId/rooms**: Tạo các phòng vật lý (P101, P102). Quản lý status (available, maintenance). |
+| **4. Frontend: Provider Dashboard** | `client/src/pages/provider/...` | Xây dựng khu vực quản lý riêng cho Provider (Traveler không vào được). Danh sách các Property của họ. |
+| **5. Frontend: Thêm/Sửa Property & Phòng** | `client/src/pages/provider/...` | Giao diện Form thêm khách sạn mới. Giao diện thêm loại phòng và thêm số phòng tương ứng. Cho phép đổi trạng thái phòng (bảo trì). |
 
 ---
 
-### 👨‍💻 Thành viên 4: API Tìm kiếm (Search) & Đặt phòng (Booking)
+### 👨‍💻 Thành viên 4: Quản lý người dùng (Admin)
 
-**Mục tiêu:** Xử lý luồng cốt lõi của hệ thống du lịch. Logic đếm phòng trống và xử lý transaction khi người dùng chốt đặt phòng.
+**Mục tiêu:** Xây dựng trang Admin panel độc lập phục vụ việc vận hành hệ thống.
 
 | Task (Việc cần làm) | Vị trí file cần thao tác | Hướng dẫn triển khai chi tiết |
 | :--- | :--- | :--- |
-| **1. API Tìm kiếm Khách sạn (Search)** | `server/src/controllers/searchController.js`<br>`server/src/services/searchService.js`<br>`server/src/routes/searchRoutes.js` | **GET /api/search**: Người dùng truyền query: `?location=DaNang&checkIn=...&checkOut=...&guests=2`.<br>**Logic phức tạp:** Dùng Prisma query để tìm các Property theo địa chỉ, đếm số lượng Room đang rảnh (không trùng với bất kỳ Booking nào đang `confirmed` hoặc `pending` trong khoảng ngày đó). |
-| **2. API Xem chi tiết Property** | (Tương tự trên) | **GET /api/search/:propertyId**: Trả về chi tiết Property, danh sách Room_Types, và lọc ra MỖI loại phòng hiện còn TRỐNG bao nhiêu phòng theo thời gian check-in/out. |
-| **3. API Đặt phòng (Booking)** | `server/src/controllers/bookingController.js`<br>`server/src/services/bookingService.js`<br>`server/src/routes/bookingRoutes.js` | **POST /api/bookings**: Traveler gửi `property_id` và danh sách các loại phòng muốn đặt.<br>**Logic:** Dùng `Prisma Transaction` (chạy lệnh DB dạng đồng bộ) để: 1. Kiểm tra lại số phòng trống. 2. Tính `total_price`. 3. Ghi vào bảng `Bookings`. 4. Ghi vào `Booking_Details`. |
-| **4. API Quản lý Booking** | (Tương tự trên) | **GET /api/bookings/my-bookings**: Traveler lấy danh sách đơn của mình.<br>**GET /api/bookings/provider-bookings**: Provider lấy đơn đặt phòng thuộc khách sạn của họ.<br>**PUT /api/bookings/:id/status**: Đổi trạng thái (`confirmed` / `cancelled`). |
+| **1. Backend: API Users (Admin)** | `server/src/controllers/userController.js`<br>`server/src/services/userService.js`<br>`server/src/routes/userRoutes.js` | **GET /api/users**: Trả danh sách user (không kèm `password_hash`), có phân trang, tìm kiếm, lọc role.<br>**GET /api/users/:id**: Xem chi tiết.<br>**PUT /api/users/:id/role**: Đổi role (Traveler <-> Provider).<br>**DELETE /api/users/:id**: Xóa user. Bọc bằng middleware `authorizeRoles('admin')`. |
+| **2. Frontend: Admin Layout** | `admin/src/App.jsx`<br>`admin/src/components/...` | Khởi tạo Layout cho Admin trên project `admin/` riêng biệt. Thêm Navbar, Sidebar. Kiểm tra token admin, không có quyền thì văng ra. |
+| **3. Frontend: Quản lý Danh sách** | `admin/src/pages/UsersManagement.jsx` | Hiển thị bảng User. Gắn bộ lọc (Role) và thanh tìm kiếm (Email, Tên). Tích hợp phân trang (Pagination). |
+| **4. Frontend: Thao tác User** | `admin/src/pages/UsersManagement.jsx` | Thêm cột "Hành động" (Actions). Nút Xóa (bật popup confirm trước khi gọi API DELETE). Nút Đổi Role (Mở modal dropdown chọn role mới). |
 
 ---
 
-### 👨‍💻 Thành viên 5: API Lịch trình (Itinerary) & Upload Ảnh & Email
+### 👨‍💻 Thành viên 5: Đặt phòng & Quản lý booking
 
-**Mục tiêu:** Cung cấp tính năng lên kế hoạch chuyến đi (Itinerary), đồng thời lo các dịch vụ bên thứ 3 (Upload ảnh Cloudinary, gửi Email Nodemailer).
+**Mục tiêu:** Cho phép người dùng tìm phòng trống và thanh toán (chốt booking).
 
 | Task (Việc cần làm) | Vị trí file cần thao tác | Hướng dẫn triển khai chi tiết |
 | :--- | :--- | :--- |
-| **1. CRUD Lịch trình (Itinerary)** | `server/src/controllers/itineraryController.js`<br>`server/src/services/itineraryService.js`<br>`server/src/routes/itineraryRoutes.js` | **POST /api/itineraries**: Tạo một bảng kế hoạch mới (cần `title`, `start_date`, `end_date`). Gắn với `req.user.id`.<br>**GET /api/itineraries**: Trả về danh sách lịch trình cá nhân.<br>**PUT/DELETE**: Sửa/Xóa lịch trình. |
-| **2. API Quản lý Địa điểm (Locations)** | `server/src/controllers/itineraryController.js`<br>`server/src/services/itineraryService.js` | **POST /api/itineraries/:id/locations**: Thêm địa điểm vào lịch trình. Truyền `property_id` (nếu là KS trong hệ thống) HOẶC `custom_name`, `latitude`, `longitude`. Tính toán field `order_index`.<br>**PUT /api/itineraries/:id/locations/reorder**: Đảo vị trí địa điểm. |
-| **3. API Tích hợp Upload Ảnh** | `server/src/controllers/uploadController.js`<br>`server/src/services/uploadService.js`<br>`server/src/routes/uploadRoutes.js` | Cài đặt package `cloudinary`, `multer`.<br>**POST /api/upload**: Nhận file từ `req.file` (form-data), đẩy lên Cloudinary, trả về URL (vd: `https://res.cloudinary.com/...`). Dùng chung cho upload Avatar, upload ảnh Khách sạn/Phòng. |
-| **4. Service Gửi Email tự động** | `server/src/services/emailService.js` | Cấu hình `nodemailer` (SMTP Gmail hoặc Mailtrap).<br>Viết hàm `sendBookingConfirmation(email, bookingData)`: Gửi email HTML hóa đơn khi khách đặt phòng thành công.<br>Viết hàm `sendWelcomeEmail(email, name)`: Gửi khi đăng ký thành công. (Thành viên 1 sẽ gọi hàm này). |
+| **1. Backend: API Đặt phòng** | `server/src/controllers/bookingController.js`<br>`server/src/services/bookingService.js`<br>`server/src/routes/bookingRoutes.js` | **POST /api/bookings**: Yêu cầu check-in < check-out. Tính tiền tổng dựa trên số đêm. Trừ số lượng phòng khả dụng. Dùng DB Transaction. |
+| **2. Backend: API Danh sách Booking** | `server/src/controllers/bookingController.js` | **GET /api/bookings/my-bookings**: Dành cho Traveler xem phòng đã đặt.<br>**GET /api/bookings/provider-bookings**: Dành cho Provider xem có ai đặt phòng khách sạn mình không. |
+| **3. Backend: Cập nhật Trạng thái** | `server/src/controllers/bookingController.js` | **PUT /api/bookings/:id/status**: Provider được phép xác nhận (confirmed) hoặc từ chối/hủy (cancelled) đơn đặt phòng. |
+| **4. Frontend: Form Đặt phòng** | `client/src/pages/Booking.jsx` | UI chọn ngày nhận/trả phòng. Chọn loại phòng cần đặt. Hiển thị tổng tiền tự động tính toán. Validate chỉ cho đặt khi đã đăng nhập. |
+| **5. Frontend: Lịch sử & Quản lý đơn** | `client/src/pages/MyBookings.jsx`<br>`client/src/pages/provider/ManageBookings.jsx` | Traveler: Giao diện xem lịch sử các đơn đặt phòng.<br>Provider: Màn hình danh sách đơn hàng chờ xác nhận, có nút Duyệt / Hủy đơn. |
 
 ---
 
-### LƯU Ý SPRINT 1. Quy chuẩn giao tiếp API
+### LƯU Ý SPRINT 2. Quy chuẩn giao tiếp API
 
 **1. Format Response thống nhất:**
 
@@ -404,27 +407,16 @@ export { myAction }
 **5. Hướng dẫn Test API bằng Postman sau khi Code xong:**
 
 Để đảm bảo API hoạt động đúng trước khi báo cáo hoặc push code, mỗi thành viên **BẮT BUỘC** thực hiện các bước sau:
-1. **Khởi động Server:** Chạy lệnh `npm run dev` ở thư mục `server/`. Đảm bảo server đang chạy (thường là ở `http://localhost:5000`).
-2. **Quy tắc đặt tên request (bắt buộc):**
-    - Mỗi module là một folder (VD: `auth/`, `users/`, `bookings/`).
-    - Tên request trong folder chỉ là **action**.
-    - Ví dụ:
-       - Folder `auth/`: `login`, `register`, `refresh-token`, `logout`
-       - Folder `users/`: `list`, `detail`, `update-role`, `delete`
-       - Folder `bookings/`: `create`, `my-bookings`, `provider-bookings`, `update-status`
-    - URL luôn dùng biến: `{{BASE_URL}}/api/...`
-3. **Tạo Request mới trong Postman:**
+1. **Khởi động Server:** Chạy lệnh `npm run dev` ở thư mục `server/`. Đảm bảo server đang chạy.
+2. **Tạo Request mới trong Postman:**
    - Chọn đúng phương thức HTTP (`GET`, `POST`, `PUT`, `DELETE`).
    - Nhập đường dẫn API (VD: `{{BASE_URL}}/api/auth/login`).
-4. **Truyền Dữ liệu (Nếu là POST/PUT):**
+3. **Truyền Dữ liệu (Nếu là POST/PUT):**
    - Chuyển sang tab **Body**, chọn **raw** và chọn định dạng **JSON**.
-   - Gõ dữ liệu test vào (VD: `{"email": "test@gmail.com", "password": "123"}`).
-5. **Gắn Token (Với các API yêu cầu đăng nhập/phân quyền):**
+4. **Gắn Token (Với các API yêu cầu đăng nhập/phân quyền):**
    - Dùng biến `{{access_token}}` ở **Authorization** → **Bearer Token**.
-   - Sau khi chạy login, token tự cập nhật cho các request tiếp theo.
-6. **Gửi và Kiểm tra Response:**
-   - Nhấn **Send**.
-   - Kiểm tra kết quả trả về có đúng chuẩn `{ success, message, data }` chưa. (Lưu ý message tiếng Anh).
-   - **ĐẶC BIỆT:** Phải tự cố tình test các luồng lỗi (VD: gửi thiếu field, gửi sai ID, test user không đủ quyền) để xem HTTP Status Code có trả đúng mã lỗi (`400`, `401`, `403`, `404`) không, và server có bị crash không.
+5. **Gửi và Kiểm tra Response:**
+   - Kiểm tra kết quả trả về có đúng chuẩn `{ success, message, data }` chưa.
+   - **ĐẶC BIỆT:** Phải tự cố tình test các luồng lỗi (VD: gửi thiếu field, test user không đủ quyền) để xem HTTP Status Code có trả đúng mã lỗi không.
 
 > Gợi ý: Khi gặp bất kỳ vấn đề nào, hãy nhắn ngay vào group chat thay vì tự giải quyết một mình. Các hàm liên quan tới cơ sở dữ liệu (`Prisma`) rất mạnh mẽ nhưng nếu kẹt thì cần hỏi để dùng đúng cách. Teamwork là chìa khóa! 🚀

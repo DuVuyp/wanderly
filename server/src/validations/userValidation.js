@@ -14,10 +14,10 @@ export const createUserSchema = Joi.object({
     'string.email': 'Email must be a valid email address',
     'string.empty': 'Email is required',
   }),
-  password: Joi.string().min(6).required().messages({
+  password: Joi.string().min(8).required().messages({
     'any.required': 'Password is required',
     'string.empty': 'Password is required',
-    'string.min': 'Password must be at least 6 characters',
+    'string.min': 'Password must be at least 8 characters',
   }),
   role: Joi.string()
     .valid(...Object.values(USER_ROLES))
@@ -39,15 +39,7 @@ export const loginSchema = Joi.object({
   }),
 })
 
-export const addressSchema = Joi.object({
-  receiverName: Joi.string().required(),
-  receiverPhone: Joi.string().required(),
-  street: Joi.string().required(),
-  city: Joi.string().required(),
-  country: Joi.string().required(),
-  postalCode: Joi.string().required(),
-  isDefault: Joi.boolean().default(false),
-})
+
 
 export const refreshTokenSchema = Joi.object({
   refreshToken: Joi.string().required().messages({
