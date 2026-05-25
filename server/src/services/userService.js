@@ -89,4 +89,83 @@ const loginUserWithEmail = async (email, password) => {
 
   return sanitizeUser(user)
 }
-export { getUsers, createUser, loginUserWithEmail }
+
+const getUsersAdmin = async ({ page = 1, limit = 10, role, search }) => {
+  const skip = (page - 1) * limit
+  const where = {}
+  
+  if (role) {
+    where.role = role
+  }
+
+  if (search) {
+    where.OR = [
+      { email: { contains: search } },
+      { full_name: { contains: search } }
+    ]
+  }
+
+  const users = await prisma.users.findMany({
+    where,
+    skip: Number(skip),
+    take: Number(limit),
+    orderBy: { created_at: 'desc' },
+  })
+
+  const total = await prisma.users.count({ where })
+
+  return {
+    users: users.map(sanitizeUser),
+    pagination: {
+      total,
+      page: Number(page),
+      limit: Number(limit),
+      totalPages: Math.ceil(total / limit)
+    }
+  }
+}
+
+const getUserById = async (id) => {
+  const user = await prisma.users.findUnique({
+    where: { id: Number(id) }
+  })
+
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found')
+  }
+
+  return sanitizeUser(user)
+}
+
+const updateUserRole = async (id, newRole) => {
+  const user = await prisma.users.findUnique({
+    where: { id: Number(id) }
+  })
+
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found')
+  }
+
+  const updatedUser = await prisma.users.update({
+    where: { id: Number(id) },
+    data: { role: newRole }
+  })
+
+  return sanitizeUser(updatedUser)
+}
+
+const deleteUser = async (id) => {
+  const user = await prisma.users.findUnique({
+    where: { id: Number(id) }
+  })
+
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found')
+  }
+
+  await prisma.users.delete({
+    where: { id: Number(id) }
+  })
+}
+
+export { getUsers, createUser, loginUserWithEmail, getUsersAdmin, getUserById, updateUserRole, deleteUser }
