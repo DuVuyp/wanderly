@@ -25,7 +25,7 @@ export const uploadImageToCloudinary = (fileBuffer, folder = 'wanderly') => {
 
     // Create a readable stream from the buffer and pipe it to Cloudinary
     const readable = new Readable()
-    readable._read = () => { } // No-op, required for Readable
+    readable._read = () => {} // No-op, required for Readable
     readable.push(fileBuffer)
     readable.push(null)
 
