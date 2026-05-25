@@ -3,6 +3,7 @@ import dotenv from 'dotenv'
 import express from 'express'
 import httpStatus from 'http-status'
 import authRoutes from './routes/authRoutes.js'
+import profileRoutes from './routes/profileRoutes.js'
 import uploadRoutes from './routes/uploadRoutes.js'
 import { errorHandler } from './middlewares/errorMiddleware.js'
 import ApiError from './utils/ApiError.js'
@@ -52,6 +53,7 @@ app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ limit: '10mb', extended: true }))
 
 app.use('/api/auth', authRoutes)
+app.use('/api/profile', profileRoutes)
 app.use('/api/upload', uploadRoutes)
 
 app.get('/health', (req, res) => {
