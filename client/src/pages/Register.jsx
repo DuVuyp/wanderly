@@ -7,14 +7,95 @@ import { toast } from 'sonner';
 import { register as registerUser } from '../api/auth';
 
 const schema = z.object({
-  fullName: z.string().min(2, { message: "Name must be at least 2 characters" }),
-  email: z.string().email({ message: "Invalid email address" }),
-  password: z.string().min(8, { message: "Password must be at least 8 characters" }),
-  confirmPassword: z.string().min(8, { message: "Password must be at least 8 characters" }),
-  agreeTerms: z.literal(true, { errorMap: () => ({ message: "You must agree to the Terms & Privacy Policy" }) }),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords do not match",
-  path: ["confirmPassword"],
+  fullName: z.string().trim().superRefine((value, ctx) => {
+    if (!value) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Full name is required',
+      });
+      return;
+    }
+
+    if (value.length < 2) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Name must be at least 2 characters',
+      });
+    }
+  }),
+  email: z.string().trim().superRefine((value, ctx) => {
+    if (!value) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Email is required',
+      });
+      return;
+    }
+
+    if (!z.email().safeParse(value).success) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Email must be a valid email address',
+      });
+    }
+  }),
+  password: z.string().superRefine((value, ctx) => {
+    if (!value.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Password is required',
+      });
+      return;
+    }
+
+    if (value.length < 8) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Password must be at least 8 characters',
+      });
+      return;
+    }
+
+    if (!/[a-z]/.test(value) || !/[A-Z]/.test(value) || !/\d/.test(value) || !/[^A-Za-z\d]/.test(value)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Password must include uppercase, lowercase, number, and special character',
+      });
+    }
+  }),
+  confirmPassword: z.string().superRefine((value, ctx) => {
+    if (!value.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Confirm password is required',
+      });
+      return;
+    }
+
+    if (value.length < 8) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Password must be at least 8 characters',
+      });
+    }
+  }),
+  agreeTerms: z.boolean().optional().refine((value) => value === true, {
+    message: 'You must agree to the Terms & Privacy Policy',
+  }),
+}).superRefine((data, ctx) => {
+  if (data.password && data.confirmPassword && data.password === data.confirmPassword) {
+    return;
+  }
+
+  if (!data.password?.trim() || !data.confirmPassword?.trim()) {
+    return;
+  }
+
+  ctx.addIssue({
+    code: z.ZodIssueCode.custom,
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
 });
 
 export default function Register() {

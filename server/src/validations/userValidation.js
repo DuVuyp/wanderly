@@ -14,11 +14,30 @@ export const createUserSchema = Joi.object({
     'string.email': 'Email must be a valid email address',
     'string.empty': 'Email is required',
   }),
-  password: Joi.string().min(8).required().messages({
-    'any.required': 'Password is required',
-    'string.empty': 'Password is required',
-    'string.min': 'Password must be at least 8 characters',
-  }),
+  password: Joi.string()
+    .required()
+    .custom((value, helpers) => {
+      if (value.length < 8) {
+        return helpers.error('password.min')
+      }
+
+      if (
+        !/[a-z]/.test(value) ||
+        !/[A-Z]/.test(value) ||
+        !/\d/.test(value) ||
+        !/[^A-Za-z\d]/.test(value)
+      ) {
+        return helpers.error('password.weak')
+      }
+
+      return value
+    })
+    .messages({
+      'any.required': 'Password is required',
+      'string.empty': 'Password is required',
+      'password.min': 'Password must be at least 8 characters',
+      'password.weak': 'Password must include uppercase, lowercase, number, and special character',
+    }),
   role: Joi.string()
     .valid(...Object.values(USER_ROLES))
     .default(USER_ROLES.TRAVELER)
@@ -38,8 +57,6 @@ export const loginSchema = Joi.object({
     'any.required': 'Password is required',
   }),
 })
-
-
 
 export const refreshTokenSchema = Joi.object({
   refreshToken: Joi.string().required().messages({

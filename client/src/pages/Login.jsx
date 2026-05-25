@@ -7,8 +7,30 @@ import { toast } from 'sonner';
 import { login } from '../api/auth';
 
 const schema = z.object({
-  email: z.string().email({ message: "Invalid email address" }),
-  password: z.string().min(8, { message: "Password must be at least 8 characters" }),
+  email: z.string().trim().superRefine((value, ctx) => {
+    if (!value) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Email is required',
+      });
+      return;
+    }
+
+    if (!z.email().safeParse(value).success) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Email must be a valid email address',
+      });
+    }
+  }),
+  password: z.string().superRefine((value, ctx) => {
+    if (!value.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Password is required',
+      });
+    }
+  }),
 });
 
 export default function Login() {
