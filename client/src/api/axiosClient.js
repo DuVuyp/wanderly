@@ -7,10 +7,9 @@ const axiosClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true, // For refresh token cookies
+  withCredentials: true,
 });
 
-// Request Interceptor - Attach access token to every request
 axiosClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('accessToken');
@@ -24,35 +23,46 @@ axiosClient.interceptors.request.use(
   }
 );
 
-// Response Interceptor - Extract data & handle 401 refresh
 axiosClient.interceptors.response.use(
   (response) => {
-    // Axios wraps response in { data, status, ... }
-    // We unwrap to return response.data directly
     return response.data;
   },
   async (error) => {
     const originalRequest = error.config;
+    const requestUrl = originalRequest?.url || '';
+    const isAuthRequest =
+      requestUrl.includes('/auth/login') ||
+      requestUrl.includes('/auth/register') ||
+      requestUrl.includes('/auth/refresh-token');
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 && !originalRequest?._retry && !isAuthRequest) {
       originalRequest._retry = true;
       try {
-        // Use refresh token to get new access token
         const refreshToken = localStorage.getItem('refreshToken');
+
+        if (!refreshToken || typeof refreshToken !== 'string' || !refreshToken.trim()) {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('user');
+          window.location.href = '/login';
+          return Promise.reject(error);
+        }
+
         const rs = await axios.post(
           `${API_BASE_URL}/auth/refresh-token`,
           { refreshToken },
           { withCredentials: true }
         );
 
-        // API response shape: { success, data: { tokens: { access: { token } } } }
-        const newAccessToken = rs.data?.data?.tokens?.access?.token;
+        const newAccessToken = rs.data?.data?.access?.token;
         if (newAccessToken) {
           localStorage.setItem('accessToken', newAccessToken);
+          if (rs.data?.data?.refresh?.token) {
+            localStorage.setItem('refreshToken', rs.data.data.refresh.token);
+          }
           return axiosClient(originalRequest);
         }
       } catch (_error) {
-        // Refresh failed - clear tokens and redirect to login
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');

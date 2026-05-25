@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -13,22 +13,30 @@ const schema = z.object({
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [loading, setLoading] = React.useState(false);
+  const hasShownRedirectNotice = React.useRef(false);
   const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: zodResolver(schema)
   });
+
+  React.useEffect(() => {
+    if (location.state?.authRequired && !hasShownRedirectNotice.current) {
+      hasShownRedirectNotice.current = true;
+      toast.error(location.state.message || 'Please sign in to continue.');
+    }
+  }, [location.state]);
 
   const onSubmit = async (data) => {
     try {
       setLoading(true);
       const response = await login(data);
-      // API returns: { success, message, data: { user, tokens: { access, refresh } } }
       const { user, tokens } = response.data;
       localStorage.setItem('accessToken', tokens.access.token);
       localStorage.setItem('refreshToken', tokens.refresh.token);
       localStorage.setItem('user', JSON.stringify(user));
       toast.success(response.message || 'Login successful');
-      navigate('/');
+      navigate(location.state?.from?.pathname || '/');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Login failed. Please try again.');
     } finally {
@@ -38,13 +46,10 @@ export default function Login() {
 
   return (
     <main className="min-h-screen flex flex-col md:flex-row overflow-hidden relative bg-surface-bright">
-      {/* Background Blobs */}
       <div className="absolute top-[-10%] right-[-5%] w-96 h-96 bg-gradient-end hero-blob opacity-20 pointer-events-none" />
       <div className="absolute bottom-[-10%] left-[45%] w-[500px] h-[500px] bg-gradient-start hero-blob opacity-10 pointer-events-none" />
 
-      {/* ====== LEFT PANEL: Immersive Visual ====== */}
       <section className="hidden md:flex md:w-1/2 relative overflow-hidden tropical-gradient items-center justify-center p-12 lg:p-16">
-        {/* Decorative circles */}
         <div className="absolute inset-0 opacity-40 pointer-events-none">
           <div className="absolute top-20 left-20 w-32 h-32 border-2 border-white/20 rounded-full" />
           <div className="absolute bottom-40 right-10 w-64 h-64 border-4 border-white/10 rounded-full" />
@@ -52,7 +57,6 @@ export default function Login() {
         </div>
 
         <div className="relative z-10 w-full max-w-xl">
-          {/* Headline */}
           <div className="mb-10">
             <h1 className="font-display text-5xl lg:text-6xl text-white mb-5 leading-tight font-bold">
               Welcome Back, <br />Explorer
@@ -62,7 +66,6 @@ export default function Login() {
             </p>
           </div>
 
-          {/* Featured Image + Floating Cards */}
           <div className="relative w-full aspect-[4/3] rounded-3xl overflow-visible">
             <div className="w-full h-full rounded-3xl shadow-2xl overflow-hidden group">
               <img
@@ -72,7 +75,6 @@ export default function Login() {
               />
             </div>
 
-            {/* Floating Card - Travelers */}
             <div className="absolute -top-5 -right-5 glass-card py-3 px-4 rounded-xl shadow-xl flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-primary-container/20 flex items-center justify-center">
                 <span className="material-symbols-outlined text-primary-container text-xl">groups</span>
@@ -83,7 +85,6 @@ export default function Login() {
               </div>
             </div>
 
-            {/* Floating Card - Destinations */}
             <div className="absolute top-1/2 -left-8 -translate-y-1/2 glass-card py-3 px-4 rounded-xl shadow-xl flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-tertiary-container/20 flex items-center justify-center">
                 <span className="material-symbols-outlined text-tertiary text-xl">explore</span>
@@ -94,7 +95,6 @@ export default function Login() {
               </div>
             </div>
 
-            {/* Floating Card - AI */}
             <div className="absolute -bottom-5 right-8 glass-card py-3 px-4 rounded-xl shadow-xl flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-secondary-container/20 flex items-center justify-center">
                 <span className="material-symbols-outlined text-secondary text-xl">psychology</span>
@@ -108,11 +108,8 @@ export default function Login() {
         </div>
       </section>
 
-      {/* ====== RIGHT PANEL: Login Form ====== */}
       <section className="w-full md:w-1/2 flex items-center justify-center p-6 sm:p-10 lg:p-16 z-20">
         <div className="w-full max-w-[440px] glass-card rounded-3xl p-8 sm:p-10 border border-white/30 shadow-2xl">
-
-          {/* Brand */}
           <div className="flex flex-col items-center mb-8">
             <div className="w-16 h-16 mb-5 rounded-2xl bg-gradient-to-br from-gradient-start to-gradient-end flex items-center justify-center shadow-lg">
               <span className="material-symbols-outlined text-white text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>
@@ -127,11 +124,7 @@ export default function Login() {
             </p>
           </div>
 
-
-
-          {/* Form */}
           <form className="flex flex-col gap-5" onSubmit={handleSubmit(onSubmit)}>
-            {/* Email */}
             <div>
               <div className="relative">
                 <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-xl">
@@ -149,7 +142,6 @@ export default function Login() {
               )}
             </div>
 
-            {/* Password */}
             <div>
               <div className="relative">
                 <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-xl">
@@ -167,7 +159,6 @@ export default function Login() {
               )}
             </div>
 
-            {/* Remember + Forgot */}
             <div className="flex items-center justify-between">
               <label className="flex items-center gap-2 cursor-pointer group">
                 <input
@@ -183,7 +174,6 @@ export default function Login() {
               </a>
             </div>
 
-            {/* Submit Button */}
             <button
               className="w-full h-14 rounded-xl text-white font-sans font-semibold text-base shadow-lg shadow-primary-container/30 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed mt-1 bg-gradient-to-r from-gradient-start to-button-gradient-pink"
               type="submit"
@@ -201,7 +191,6 @@ export default function Login() {
             </button>
           </form>
 
-          {/* Divider */}
           <div className="relative my-7">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-outline-variant" />
@@ -211,7 +200,6 @@ export default function Login() {
             </span>
           </div>
 
-          {/* Social Login */}
           <div className="grid grid-cols-2 gap-3">
             <button className="flex items-center justify-center gap-2.5 h-12 bg-white/60 border border-outline-variant rounded-xl hover:bg-white hover:border-primary/30 transition-all group">
               <img
@@ -229,7 +217,6 @@ export default function Login() {
             </button>
           </div>
 
-          {/* Footer Link */}
           <p className="mt-8 text-center font-sans text-sm text-on-surface-variant">
             Don't have an account?{' '}
             <Link to="/register" className="text-primary font-semibold hover:underline">
