@@ -3,6 +3,9 @@ import dotenv from 'dotenv'
 import express from 'express'
 import httpStatus from 'http-status'
 import authRoutes from './routes/authRoutes.js'
+import propertyRoutes from './routes/propertyRoutes.js'
+import roomTypeRoutes from './routes/roomTypeRoutes.js'
+import roomRoutes from './routes/roomRoutes.js'
 import { errorHandler } from './middlewares/errorMiddleware.js'
 import ApiError from './utils/ApiError.js'
 
@@ -51,6 +54,9 @@ app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ limit: '10mb', extended: true }))
 
 app.use('/api/auth', authRoutes)
+app.use('/api/properties', propertyRoutes)
+app.use('/api/room-types', roomTypeRoutes)
+app.use('/api/rooms', roomRoutes)
 
 app.get('/health', (req, res) => {
   res.json({

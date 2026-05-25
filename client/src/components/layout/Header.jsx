@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { Compass, LogOut, Menu, UserCircle, X } from 'lucide-react'
+import { Compass, LogOut, Menu, UserCircle, X, LayoutDashboard } from 'lucide-react'
 import { logout } from '../../api/auth'
 import { clearAuthStorage, getDefaultRouteByRole, getStoredUser } from '../../utils/auth'
 
@@ -117,7 +117,17 @@ function Header() {
                     <p className="truncate font-semibold text-on-surface">{user.full_name || 'Traveler'}</p>
                     <p className="truncate text-sm text-on-surface-variant">{user.email || ''}</p>
                   </div>
-                  <div className="p-2">
+                   <div className="p-2 flex flex-col gap-1">
+                    {user.role === 'provider' && (
+                      <Link
+                        to="/provider"
+                        onClick={() => setIsDropdownOpen(false)}
+                        className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-on-surface transition hover:bg-primary/5 hover:text-primary"
+                      >
+                        <LayoutDashboard className="h-4 w-4" />
+                        Provider Dashboard
+                      </Link>
+                    )}
                     <button
                       type="button"
                       onClick={handleLogout}
