@@ -1,6 +1,12 @@
 import express from 'express'
 
-import { registerUser, loginUser, getMe, refreshTokens, logoutUser } from '../controllers/authController.js'
+import {
+  registerUser,
+  loginUser,
+  getMe,
+  refreshTokens,
+  logoutUser,
+} from '../controllers/authController.js'
 import validate from '../middlewares/validateMiddleware.js'
 import auth from '../middlewares/authMiddleware.js'
 import { createUserSchema, loginSchema, refreshTokenSchema } from '../validations/userValidation.js'
