@@ -120,6 +120,8 @@ model Users {
   created_at       DateTime?     @default(now(), map: "DF__Users__created_a__4D94879B") @db.DateTime
   is_deleted       Boolean?      @default(false)
   full_name        String        @db.NVarChar(255)
+  avatar           String?       @db.NVarChar(Max)
+  phone_number     String?       @db.VarChar(20)
   Bookings         Bookings[]
   Itineraries      Itineraries[]
   Properties       Properties[]

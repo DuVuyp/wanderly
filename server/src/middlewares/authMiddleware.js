@@ -47,7 +47,10 @@ const auth = (...allowedRoles) => {
 
       // 5. Check role authorization (if roles specified)
       if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
-        throw new ApiError(httpStatus.FORBIDDEN, 'You do not have permission to access this resource')
+        throw new ApiError(
+          httpStatus.FORBIDDEN,
+          'You do not have permission to access this resource'
+        )
       }
 
       // 6. Attach user to request (without password)
