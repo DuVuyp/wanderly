@@ -1,4 +1,4 @@
-﻿CREATE DATABASE wanderly
+CREATE DATABASE wanderly
 go
 USE wanderly
 go
@@ -16,7 +16,8 @@ CREATE TABLE Users (
     verify_token VARCHAR(255) NULL,
     reset_pass_token VARCHAR(255) NULL,
     token_expiry DATETIME NULL,
-    created_at DATETIME DEFAULT GETDATE()
+    created_at DATETIME DEFAULT GETDATE(),
+    is_deleted BIT DEFAULT 0
 );
 
 -- 2. Bảng Properties
