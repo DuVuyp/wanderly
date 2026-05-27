@@ -34,7 +34,7 @@ const getUsers = async (filter = {}, options = {}) => {
   const orderBy = parseOrderBy(options.sortBy)
 
   const users = await prisma.users.findMany({
-    where: { ...filter, is_deleted: false },
+    where: { ...filter, is_deleted: { not: true } },
     take: limit,
     skip,
     orderBy,
@@ -92,7 +92,7 @@ const loginUserWithEmail = async (email, password) => {
 
 const getUsersAdmin = async ({ page = 1, limit = 10, role, search }) => {
   const skip = (page - 1) * limit
-  const where = { is_deleted: false }
+  const where = { is_deleted: { not: true } }
   
   if (role) {
     where.role = role
