@@ -2,6 +2,8 @@ import express from 'express'
 import auth from '../middlewares/authMiddleware.js'
 import USER_ROLES from '../constants/roles.js'
 import * as userController from '../controllers/userController.js'
+import validate from '../middlewares/validateMiddleware.js'
+import { updateUserRoleSchema } from '../validations/userValidation.js'
 
 const router = express.Router()
 
@@ -10,7 +12,7 @@ router.use(auth(USER_ROLES.ADMIN))
 
 router.get('/', userController.getUsersAdmin)
 router.get('/:id', userController.getUserById)
-router.put('/:id/role', userController.updateUserRole)
+router.put('/:id/role', validate(updateUserRoleSchema), userController.updateUserRole)
 router.delete('/:id', userController.deleteUser)
 
 export default router

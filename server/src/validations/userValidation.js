@@ -64,3 +64,13 @@ export const refreshTokenSchema = Joi.object({
     'string.empty': 'Refresh token is required',
   }),
 })
+
+export const updateUserRoleSchema = Joi.object({
+  role: Joi.string()
+    .valid(...Object.values(USER_ROLES))
+    .required()
+    .messages({
+      'any.required': 'Role is required',
+      'any.only': 'Role must be either traveler, provider, or admin',
+    }),
+})
