@@ -34,7 +34,7 @@ const getUsers = async (filter = {}, options = {}) => {
   const orderBy = parseOrderBy(options.sortBy)
 
   const users = await prisma.users.findMany({
-    where: filter,
+    where: { ...filter, is_deleted: false },
     take: limit,
     skip,
     orderBy,
@@ -78,7 +78,7 @@ const createUser = async (userData) => {
 const loginUserWithEmail = async (email, password) => {
   const user = await prisma.users.findUnique({ where: { email } })
 
-  if (!user) {
+  if (!user || user.is_deleted) {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Invalid email or password')
   }
 
@@ -92,7 +92,7 @@ const loginUserWithEmail = async (email, password) => {
 
 const getUsersAdmin = async ({ page = 1, limit = 10, role, search }) => {
   const skip = (page - 1) * limit
-  const where = {}
+  const where = { is_deleted: false }
   
   if (role) {
     where.role = role
@@ -130,7 +130,7 @@ const getUserById = async (id) => {
     where: { id: Number(id) }
   })
 
-  if (!user) {
+  if (!user || user.is_deleted) {
     throw new ApiError(httpStatus.NOT_FOUND, 'User not found')
   }
 
@@ -142,7 +142,7 @@ const updateUserRole = async (id, newRole) => {
     where: { id: Number(id) }
   })
 
-  if (!user) {
+  if (!user || user.is_deleted) {
     throw new ApiError(httpStatus.NOT_FOUND, 'User not found')
   }
 
@@ -159,12 +159,13 @@ const deleteUser = async (id) => {
     where: { id: Number(id) }
   })
 
-  if (!user) {
+  if (!user || user.is_deleted) {
     throw new ApiError(httpStatus.NOT_FOUND, 'User not found')
   }
 
-  await prisma.users.delete({
-    where: { id: Number(id) }
+  await prisma.users.update({
+    where: { id: Number(id) },
+    data: { is_deleted: true }
   })
 }
 

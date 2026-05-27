@@ -118,6 +118,7 @@ model Users {
   reset_pass_token String?       @db.VarChar(255)
   token_expiry     DateTime?     @db.DateTime
   created_at       DateTime?     @default(now(), map: "DF__Users__created_a__4D94879B") @db.DateTime
+  is_deleted       Boolean?      @default(false)
   full_name        String        @db.NVarChar(255)
   Bookings         Bookings[]
   Itineraries      Itineraries[]
