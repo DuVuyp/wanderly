@@ -306,7 +306,7 @@ Admin chạy tại `http://localhost:5173`.
 
 | Task (Việc cần làm) | Vị trí file cần thao tác | Hướng dẫn triển khai chi tiết |
 | :--- | :--- | :--- |
-| **1. Backend: API Properties** | `server/src/controllers/propertyController.js`<br>`server/src/services/propertyService.js`<br>`server/src/routes/propertyRoutes.js` | **POST, GET, PUT, DELETE /api/properties**: Quản lý khách sạn/resort. Bắt buộc nhận tọa độ (-90 đến 90 cho lat, -180 đến 180 cho lng), tên, địa chỉ. Provider không sửa được của người khác. |
+| **1. Backend: API Properties** | `server/src/controllers/propertyController.js`<br>`server/src/services/propertyService.js`<br>`server/src/routes/propertyRoutes.js` | **POST, GET, PUT, DELETE /api/properties**: Quản lý khách sạn/resort. Bắt buộc nhận tọa độ (-90 đến 90 cho lat, -180 đến 180 cho lng), tên, địa chỉ. Provider không sửa được của người khác. **Lưu ý: API DELETE phải áp dụng xóa mềm (`is_deleted = true`).** |
 | **2. Backend: API Room Types** | `server/src/controllers/roomTypeController.js`<br>`server/src/services/...` | **POST /api/properties/:propertyId/room-types**: Tạo loại phòng (đơn, đôi). Ràng buộc `max_guests` > 0, `base_price` > 0. |
 | **3. Backend: API Rooms** | `server/src/controllers/roomController.js`<br>`server/src/services/...` | **POST /api/room-types/:roomTypeId/rooms**: Tạo các phòng vật lý (P101, P102). Quản lý status (available, maintenance). |
 | **4. Frontend: Provider Dashboard** | `client/src/pages/provider/...` | Xây dựng khu vực quản lý riêng cho Provider (Traveler không vào được). Danh sách các Property của họ. |
@@ -320,7 +320,7 @@ Admin chạy tại `http://localhost:5173`.
 
 | Task (Việc cần làm) | Vị trí file cần thao tác | Hướng dẫn triển khai chi tiết |
 | :--- | :--- | :--- |
-| **1. Backend: API Users (Admin)** | `server/src/controllers/userController.js`<br>`server/src/services/userService.js`<br>`server/src/routes/userRoutes.js` | **GET /api/users**: Trả danh sách user (không kèm `password_hash`), có phân trang, tìm kiếm, lọc role.<br>**GET /api/users/:id**: Xem chi tiết.<br>**PUT /api/users/:id/role**: Đổi role (Traveler <-> Provider).<br>**DELETE /api/users/:id**: Xóa user. Bọc bằng middleware `authorizeRoles('admin')`. |
+| **1. Backend: API Users (Admin)** | `server/src/controllers/userController.js`<br>`server/src/services/userService.js`<br>`server/src/routes/userRoutes.js` | **GET /api/users**: Trả danh sách user (không kèm `password_hash`), có phân trang, tìm kiếm, lọc role.<br>**GET /api/users/:id**: Xem chi tiết.<br>**PUT /api/users/:id/role**: Đổi role (Traveler <-> Provider).<br>**DELETE /api/users/:id**: Xóa user **(áp dụng xóa mềm `is_deleted = true`)**. Bọc bằng middleware `authorizeRoles('admin')`. |
 | **2. Frontend: Admin Layout** | `admin/src/App.jsx`<br>`admin/src/components/...` | Khởi tạo Layout cho Admin trên project `admin/` riêng biệt. Thêm Navbar, Sidebar. Kiểm tra token admin, không có quyền thì văng ra. |
 | **3. Frontend: Quản lý Danh sách** | `admin/src/pages/UsersManagement.jsx` | Hiển thị bảng User. Gắn bộ lọc (Role) và thanh tìm kiếm (Email, Tên). Tích hợp phân trang (Pagination). |
 | **4. Frontend: Thao tác User** | `admin/src/pages/UsersManagement.jsx` | Thêm cột "Hành động" (Actions). Nút Xóa (bật popup confirm trước khi gọi API DELETE). Nút Đổi Role (Mở modal dropdown chọn role mới). |
@@ -404,19 +404,182 @@ export { myAction }
 3. **KHÔNG QUÊN** kiểm tra route trên Postman trước khi commit.
 4. Nhắn tin thông báo vào group chat để mọi người cùng cập nhật endpoint mới.
 
-**5. Hướng dẫn Test API bằng Postman sau khi Code xong:**
+## 5. Hướng dẫn test API bằng Postman sau khi code xong
 
-Để đảm bảo API hoạt động đúng trước khi báo cáo hoặc push code, mỗi thành viên **BẮT BUỘC** thực hiện các bước sau:
-1. **Khởi động Server:** Chạy lệnh `npm run dev` ở thư mục `server/`. Đảm bảo server đang chạy.
-2. **Tạo Request mới trong Postman:**
-   - Chọn đúng phương thức HTTP (`GET`, `POST`, `PUT`, `DELETE`).
-   - Nhập đường dẫn API (VD: `{{BASE_URL}}/api/auth/login`).
-3. **Truyền Dữ liệu (Nếu là POST/PUT):**
-   - Chuyển sang tab **Body**, chọn **raw** và chọn định dạng **JSON**.
-4. **Gắn Token (Với các API yêu cầu đăng nhập/phân quyền):**
-   - Dùng biến `{{access_token}}` ở **Authorization** → **Bearer Token**.
-5. **Gửi và Kiểm tra Response:**
-   - Kiểm tra kết quả trả về có đúng chuẩn `{ success, message, data }` chưa.
-   - **ĐẶC BIỆT:** Phải tự cố tình test các luồng lỗi (VD: gửi thiếu field, test user không đủ quyền) để xem HTTP Status Code có trả đúng mã lỗi không.
+Để đảm bảo API hoạt động đúng trước khi báo cáo hoặc push code, mỗi thành viên **BẮT BUỘC** thực hiện đầy đủ các bước sau:
+
+### 1. Khởi động server
+
+Mở terminal tại thư mục `server/` và chạy lệnh:
+
+```bash
+npm run dev
+```
+
+Đảm bảo server đã khởi động thành công và không có lỗi trong terminal.
+
+---
+
+### 2. Kiểm tra environment trong Postman
+
+Trước khi test API, cần kiểm tra Postman đang sử dụng đúng environment.
+
+Ở góc trên bên phải Postman, chọn environment:
+
+```text
+wanderly_dev
+```
+
+Nếu chưa chọn environment, các biến như `{{BASE_URL}}` hoặc `{{access_token}}` có thể không hoạt động.
+
+---
+
+### 3. Tạo folder theo module API
+
+Trong collection của project, tạo folder tương ứng với module API vừa code.
+
+Ví dụ, nếu trong code khai báo route:
+
+```js
+app.use('/api/users', userRoutes);
+```
+
+thì trong Postman tạo folder tên:
+
+```text
+users
+```
+
+Mỗi module nên có một folder riêng để dễ quản lý request.
+
+---
+
+### 4. Tạo request mới
+
+Trong folder module tương ứng, tạo request mới và cấu hình như sau:
+
+* Chọn đúng phương thức HTTP: `GET`, `POST`, `PUT`, `DELETE`, ...
+* Nhập đúng đường dẫn API.
+
+Ví dụ:
+
+```http
+POST {{BASE_URL}}/auth/login
+```
+
+hoặc:
+
+```http
+GET {{BASE_URL}}/users
+```
+
+---
+
+### 5. Cấu hình token nếu API yêu cầu quyền truy cập
+
+Nếu API yêu cầu quyền truy cập, ví dụ chỉ user đã đăng nhập, admin hoặc một role cụ thể mới được phép thực hiện, cần lấy token trước khi test.
+
+Thực hiện như sau:
+
+1. Mở request đăng nhập:
+
+```http
+POST {{BASE_URL}}/auth/login
+```
+
+2. Nhập body bằng tài khoản đã được tạo.
+
+Ví dụ:
+
+```json
+{
+  "email": "your_email@example.com",
+  "password": "your_password"
+}
+```
+
+3. Bấm **Send**.
+
+Sau khi đăng nhập thành công, hệ thống sẽ tự động lưu `access_token` vào environment.
+
+4. Với các request cần quyền truy cập, vào tab **Headers** và thêm:
+
+| Key             | Value                     |
+| --------------- | ------------------------- |
+| `Authorization` | `Bearer {{access_token}}` |
+
+---
+
+### 6. Nhập body cho request POST hoặc PUT
+
+Nếu request sử dụng phương thức `POST`, `PUT` hoặc `PATCH`, cần nhập dữ liệu trong phần body.
+
+Thực hiện như sau:
+
+```text
+Body → raw → JSON
+```
+
+Sau đó nhập dữ liệu tương ứng.
+
+Ví dụ:
+
+```json
+{
+  "email": "your_email@example.com",
+  "password": "your_password"
+}
+```
+
+Lưu ý kiểm tra kỹ tên field và kiểu dữ liệu phải đúng với API đã định nghĩa.
+
+---
+
+### 7. Gửi request và kiểm tra response
+
+Sau khi cấu hình đầy đủ, bấm **Send** để gửi request.
+
+Cần kiểm tra các nội dung sau:
+
+* API có trả về đúng dữ liệu mong muốn không.
+* Response có đúng format chuẩn chưa:
+
+```json
+{
+  "success": true,
+  "message": "Success message",
+  "data": {}
+}
+```
+
+* HTTP Status Code có đúng với từng trường hợp không.
+
+Ví dụ:
+
+| Trường hợp             | Status Code mong muốn |
+| ---------------------- | --------------------: |
+| Thành công             |          `200`, `201` |
+| Thiếu hoặc sai dữ liệu |                 `400` |
+| Chưa đăng nhập         |                 `401` |
+| Không đủ quyền         |                 `403` |
+| Không tìm thấy dữ liệu |                 `404` |
+| Lỗi server             |                 `500` |
+
+---
+
+### 8. Bắt buộc test các luồng lỗi
+
+Ngoài luồng thành công, mỗi thành viên **BẮT BUỘC** tự test thêm các luồng lỗi.
+
+Ví dụ:
+
+* Gửi thiếu field bắt buộc.
+* Gửi sai kiểu dữ liệu.
+* Gửi token không hợp lệ.
+* Không gửi token đối với API yêu cầu đăng nhập.
+* Dùng tài khoản không đủ quyền để gọi API admin.
+* Gọi API với ID không tồn tại.
+
+Mục tiêu là đảm bảo API không chỉ chạy đúng ở trường hợp thành công, mà còn xử lý lỗi đúng chuẩn và trả về HTTP Status Code phù hợp.
 
 > Gợi ý: Khi gặp bất kỳ vấn đề nào, hãy nhắn ngay vào group chat thay vì tự giải quyết một mình. Các hàm liên quan tới cơ sở dữ liệu (`Prisma`) rất mạnh mẽ nhưng nếu kẹt thì cần hỏi để dùng đúng cách. Teamwork là chìa khóa! 🚀

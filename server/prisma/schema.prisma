@@ -12,6 +12,7 @@ model Booking_Details {
   room_type_id     Int
   quantity         Int
   price_at_booking Decimal    @db.Decimal(10, 2)
+  is_deleted       Boolean?   @default(false)
   Bookings         Bookings   @relation(fields: [booking_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Details_Bookings")
   Room_Types       Room_Types @relation(fields: [room_type_id], references: [id], onUpdate: NoAction, map: "FK_Details_RoomTypes")
 }
@@ -25,6 +26,7 @@ model Bookings {
   total_price     Decimal           @db.Decimal(10, 2)
   status          String            @db.VarChar(20)
   created_at      DateTime?         @default(now(), map: "DF__Bookings__create__71D1E811") @db.DateTime
+  is_deleted      Boolean?          @default(false)
   Booking_Details Booking_Details[]
   Properties      Properties        @relation(fields: [property_id], references: [id], onUpdate: NoAction, map: "FK_Bookings_Properties")
   Users           Users             @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "FK_Bookings_Users")
@@ -38,6 +40,7 @@ model Itineraries {
   start_date          DateTime?             @db.Date
   end_date            DateTime?             @db.Date
   created_at          DateTime?             @default(now(), map: "DF__Itinerari__creat__60A75C0F") @db.DateTime
+  is_deleted          Boolean?              @default(false)
   Users               Users                 @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Itineraries_Users")
   Itinerary_Locations Itinerary_Locations[]
   Itinerary_Notes     Itinerary_Notes[]
@@ -53,6 +56,7 @@ model Itinerary_Locations {
   visit_time   DateTime?   @db.DateTime
   order_index  Int
   created_at   DateTime?   @default(now(), map: "DF__Itinerary__creat__66603565") @db.DateTime
+  is_deleted   Boolean?    @default(false)
   Itineraries  Itineraries @relation(fields: [itinerary_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Locations_Itineraries")
   Properties   Properties? @relation(fields: [property_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Locations_Properties")
 
@@ -65,6 +69,7 @@ model Itinerary_Notes {
   content      String      @db.NVarChar(Max)
   is_checked   Boolean?    @default(false, map: "DF__Itinerary__is_ch__6C190EBB")
   created_at   DateTime?   @default(now(), map: "DF__Itinerary__creat__6D0D32F4") @db.DateTime
+  is_deleted   Boolean?    @default(false)
   Itineraries  Itineraries @relation(fields: [itinerary_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Notes_Itineraries")
 }
 
@@ -79,7 +84,7 @@ model Properties {
   check_in_time       DateTime              @db.Time
   check_out_time      DateTime              @db.Time
   created_at          DateTime?             @default(now(), map: "DF__Propertie__creat__5165187F") @db.DateTime
-  deleted_at          DateTime?             @db.DateTime
+  is_deleted          Boolean?              @default(false)
   Bookings            Bookings[]
   Itinerary_Locations Itinerary_Locations[]
   Users               Users                 @relation(fields: [provider_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Properties_Users")
@@ -95,7 +100,7 @@ model Room_Types {
   total_quantity  Int
   amenities       String?           @db.NVarChar(Max)
   created_at      DateTime?         @default(now(), map: "DF__Room_Type__creat__5535A963") @db.DateTime
-  deleted_at      DateTime?         @db.DateTime
+  is_deleted      Boolean?          @default(false)
   Booking_Details Booking_Details[]
   Properties      Properties        @relation(fields: [property_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_RoomTypes_Properties")
   Rooms           Rooms[]
@@ -107,7 +112,7 @@ model Rooms {
   room_number  String     @db.VarChar(50)
   status       String?    @default("available", map: "DF__Rooms__status__59063A47") @db.VarChar(20)
   created_at   DateTime?  @default(now(), map: "DF__Rooms__created_a__5AEE82B9") @db.DateTime
-  deleted_at   DateTime?  @db.DateTime
+  is_deleted   Boolean?   @default(false)
   Room_Types   Room_Types @relation(fields: [room_type_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Rooms_RoomTypes")
 }
 
@@ -121,7 +126,10 @@ model Users {
   reset_pass_token String?       @db.VarChar(255)
   token_expiry     DateTime?     @db.DateTime
   created_at       DateTime?     @default(now(), map: "DF__Users__created_a__4D94879B") @db.DateTime
+  is_deleted       Boolean?      @default(false)
   full_name        String        @db.NVarChar(255)
+  avatar           String?       @db.NVarChar(Max)
+  phone_number     String?       @db.VarChar(20)
   Bookings         Bookings[]
   Itineraries      Itineraries[]
   Properties       Properties[]

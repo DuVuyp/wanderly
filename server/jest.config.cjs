@@ -12,4 +12,4 @@ module.exports = {
   coveragePathIgnorePatterns: ['node_modules', 'src/config', 'src/app.js', 'tests'],
   // Emit multiple coverage formats for CI and local use
   coverageReporters: ['text', 'lcov', 'clover', 'html'],
-};
+}

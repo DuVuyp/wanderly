@@ -10,6 +10,7 @@ import ProviderDashboard from './pages/provider/ProviderDashboard';
 import AddEditProperty from './pages/provider/AddEditProperty';
 import PropertyDetail from './pages/provider/PropertyDetail';
 import Register from './pages/Register';
+import Profile from './pages/Profile';
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
         <Route path="/" element={<RoleHomeRedirect />} />
         <Route element={<ProtectedRoute allowedRoles={['traveler', 'provider']} />}>
           <Route path="/home" element={<Home />} />
+          <Route path="/profile" element={<Profile />} />
         </Route>
         <Route element={<ProtectedRoute allowedRoles={['provider']} />}>
           <Route path="/provider" element={<ProviderDashboard />} />

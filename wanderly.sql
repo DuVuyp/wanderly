@@ -1,4 +1,4 @@
-﻿CREATE DATABASE wanderly
+CREATE DATABASE wanderly
 go
 USE wanderly
 go
@@ -16,7 +16,10 @@ CREATE TABLE Users (
     verify_token VARCHAR(255) NULL,
     reset_pass_token VARCHAR(255) NULL,
     token_expiry DATETIME NULL,
-    created_at DATETIME DEFAULT GETDATE()
+    created_at DATETIME DEFAULT GETDATE(),
+    is_deleted BIT DEFAULT 0,
+    avatar NVARCHAR(MAX) NULL,
+    phone_number VARCHAR(20) NULL
 );
 
 -- 2. Bảng Properties
@@ -32,6 +35,7 @@ CREATE TABLE Properties (
     check_in_time TIME NOT NULL,
     check_out_time TIME NOT NULL,
     created_at DATETIME DEFAULT GETDATE(),
+    is_deleted BIT DEFAULT 0,
     CONSTRAINT FK_Properties_Users
         FOREIGN KEY (provider_id) REFERENCES Users(id)
         ON DELETE CASCADE
@@ -47,6 +51,7 @@ CREATE TABLE Room_Types (
     total_quantity INT NOT NULL,
     amenities NVARCHAR(MAX) NULL, -- lưu JSON string
     created_at DATETIME DEFAULT GETDATE(),
+    is_deleted BIT DEFAULT 0,
     CONSTRAINT FK_RoomTypes_Properties
         FOREIGN KEY (property_id) REFERENCES Properties(id)
         ON DELETE CASCADE
@@ -60,6 +65,7 @@ CREATE TABLE Rooms (
     status VARCHAR(20) DEFAULT 'available'
         CHECK (status IN ('available', 'occupied', 'maintenance')),
     created_at DATETIME DEFAULT GETDATE(),
+    is_deleted BIT DEFAULT 0,
     CONSTRAINT FK_Rooms_RoomTypes
         FOREIGN KEY (room_type_id) REFERENCES Room_Types(id)
         ON DELETE CASCADE
@@ -75,6 +81,7 @@ CREATE TABLE Itineraries (
     start_date DATE NULL,
     end_date DATE NULL,
     created_at DATETIME DEFAULT GETDATE(),
+    is_deleted BIT DEFAULT 0,
     CONSTRAINT FK_Itineraries_Users
         FOREIGN KEY (user_id) REFERENCES Users(id)
         ON DELETE CASCADE,
@@ -97,6 +104,7 @@ CREATE TABLE Itinerary_Locations (
     visit_time DATETIME NULL,
     order_index INT NOT NULL,
     created_at DATETIME DEFAULT GETDATE(),
+    is_deleted BIT DEFAULT 0,
     CONSTRAINT FK_Locations_Itineraries
         FOREIGN KEY (itinerary_id) REFERENCES Itineraries(id)
         ON DELETE CASCADE,
@@ -118,6 +126,7 @@ CREATE TABLE Itinerary_Notes (
     content NVARCHAR(MAX) NOT NULL,
     is_checked BIT DEFAULT 0,
     created_at DATETIME DEFAULT GETDATE(),
+    is_deleted BIT DEFAULT 0,
     CONSTRAINT FK_Notes_Itineraries
         FOREIGN KEY (itinerary_id) REFERENCES Itineraries(id)
         ON DELETE CASCADE
@@ -134,6 +143,7 @@ CREATE TABLE Bookings (
     status VARCHAR(20) NOT NULL
         CHECK (status IN ('pending', 'confirmed', 'completed', 'cancelled')),
     created_at DATETIME DEFAULT GETDATE(),
+    is_deleted BIT DEFAULT 0,
     CONSTRAINT FK_Bookings_Users
         FOREIGN KEY (user_id) REFERENCES Users(id),
     CONSTRAINT FK_Bookings_Properties
@@ -149,6 +159,7 @@ CREATE TABLE Booking_Details (
     room_type_id INT NOT NULL,
     quantity INT NOT NULL,
     price_at_booking DECIMAL(10,2) NOT NULL,
+    is_deleted BIT DEFAULT 0,
     CONSTRAINT FK_Details_Bookings
         FOREIGN KEY (booking_id) REFERENCES Bookings(id)
         ON DELETE CASCADE,

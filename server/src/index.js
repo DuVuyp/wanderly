@@ -6,6 +6,9 @@ import authRoutes from './routes/authRoutes.js'
 import propertyRoutes from './routes/propertyRoutes.js'
 import roomTypeRoutes from './routes/roomTypeRoutes.js'
 import roomRoutes from './routes/roomRoutes.js'
+import userRoutes from './routes/userRoutes.js'
+import profileRoutes from './routes/profileRoutes.js'
+import uploadRoutes from './routes/uploadRoutes.js'
 import { errorHandler } from './middlewares/errorMiddleware.js'
 import ApiError from './utils/ApiError.js'
 
@@ -57,6 +60,9 @@ app.use('/api/auth', authRoutes)
 app.use('/api/properties', propertyRoutes)
 app.use('/api/room-types', roomTypeRoutes)
 app.use('/api/rooms', roomRoutes)
+app.use('/api/users', userRoutes)
+app.use('/api/profile', profileRoutes)
+app.use('/api/upload', uploadRoutes)
 
 app.get('/health', (req, res) => {
   res.json({
