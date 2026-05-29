@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
-import { ArrowLeft, Building2, MapPin, Clock, Save } from 'lucide-react'
+import { ArrowLeft, Building2, MapPin, Clock, Save, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
 import Header from '../../components/layout/Header'
 import Footer from '../../components/layout/Footer'
@@ -132,9 +132,10 @@ function AddEditProperty() {
 
   if (fetching) {
     return (
-      <div className="min-h-screen bg-surface-bright flex flex-col">
+      <div className="min-h-screen bg-surface-bright flex flex-col relative overflow-hidden">
+        <div className="absolute top-[-10%] right-[-5%] w-96 h-96 bg-gradient-end hero-blob opacity-20 pointer-events-none" />
         <Header />
-        <main className="flex-grow flex justify-center items-center py-20">
+        <main className="flex-grow flex justify-center items-center py-20 relative z-10">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
         </main>
         <Footer />
@@ -143,30 +144,38 @@ function AddEditProperty() {
   }
 
   return (
-    <div className="min-h-screen bg-surface-bright text-on-surface flex flex-col">
+    <div className="min-h-screen bg-surface-bright text-on-surface flex flex-col relative overflow-hidden">
+      {/* Decorative Background Blobs */}
+      <div className="absolute top-[-10%] right-[-5%] w-96 h-96 bg-gradient-end hero-blob opacity-20 pointer-events-none" />
+      <div className="absolute bottom-[-10%] left-[-5%] w-[500px] h-[500px] bg-gradient-start hero-blob opacity-10 pointer-events-none" />
+
       <Header />
-      <main className="flex-grow px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+      
+      <main className="flex-grow px-4 py-8 sm:px-6 lg:px-8 lg:py-12 relative z-10">
         <div className="mx-auto max-w-2xl">
           {/* Back Link */}
           <Link
             to="/provider"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-on-surface-variant hover:text-primary transition mb-6"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-on-surface-variant hover:text-primary transition mb-8"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Dashboard
           </Link>
 
           {/* Form Card */}
-          <div className="rounded-[2rem] bg-white p-8 shadow-sm border border-outline-variant">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                <Building2 className="h-5 w-5" />
+          <div className="rounded-[2.5rem] glass-card p-8 sm:p-10 shadow-xl border border-white/50 bg-white/80 relative overflow-hidden">
+            {/* Soft decorative top accent bar */}
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-gradient-start via-gradient-mid to-gradient-end opacity-80" />
+
+            <div className="flex items-center gap-3 mb-8">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary shadow-inner">
+                <Building2 className="h-5.5 w-5.5" />
               </div>
               <div>
                 <h1 className="font-display text-2xl font-bold tracking-tight text-on-surface">
-                  {isEditMode ? 'Edit Property' : 'Add New Property'}
+                  <span className="text-gradient">{isEditMode ? 'Edit Property' : 'Add New Property'}</span>
                 </h1>
-                <p className="text-xs text-on-surface-variant">
+                <p className="text-xs font-medium text-on-surface-variant mt-0.5">
                   {isEditMode ? 'Update your accommodation details.' : 'Register a new accommodation in Wanderly.'}
                 </p>
               </div>
@@ -175,7 +184,7 @@ function AddEditProperty() {
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Name */}
               <div>
-                <label className="block text-sm font-semibold text-on-surface mb-2">Property Name</label>
+                <label className="block text-sm font-bold text-on-surface mb-2 font-display">Property Name</label>
                 <input
                   type="text"
                   name="name"
@@ -183,21 +192,21 @@ function AddEditProperty() {
                   onChange={handleChange}
                   placeholder="e.g. Majestic Hotel & Resort"
                   className={[
-                    'w-full rounded-2xl border px-4 py-3 text-sm transition focus:outline-none focus:ring-2 focus:ring-primary/20',
+                    'w-full rounded-2xl border bg-white/60 px-4 py-3.5 text-sm transition focus:outline-none focus:ring-2 focus:ring-primary/20',
                     errors.name ? 'border-red-500 focus:border-red-500' : 'border-outline-variant focus:border-primary',
                   ].join(' ')}
                 />
-                {errors.name && <p className="mt-1.5 text-xs text-red-500 font-medium">{errors.name}</p>}
+                {errors.name && <p className="mt-1.5 text-xs text-red-500 font-bold">{errors.name}</p>}
               </div>
 
               {/* Type */}
               <div>
-                <label className="block text-sm font-semibold text-on-surface mb-2">Property Type</label>
+                <label className="block text-sm font-bold text-on-surface mb-2 font-display">Property Type</label>
                 <select
                   name="property_type"
                   value={formData.property_type}
                   onChange={handleChange}
-                  className="w-full rounded-2xl border border-outline-variant px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"
+                  className="w-full rounded-2xl border border-outline-variant bg-white/60 px-4 py-3.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 >
                   <option value="hotel">Hotel</option>
                   <option value="homestay">Homestay</option>
@@ -208,7 +217,7 @@ function AddEditProperty() {
 
               {/* Address */}
               <div>
-                <label className="block text-sm font-semibold text-on-surface mb-2">Address</label>
+                <label className="block text-sm font-bold text-on-surface mb-2 font-display">Address</label>
                 <textarea
                   name="address"
                   value={formData.address}
@@ -216,18 +225,18 @@ function AddEditProperty() {
                   rows="3"
                   placeholder="Full street address, city, country"
                   className={[
-                    'w-full rounded-2xl border px-4 py-3 text-sm transition focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none',
+                    'w-full rounded-2xl border bg-white/60 px-4 py-3.5 text-sm transition focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none',
                     errors.address ? 'border-red-500 focus:border-red-500' : 'border-outline-variant focus:border-primary',
                   ].join(' ')}
                 ></textarea>
-                {errors.address && <p className="mt-1.5 text-xs text-red-500 font-medium">{errors.address}</p>}
+                {errors.address && <p className="mt-1.5 text-xs text-red-500 font-bold">{errors.address}</p>}
               </div>
 
               {/* Coordinates */}
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="flex items-center gap-1 text-sm font-semibold text-on-surface mb-2">
-                    <MapPin className="h-4 w-4 text-on-surface-variant" />
+                  <label className="flex items-center gap-1 text-sm font-bold text-on-surface mb-2 font-display">
+                    <MapPin className="h-4 w-4 text-primary-container" />
                     Latitude
                   </label>
                   <input
@@ -238,16 +247,16 @@ function AddEditProperty() {
                     onChange={handleChange}
                     placeholder="-90 to 90"
                     className={[
-                      'w-full rounded-2xl border px-4 py-3 text-sm transition focus:outline-none focus:ring-2 focus:ring-primary/20',
+                      'w-full rounded-2xl border bg-white/60 px-4 py-3.5 text-sm transition focus:outline-none focus:ring-2 focus:ring-primary/20',
                       errors.latitude ? 'border-red-500 focus:border-red-500' : 'border-outline-variant focus:border-primary',
                     ].join(' ')}
                   />
-                  {errors.latitude && <p className="mt-1.5 text-xs text-red-500 font-medium">{errors.latitude}</p>}
+                  {errors.latitude && <p className="mt-1.5 text-xs text-red-500 font-bold">{errors.latitude}</p>}
                 </div>
 
                 <div>
-                  <label className="flex items-center gap-1 text-sm font-semibold text-on-surface mb-2">
-                    <MapPin className="h-4 w-4 text-on-surface-variant" />
+                  <label className="flex items-center gap-1 text-sm font-bold text-on-surface mb-2 font-display">
+                    <MapPin className="h-4 w-4 text-primary-container" />
                     Longitude
                   </label>
                   <input
@@ -258,19 +267,19 @@ function AddEditProperty() {
                     onChange={handleChange}
                     placeholder="-180 to 180"
                     className={[
-                      'w-full rounded-2xl border px-4 py-3 text-sm transition focus:outline-none focus:ring-2 focus:ring-primary/20',
+                      'w-full rounded-2xl border bg-white/60 px-4 py-3.5 text-sm transition focus:outline-none focus:ring-2 focus:ring-primary/20',
                       errors.longitude ? 'border-red-500 focus:border-red-500' : 'border-outline-variant focus:border-primary',
                     ].join(' ')}
                   />
-                  {errors.longitude && <p className="mt-1.5 text-xs text-red-500 font-medium">{errors.longitude}</p>}
+                  {errors.longitude && <p className="mt-1.5 text-xs text-red-500 font-bold">{errors.longitude}</p>}
                 </div>
               </div>
 
               {/* Times */}
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="flex items-center gap-1 text-sm font-semibold text-on-surface mb-2">
-                    <Clock className="h-4 w-4 text-on-surface-variant" />
+                  <label className="flex items-center gap-1 text-sm font-bold text-on-surface mb-2 font-display">
+                    <Clock className="h-4 w-4 text-secondary" />
                     Check-in Time
                   </label>
                   <input
@@ -278,14 +287,14 @@ function AddEditProperty() {
                     name="check_in_time"
                     value={formData.check_in_time}
                     onChange={handleChange}
-                    className="w-full rounded-2xl border border-outline-variant px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    className="w-full rounded-2xl border border-outline-variant bg-white/60 px-4 py-3.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
-                  {errors.check_in_time && <p className="mt-1.5 text-xs text-red-500 font-medium">{errors.check_in_time}</p>}
+                  {errors.check_in_time && <p className="mt-1.5 text-xs text-red-500 font-bold">{errors.check_in_time}</p>}
                 </div>
 
                 <div>
-                  <label className="flex items-center gap-1 text-sm font-semibold text-on-surface mb-2">
-                    <Clock className="h-4 w-4 text-on-surface-variant" />
+                  <label className="flex items-center gap-1 text-sm font-bold text-on-surface mb-2 font-display">
+                    <Clock className="h-4 w-4 text-secondary" />
                     Check-out Time
                   </label>
                   <input
@@ -293,24 +302,24 @@ function AddEditProperty() {
                     name="check_out_time"
                     value={formData.check_out_time}
                     onChange={handleChange}
-                    className="w-full rounded-2xl border border-outline-variant px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    className="w-full rounded-2xl border border-outline-variant bg-white/60 px-4 py-3.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
-                  {errors.check_out_time && <p className="mt-1.5 text-xs text-red-500 font-medium">{errors.check_out_time}</p>}
+                  {errors.check_out_time && <p className="mt-1.5 text-xs text-red-500 font-bold">{errors.check_out_time}</p>}
                 </div>
               </div>
 
               {/* Submit */}
-              <div className="flex gap-4 border-t border-outline-variant pt-6 mt-8">
+              <div className="flex gap-4 border-t border-outline-variant/60 pt-6 mt-8">
                 <Link
                   to="/provider"
-                  className="flex-1 text-center rounded-2xl border border-outline-variant px-5 py-3 text-sm font-semibold hover:bg-surface-bright transition"
+                  className="flex-1 text-center rounded-2xl border border-outline-variant px-5 py-3.5 text-sm font-semibold hover:bg-surface-bright/50 transition duration-300"
                 >
                   Cancel
                 </Link>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-gradient-start to-button-gradient-pink px-5 py-3 text-sm font-semibold text-white shadow-md shadow-primary-container/40 hover:scale-[1.01] transition disabled:opacity-55"
+                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-gradient-start to-button-gradient-pink px-5 py-3.5 text-sm font-semibold text-white shadow-lg shadow-primary-container/30 hover:scale-[1.02] transition duration-300 disabled:opacity-55"
                 >
                   <Save className="h-4 w-4" />
                   {loading ? 'Saving...' : 'Save Property'}
@@ -320,6 +329,7 @@ function AddEditProperty() {
           </div>
         </div>
       </main>
+
       <Footer />
     </div>
   )

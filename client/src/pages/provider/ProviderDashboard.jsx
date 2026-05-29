@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Building2, Plus, Edit, Trash2, ArrowRight, MapPin, Clock, Hotel } from 'lucide-react'
+import { Building2, Plus, Edit, Trash2, ArrowRight, MapPin, Clock, Hotel, CheckCircle2, AlertTriangle } from 'lucide-react'
 import { toast } from 'sonner'
 import Header from '../../components/layout/Header'
 import Footer from '../../components/layout/Footer'
@@ -73,61 +73,101 @@ function ProviderDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-surface-bright text-on-surface flex flex-col">
+    <div className="min-h-screen bg-surface-bright text-on-surface flex flex-col relative overflow-hidden">
+      {/* Dynamic Background Blobs */}
+      <div className="absolute top-[-10%] right-[-5%] w-96 h-96 bg-gradient-end hero-blob opacity-20 pointer-events-none" />
+      <div className="absolute bottom-[20%] left-[-10%] w-[500px] h-[500px] bg-gradient-start hero-blob opacity-10 pointer-events-none" />
+
       <Header />
-      <main className="flex-grow px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+      
+      <main className="flex-grow px-4 py-8 sm:px-6 lg:px-8 lg:py-12 relative z-10">
         <div className="mx-auto max-w-7xl">
           {/* Header section */}
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-10">
             <div>
-              <h1 className="font-display text-3xl font-bold tracking-tight text-on-surface sm:text-4xl">
-                Provider Dashboard
+              <h1 className="font-display text-4xl font-extrabold tracking-tight text-on-surface sm:text-5xl">
+                <span className="text-gradient">Provider Dashboard</span>
               </h1>
-              <p className="mt-1 text-sm text-on-surface-variant">
-                Manage your properties, room types, and room availability.
+              <p className="mt-2 text-sm font-medium text-on-surface-variant">
+                Manage your accommodation properties, room types, and physical room inventories.
               </p>
             </div>
             <Link
               to="/provider/properties/new"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-gradient-start to-button-gradient-pink px-5 py-3 text-sm font-semibold text-white shadow-md shadow-primary-container/40 hover:scale-[1.02] transition"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-gradient-start to-button-gradient-pink px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-primary-container/30 hover:scale-[1.03] transition-all duration-300"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-5 w-5" />
               Add New Property
             </Link>
           </div>
 
           {/* Stats Section */}
-          <div className="grid gap-5 grid-cols-2 lg:grid-cols-4 mb-10">
-            <div className="rounded-3xl bg-white p-5 shadow-sm border border-outline-variant">
-              <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Total Properties</p>
-              <div className="flex items-baseline justify-between mt-2">
-                <p className="text-3xl font-bold text-primary">{totalProperties}</p>
-                <Building2 className="h-6 w-6 text-primary/40" />
+          <div className="grid gap-6 grid-cols-2 lg:grid-cols-4 mb-12">
+            {/* Card 1 */}
+            <div className="rounded-3xl glass-card p-5 shadow-lg border border-white/50 bg-white/70 hover:shadow-xl transition-all duration-300 flex flex-col justify-between min-h-36">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-bold uppercase tracking-wider text-on-surface-variant font-display">Total Properties</p>
+                <div className="p-2.5 rounded-2xl bg-primary/10 text-primary">
+                  <Building2 className="h-5 w-5" />
+                </div>
               </div>
-            </div>
-            <div className="rounded-3xl bg-white p-5 shadow-sm border border-outline-variant">
-              <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Room Types</p>
-              <div className="flex items-baseline justify-between mt-2">
-                <p className="text-3xl font-bold text-secondary">{totalRoomTypes}</p>
-                <Hotel className="h-6 w-6 text-secondary/40" />
-              </div>
-            </div>
-            <div className="rounded-3xl bg-white p-5 shadow-sm border border-outline-variant">
-              <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Available Rooms</p>
-              <div className="flex items-baseline justify-between mt-2">
-                <p className="text-3xl font-bold text-emerald-600">{availableRooms}</p>
-                <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
-                  / {totalRooms} total
+              <div className="flex items-baseline justify-between mt-4">
+                <p className="text-4xl font-extrabold text-primary font-display">{totalProperties}</p>
+                <span className="text-[10px] font-bold text-primary/80 bg-primary/5 px-2.5 py-1 rounded-full border border-primary/10">
+                  Active Listings
                 </span>
               </div>
             </div>
-            <div className="rounded-3xl bg-white p-5 shadow-sm border border-outline-variant">
-              <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Maintenance</p>
-              <div className="flex items-baseline justify-between mt-2">
-                <p className="text-3xl font-bold text-amber-600">{maintenanceRooms}</p>
-                {maintenanceRooms > 0 && (
-                  <span className="text-xs font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full animate-pulse">
-                    Action required
+
+            {/* Card 2 */}
+            <div className="rounded-3xl glass-card p-5 shadow-lg border border-white/50 bg-white/70 hover:shadow-xl transition-all duration-300 flex flex-col justify-between min-h-36">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-bold uppercase tracking-wider text-on-surface-variant font-display">Room Categories</p>
+                <div className="p-2.5 rounded-2xl bg-secondary/10 text-secondary">
+                  <Hotel className="h-5 w-5" />
+                </div>
+              </div>
+              <div className="flex items-baseline justify-between mt-4">
+                <p className="text-4xl font-extrabold text-secondary font-display">{totalRoomTypes}</p>
+                <span className="text-[10px] font-bold text-secondary/80 bg-secondary/5 px-2.5 py-1 rounded-full border border-secondary/10">
+                  Room Types
+                </span>
+              </div>
+            </div>
+
+            {/* Card 3 */}
+            <div className="rounded-3xl glass-card p-5 shadow-lg border border-white/50 bg-white/70 hover:shadow-xl transition-all duration-300 flex flex-col justify-between min-h-36">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-bold uppercase tracking-wider text-on-surface-variant font-display">Available Rooms</p>
+                <div className="p-2.5 rounded-2xl bg-emerald-50 text-emerald-600">
+                  <CheckCircle2 className="h-5 w-5" />
+                </div>
+              </div>
+              <div className="flex items-baseline justify-between mt-4">
+                <p className="text-4xl font-extrabold text-emerald-600 font-display">{availableRooms}</p>
+                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100">
+                  / {totalRooms} Total
+                </span>
+              </div>
+            </div>
+
+            {/* Card 4 */}
+            <div className="rounded-3xl glass-card p-5 shadow-lg border border-white/50 bg-white/70 hover:shadow-xl transition-all duration-300 flex flex-col justify-between min-h-36">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-bold uppercase tracking-wider text-on-surface-variant font-display">In Maintenance</p>
+                <div className="p-2.5 rounded-2xl bg-amber-50 text-amber-600">
+                  <AlertTriangle className="h-5 w-5" />
+                </div>
+              </div>
+              <div className="flex items-baseline justify-between mt-4">
+                <p className="text-4xl font-extrabold text-amber-600 font-display">{maintenanceRooms}</p>
+                {maintenanceRooms > 0 ? (
+                  <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-100 animate-pulse">
+                    Action Required
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-bold text-on-surface-variant bg-surface px-2.5 py-1 rounded-full border border-outline-variant">
+                    All Healthy
                   </span>
                 )}
               </div>
@@ -136,51 +176,54 @@ function ProviderDashboard() {
 
           {/* Properties list */}
           {loading ? (
-            <div className="flex justify-center items-center py-20">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+            <div className="flex justify-center items-center py-24">
+              <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
             </div>
           ) : properties.length === 0 ? (
-            <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-outline-variant">
-              <Building2 className="mx-auto h-12 w-12 text-on-surface-variant/40 mb-4" />
-              <h3 className="text-lg font-semibold">No properties registered yet</h3>
+            <div className="text-center py-20 glass-card bg-white/50 rounded-[2.5rem] border border-white/40 shadow-lg">
+              <Building2 className="mx-auto h-16 w-16 text-on-surface-variant/40 mb-6" />
+              <h3 className="text-2xl font-bold tracking-tight text-on-surface">No properties registered yet</h3>
               <p className="mt-2 text-sm text-on-surface-variant max-w-sm mx-auto">
-                Start listing your hotel, resort, villa, or homestay to begin receiving guests.
+                Start listing your hotel, resort, villa, or homestay to begin receiving guests and managing reservations.
               </p>
               <Link
                 to="/provider/properties/new"
-                className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-primary/90 transition"
+                className="mt-8 inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-gradient-start to-button-gradient-pink px-6 py-3.5 text-sm font-semibold text-white shadow-md hover:scale-[1.02] transition duration-300"
               >
                 Create Your First Listing
               </Link>
             </div>
           ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
               {properties.map((property) => (
                 <div
                   key={property.id}
-                  className="group relative flex flex-col justify-between overflow-hidden rounded-[2rem] bg-white border border-outline-variant shadow-sm transition hover:shadow-md hover:border-primary/20"
+                  className="group relative flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-white/90 border border-outline-variant shadow-md transition-all duration-300 hover:shadow-xl hover:border-primary/20 hover:-translate-y-1"
                 >
+                  {/* Visual Top Decorative Gradient Line */}
+                  <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-gradient-start via-gradient-mid to-gradient-end opacity-80 group-hover:opacity-100 transition-opacity" />
+
                   {/* Top content */}
-                  <div className="p-6">
+                  <div className="p-6 pt-8">
                     <div className="flex items-center justify-between mb-4">
-                      <span className="inline-flex rounded-full bg-primary/5 border border-primary/10 px-3 py-1 text-xs font-semibold capitalize text-primary">
+                      <span className="inline-flex rounded-full bg-primary/5 border border-primary/10 px-3.5 py-1 text-xs font-bold capitalize text-primary">
                         {property.property_type}
                       </span>
-                      <div className="flex items-center gap-1.5 text-xs text-on-surface-variant font-medium">
-                        <MapPin className="h-3.5 w-3.5 text-on-surface-variant/70" />
-                        <span>{property.latitude.toString().slice(0, 7)}, {property.longitude.toString().slice(0, 7)}</span>
+                      <div className="flex items-center gap-1.5 text-xs text-on-surface-variant font-bold">
+                        <MapPin className="h-3.5 w-3.5 text-primary-container" />
+                        <span>{Number(property.latitude).toFixed(4)}, {Number(property.longitude).toFixed(4)}</span>
                       </div>
                     </div>
 
-                    <h2 className="text-xl font-bold tracking-tight text-on-surface group-hover:text-primary transition line-clamp-1">
+                    <h2 className="text-2xl font-bold tracking-tight text-on-surface group-hover:text-primary transition line-clamp-1">
                       {property.name}
                     </h2>
 
-                    <p className="mt-2 text-sm text-on-surface-variant line-clamp-2 min-h-10">
+                    <p className="mt-2 text-sm text-on-surface-variant line-clamp-2 min-h-10 leading-relaxed">
                       {property.address}
                     </p>
 
-                    <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 border-t border-outline-variant pt-4 text-xs font-semibold text-on-surface-variant">
+                    <div className="mt-5 flex flex-wrap gap-x-4 gap-y-2 border-t border-outline-variant/60 pt-4 text-xs font-bold text-on-surface-variant">
                       <div className="flex items-center gap-1.5">
                         <Clock className="h-3.5 w-3.5 text-secondary" />
                         <span>Check-in: {formatTime(property.check_in_time)}</span>
@@ -193,7 +236,7 @@ function ProviderDashboard() {
                   </div>
 
                   {/* Actions footer */}
-                  <div className="flex border-t border-outline-variant bg-surface-bright px-6 py-4 justify-between items-center">
+                  <div className="flex border-t border-outline-variant/60 bg-surface-bright/50 px-6 py-4 justify-between items-center">
                     <div className="flex gap-2">
                       <Link
                         to={`/provider/properties/edit/${property.id}`}
@@ -213,7 +256,7 @@ function ProviderDashboard() {
 
                     <Link
                       to={`/provider/properties/${property.id}`}
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-white border border-outline-variant hover:border-primary/30 hover:bg-primary/5 hover:text-primary px-4 py-2 text-xs font-bold transition shadow-sm text-on-surface"
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-white border border-outline-variant hover:border-primary/30 hover:bg-primary/5 hover:text-primary px-4 py-2.5 text-xs font-bold transition shadow-sm text-on-surface"
                     >
                       Manage Rooms
                       <ArrowRight className="h-3.5 w-3.5" />
@@ -225,6 +268,7 @@ function ProviderDashboard() {
           )}
         </div>
       </main>
+      
       <Footer />
     </div>
   )

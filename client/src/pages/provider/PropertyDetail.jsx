@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, Building2, MapPin, Clock, Plus, Trash2, ShieldAlert, CheckCircle2, AlertTriangle, Sparkles, Hotel } from 'lucide-react'
+import { ArrowLeft, Building2, MapPin, Clock, Plus, Trash2, ShieldAlert, CheckCircle2, AlertTriangle, Sparkles, Hotel, Save } from 'lucide-react'
 import { toast } from 'sonner'
 import Header from '../../components/layout/Header'
 import Footer from '../../components/layout/Footer'
@@ -146,9 +146,10 @@ function PropertyDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-surface-bright flex flex-col">
+      <div className="min-h-screen bg-surface-bright flex flex-col relative overflow-hidden">
+        <div className="absolute top-[-10%] right-[-5%] w-96 h-96 bg-gradient-end hero-blob opacity-20 pointer-events-none" />
         <Header />
-        <main className="flex-grow flex justify-center items-center py-20">
+        <main className="flex-grow flex justify-center items-center py-20 relative z-10">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
         </main>
         <Footer />
@@ -158,13 +159,15 @@ function PropertyDetail() {
 
   if (!property) {
     return (
-      <div className="min-h-screen bg-surface-bright flex flex-col">
+      <div className="min-h-screen bg-surface-bright flex flex-col relative overflow-hidden">
+        <div className="absolute top-[-10%] right-[-5%] w-96 h-96 bg-gradient-end hero-blob opacity-20 pointer-events-none" />
         <Header />
-        <main className="flex-grow flex justify-center items-center py-20">
-          <div className="text-center">
-            <h2 className="text-xl font-bold">Property not found</h2>
-            <Link to="/provider" className="mt-4 inline-block text-primary font-semibold">
-              Go back
+        <main className="flex-grow flex justify-center items-center py-20 relative z-10">
+          <div className="text-center glass-card p-10 rounded-[2rem] border border-white/50 bg-white/70">
+            <h2 className="text-2xl font-bold font-display text-on-surface">Property Not Found</h2>
+            <p className="mt-2 text-sm text-on-surface-variant">The property you are looking for does not exist or has been deleted.</p>
+            <Link to="/provider" className="mt-6 inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-5 py-2.5 text-xs font-semibold text-white transition hover:scale-105">
+              Go Back to Dashboard
             </Link>
           </div>
         </main>
@@ -174,62 +177,79 @@ function PropertyDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-surface-bright text-on-surface flex flex-col">
+    <div className="min-h-screen bg-surface-bright text-on-surface flex flex-col relative overflow-hidden">
+      {/* Decorative Background Blobs */}
+      <div className="absolute top-[-10%] right-[-5%] w-96 h-96 bg-gradient-end hero-blob opacity-20 pointer-events-none" />
+      <div className="absolute bottom-[-10%] left-[-5%] w-[500px] h-[500px] bg-gradient-start hero-blob opacity-10 pointer-events-none" />
+
       <Header />
-      <main className="flex-grow px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+      
+      <main className="flex-grow px-4 py-8 sm:px-6 lg:px-8 lg:py-12 relative z-10">
         <div className="mx-auto max-w-7xl">
           {/* Back button */}
           <Link
             to="/provider"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-on-surface-variant hover:text-primary transition mb-6"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-on-surface-variant hover:text-primary transition mb-8"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Dashboard
           </Link>
 
           {/* Grid Layout */}
-          <div className="grid gap-8 lg:grid-cols-[1fr_2fr]">
+          <div className="grid gap-8 lg:grid-cols-[1fr_2.2fr] items-start">
             {/* Left Column: Property Info */}
-            <div className="rounded-[2rem] bg-white p-6 shadow-sm border border-outline-variant h-fit">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-4">
-                <Building2 className="h-5 w-5" />
+            <div className="rounded-[2.5rem] glass-card p-6 sm:p-8 shadow-lg border border-white/50 bg-white/80 relative overflow-hidden h-fit">
+              {/* Soft decorative top accent bar */}
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-gradient-start via-gradient-mid to-gradient-end opacity-80" />
+
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-5 shadow-inner">
+                <Building2 className="h-5.5 w-5.5" />
               </div>
-              <span className="inline-flex rounded-full bg-primary/5 border border-primary/10 px-3 py-1 text-xs font-semibold capitalize text-primary mb-3">
+              <span className="inline-flex rounded-full bg-primary/5 border border-primary/10 px-3.5 py-1 text-xs font-bold capitalize text-primary mb-4">
                 {property.property_type}
               </span>
-              <h1 className="text-2xl font-bold tracking-tight text-on-surface mb-2">{property.name}</h1>
-              <p className="text-sm text-on-surface-variant mb-6">{property.address}</p>
+              <h1 className="text-2xl font-extrabold tracking-tight text-on-surface mb-3 font-display">{property.name}</h1>
+              <p className="text-sm text-on-surface-variant mb-6 leading-relaxed flex items-start gap-1.5">
+                <MapPin className="h-4 w-4 text-primary-container shrink-0 mt-0.5" />
+                <span>{property.address}</span>
+              </p>
 
-              <div className="space-y-4 border-t border-outline-variant pt-6 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-on-surface-variant">Check-in hours:</span>
-                  <span className="font-semibold">{formatTime(property.check_in_time)}</span>
+              <div className="space-y-4 border-t border-outline-variant/60 pt-6 text-sm font-semibold text-on-surface-variant">
+                <div className="flex justify-between items-center">
+                  <span className="text-on-surface-variant font-medium">Check-in:</span>
+                  <span className="text-on-surface flex items-center gap-1">
+                    <Clock className="h-4 w-4 text-secondary" />
+                    {formatTime(property.check_in_time)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-on-surface-variant font-medium">Check-out:</span>
+                  <span className="text-on-surface flex items-center gap-1">
+                    <Clock className="h-4 w-4 text-secondary" />
+                    {formatTime(property.check_out_time)}
+                  </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-on-surface-variant">Check-out hours:</span>
-                  <span className="font-semibold">{formatTime(property.check_out_time)}</span>
+                  <span className="text-on-surface-variant font-medium">Latitude:</span>
+                  <span className="text-on-surface">{Number(property.latitude).toFixed(6)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-on-surface-variant">Latitude:</span>
-                  <span className="font-semibold">{Number(property.latitude).toFixed(6)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-on-surface-variant">Longitude:</span>
-                  <span className="font-semibold">{Number(property.longitude).toFixed(6)}</span>
+                  <span className="text-on-surface-variant font-medium">Longitude:</span>
+                  <span className="text-on-surface">{Number(property.longitude).toFixed(6)}</span>
                 </div>
               </div>
             </div>
 
             {/* Right Column: Room Inventory */}
-            <div className="space-y-6">
+            <div className="space-y-8">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-xl font-bold tracking-tight text-on-surface">Room Inventory</h2>
-                  <p className="text-xs text-on-surface-variant">Create room types and manage individual rooms.</p>
+                  <h2 className="text-2xl font-extrabold tracking-tight text-on-surface font-display">Room Inventory</h2>
+                  <p className="text-xs font-medium text-on-surface-variant mt-1">Configure room categories and manage individual room status.</p>
                 </div>
                 <button
                   onClick={() => setShowRoomTypeForm(!showRoomTypeForm)}
-                  className="inline-flex items-center gap-1.5 rounded-2xl bg-gradient-to-r from-gradient-start to-button-gradient-pink px-4 py-2.5 text-xs font-bold text-white shadow-md shadow-primary-container/40 transition hover:scale-[1.02]"
+                  className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-gradient-start to-button-gradient-pink px-5 py-3 text-xs font-bold text-white shadow-md shadow-primary-container/30 transition hover:scale-[1.03] duration-300"
                 >
                   <Plus className="h-4 w-4" />
                   Add Room Type
@@ -240,37 +260,44 @@ function PropertyDetail() {
               {showRoomTypeForm && (
                 <form
                   onSubmit={handleCreateRoomType}
-                  className="rounded-3xl bg-white p-6 shadow-sm border border-outline-variant space-y-4 animate-fade-in"
+                  className="rounded-[2rem] glass-card p-6 sm:p-8 shadow-xl border border-white/50 bg-white/95 space-y-5 animate-fade-in relative overflow-hidden"
                 >
-                  <h3 className="font-semibold text-sm">New Room Type</h3>
+                  {/* Decorative line */}
+                  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-gradient-start to-button-gradient-coral opacity-80" />
+
+                  <h3 className="font-bold text-base font-display text-on-surface flex items-center gap-2">
+                    <Hotel className="h-4.5 w-4.5 text-primary" />
+                    New Room Type
+                  </h3>
+                  
                   <div className="grid gap-4 sm:grid-cols-3">
                     <div className="sm:col-span-2">
-                      <label className="block text-xs font-semibold text-on-surface mb-1">Name</label>
+                      <label className="block text-xs font-bold text-on-surface mb-2 font-display">Name</label>
                       <input
                         type="text"
                         placeholder="e.g. Deluxe Double Room"
                         value={newRoomType.name}
                         onChange={(e) => setNewRoomType({ ...newRoomType, name: e.target.value })}
-                        className="w-full rounded-xl border border-outline-variant px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                        className="w-full rounded-xl border border-outline-variant bg-white/50 px-3.5 py-2.5 text-sm focus:border-primary focus:outline-none"
                       />
-                      {roomTypeErrors.name && <p className="mt-1 text-xs text-red-500">{roomTypeErrors.name}</p>}
+                      {roomTypeErrors.name && <p className="mt-1 text-xs text-red-500 font-bold">{roomTypeErrors.name}</p>}
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-on-surface mb-1">Max Guests</label>
+                      <label className="block text-xs font-bold text-on-surface mb-2 font-display">Max Guests</label>
                       <input
                         type="number"
                         min="1"
                         value={newRoomType.max_guests}
                         onChange={(e) => setNewRoomType({ ...newRoomType, max_guests: Number(e.target.value) })}
-                        className="w-full rounded-xl border border-outline-variant px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                        className="w-full rounded-xl border border-outline-variant bg-white/50 px-3.5 py-2.5 text-sm focus:border-primary focus:outline-none"
                       />
-                      {roomTypeErrors.max_guests && <p className="mt-1 text-xs text-red-500">{roomTypeErrors.max_guests}</p>}
+                      {roomTypeErrors.max_guests && <p className="mt-1 text-xs text-red-500 font-bold">{roomTypeErrors.max_guests}</p>}
                     </div>
                   </div>
 
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
-                      <label className="block text-xs font-semibold text-on-surface mb-1">Base Price ($)</label>
+                      <label className="block text-xs font-bold text-on-surface mb-2 font-display">Base Price ($)</label>
                       <input
                         type="number"
                         min="0.01"
@@ -278,34 +305,35 @@ function PropertyDetail() {
                         placeholder="e.g. 120"
                         value={newRoomType.base_price}
                         onChange={(e) => setNewRoomType({ ...newRoomType, base_price: e.target.value })}
-                        className="w-full rounded-xl border border-outline-variant px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                        className="w-full rounded-xl border border-outline-variant bg-white/50 px-3.5 py-2.5 text-sm focus:border-primary focus:outline-none"
                       />
-                      {roomTypeErrors.base_price && <p className="mt-1 text-xs text-red-500">{roomTypeErrors.base_price}</p>}
+                      {roomTypeErrors.base_price && <p className="mt-1 text-xs text-red-500 font-bold">{roomTypeErrors.base_price}</p>}
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-on-surface mb-1">Amenities</label>
+                      <label className="block text-xs font-bold text-on-surface mb-2 font-display">Amenities</label>
                       <input
                         type="text"
                         placeholder="Wifi, AC, Bath, Mini-bar"
                         value={newRoomType.amenities}
                         onChange={(e) => setNewRoomType({ ...newRoomType, amenities: e.target.value })}
-                        className="w-full rounded-xl border border-outline-variant px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                        className="w-full rounded-xl border border-outline-variant bg-white/50 px-3.5 py-2.5 text-sm focus:border-primary focus:outline-none"
                       />
                     </div>
                   </div>
 
-                  <div className="flex justify-end gap-2 pt-2 border-t border-outline-variant">
+                  <div className="flex justify-end gap-3 pt-4 border-t border-outline-variant/60">
                     <button
                       type="button"
                       onClick={() => setShowRoomTypeForm(false)}
-                      className="rounded-xl border border-outline-variant px-4 py-2 text-xs font-semibold hover:bg-surface-bright transition"
+                      className="rounded-xl border border-outline-variant bg-white px-5 py-2.5 text-xs font-semibold hover:bg-surface-bright/50 transition duration-300"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="rounded-xl bg-primary text-white px-4 py-2 text-xs font-semibold hover:bg-primary/90 transition"
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-primary text-white px-5 py-2.5 text-xs font-bold hover:bg-primary/95 transition duration-300 shadow-md shadow-primary/20"
                     >
+                      <Save className="h-3.5 w-3.5" />
                       Save Room Type
                     </button>
                   </div>
@@ -314,34 +342,33 @@ function PropertyDetail() {
 
               {/* Room Types Listing */}
               {property.Room_Types?.length === 0 ? (
-                <div className="text-center py-16 bg-white rounded-[2rem] border border-outline-variant">
-                  <Hotel className="mx-auto h-10 w-10 text-on-surface-variant/40 mb-3" />
-                  <p className="text-sm font-semibold">No room types defined</p>
-                  <p className="text-xs text-on-surface-variant mt-1">Add a room type (like Single or Deluxe) first.</p>
+                <div className="text-center py-20 glass-card bg-white/50 rounded-[2.5rem] border border-white/40 shadow-lg">
+                  <Hotel className="mx-auto h-12 w-12 text-on-surface-variant/40 mb-4" />
+                  <p className="text-lg font-bold text-on-surface">No room types defined</p>
+                  <p className="text-sm text-on-surface-variant mt-1">Create your first room category (e.g. Single, Twin, Deluxe Suite).</p>
                 </div>
               ) : (
-                <div className="space-y-6">
+                <div className="space-y-8">
                   {property.Room_Types?.map((rt) => (
                     <div
                       key={rt.id}
-                      className="rounded-[1.75rem] bg-white border border-outline-variant shadow-sm overflow-hidden"
+                      className="rounded-[2.5rem] bg-white border border-outline-variant/70 shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden relative"
                     >
+                      {/* Accent sidebar or tag */}
+                      <div className="absolute top-0 bottom-0 left-0 w-1.5 bg-gradient-to-b from-primary via-gradient-mid to-gradient-end opacity-85" />
+
                       {/* Room Type Details Header */}
-                      <div className="bg-surface-bright px-6 py-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-outline-variant">
+                      <div className="bg-surface-bright/40 pl-8 pr-6 py-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-outline-variant/60">
                         <div>
-                          <h3 className="text-lg font-bold tracking-tight text-on-surface">{rt.name}</h3>
-                          <div className="flex flex-wrap items-center gap-3 mt-1.5 text-xs text-on-surface-variant font-semibold">
-                            <span>Max guests: {rt.max_guests}</span>
-                            <span className="text-outline-variant">•</span>
-                            <span className="text-primary font-bold">${Number(rt.base_price).toFixed(2)}/night</span>
+                          <h3 className="text-xl font-bold tracking-tight text-on-surface font-display">{rt.name}</h3>
+                          <div className="flex flex-wrap items-center gap-x-3.5 gap-y-1.5 mt-2 text-xs text-on-surface-variant font-bold">
+                            <span className="bg-surface-dim/40 px-2.5 py-1 rounded-lg border border-outline-variant/40">Max guests: {rt.max_guests}</span>
+                            <span className="text-primary font-extrabold bg-primary/5 px-2.5 py-1 rounded-lg border border-primary/10">${Number(rt.base_price).toFixed(2)} / night</span>
                             {rt.amenities && (
-                              <>
-                                <span className="text-outline-variant">•</span>
-                                <span className="flex items-center gap-1 text-secondary">
-                                  <Sparkles className="h-3 w-3" />
-                                  {rt.amenities}
-                                </span>
-                              </>
+                              <span className="flex items-center gap-1.5 text-secondary bg-secondary/5 px-2.5 py-1 rounded-lg border border-secondary/10">
+                                <Sparkles className="h-3.5 w-3.5 shrink-0" />
+                                {rt.amenities}
+                              </span>
                             )}
                           </div>
                         </div>
@@ -356,7 +383,7 @@ function PropertyDetail() {
                               setRoomError('')
                             }
                           }}
-                          className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-outline-variant bg-white px-4 py-2 text-xs font-bold text-on-surface hover:border-primary/30 transition shadow-sm"
+                          className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-outline-variant bg-white px-4 py-2.5 text-xs font-bold text-on-surface hover:border-primary/30 transition shadow-sm"
                         >
                           <Plus className="h-3.5 w-3.5" />
                           Add Room
@@ -365,7 +392,7 @@ function PropertyDetail() {
 
                       {/* Add Room Number Form */}
                       {activeRoomTypeForm === rt.id && (
-                        <div className="p-4 bg-primary/5 border-b border-outline-variant flex flex-col gap-2 sm:flex-row sm:items-center">
+                        <div className="pl-8 pr-6 py-4 bg-primary/5 border-b border-outline-variant/60 flex flex-col gap-2.5 sm:flex-row sm:items-center">
                           <div className="flex-grow">
                             <input
                               type="text"
@@ -375,16 +402,16 @@ function PropertyDetail() {
                                 setNewRoomNumber(e.target.value)
                                 setRoomError('')
                               }}
-                              className="w-full sm:max-w-xs rounded-xl border border-outline-variant bg-white px-3 py-2 text-xs focus:border-primary focus:outline-none"
+                              className="w-full sm:max-w-xs rounded-xl border border-outline-variant bg-white px-3.5 py-2.5 text-xs focus:border-primary focus:outline-none"
                             />
-                            {roomError && <p className="mt-1 text-[10px] text-red-500 font-medium">{roomError}</p>}
+                            {roomError && <p className="mt-1 text-[10px] text-red-500 font-bold">{roomError}</p>}
                           </div>
                           <div className="flex gap-2">
                             <button
                               onClick={() => {
                                 handleCreateRoom(rt.id)
                               }}
-                              className="rounded-xl bg-primary text-white px-4 py-2 text-xs font-bold hover:bg-primary/95 transition"
+                              className="rounded-xl bg-primary text-white px-5 py-2.5 text-xs font-bold hover:bg-primary/95 transition"
                             >
                               Add
                             </button>
@@ -394,7 +421,7 @@ function PropertyDetail() {
                                 setNewRoomNumber('')
                                 setRoomError('')
                               }}
-                              className="rounded-xl bg-white border border-outline-variant px-4 py-2 text-xs font-semibold transition"
+                              className="rounded-xl bg-white border border-outline-variant px-5 py-2.5 text-xs font-bold transition"
                             >
                               Cancel
                             </button>
@@ -403,23 +430,23 @@ function PropertyDetail() {
                       )}
 
                       {/* Physical Rooms List */}
-                      <div className="p-6">
+                      <div className="pl-8 pr-6 py-6">
                         {rt.Rooms?.length === 0 ? (
-                          <p className="text-xs text-on-surface-variant italic">No physical rooms registered for this type.</p>
+                          <p className="text-xs text-on-surface-variant font-medium italic">No physical rooms registered for this type.</p>
                         ) : (
-                          <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
+                          <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
                             {rt.Rooms?.map((room) => (
                               <div
                                 key={room.id}
-                                className="flex items-center justify-between rounded-2xl border border-outline-variant p-3 hover:border-primary/20 transition group"
+                                className="flex items-center justify-between rounded-2xl border border-outline-variant/80 bg-surface-bright/20 p-3 hover:border-primary/30 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 group"
                               >
-                                <div>
-                                  <p className="text-sm font-bold text-on-surface">{room.room_number}</p>
+                                <div className="pl-1">
+                                  <p className="text-sm font-bold text-on-surface font-display">{room.room_number}</p>
                                   {/* Status indicator */}
                                   <button
                                     onClick={() => handleToggleRoomStatus(room)}
                                     className={[
-                                      'mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold transition hover:scale-[1.03]',
+                                      'mt-1.5 inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[9px] font-bold transition hover:scale-[1.03]',
                                       room.status === 'available'
                                         ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-100'
                                         : room.status === 'maintenance'
@@ -429,7 +456,7 @@ function PropertyDetail() {
                                     title="Click to toggle status"
                                   >
                                     {room.status === 'available' && <CheckCircle2 className="h-2.5 w-2.5" />}
-                                    {room.status === 'maintenance' && <AlertTriangle className="h-2.5 w-2.5" />}
+                                    {room.status === 'maintenance' && <AlertTriangle className="h-2.5 w-2.5 animate-bounce" />}
                                     {room.status === 'occupied' && <ShieldAlert className="h-2.5 w-2.5" />}
                                     <span className="capitalize">{room.status}</span>
                                   </button>
