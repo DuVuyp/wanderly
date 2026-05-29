@@ -18,19 +18,20 @@ export const createProperty = async (providerId, propertyData) => {
       longitude: propertyData.longitude,
       check_in_time: parseTimeToDate(propertyData.check_in_time),
       check_out_time: parseTimeToDate(propertyData.check_out_time),
+      is_deleted: false,
     },
   })
 }
 
 export const getPropertiesByProvider = async (providerId) => {
   return prisma.properties.findMany({
-    where: { provider_id: providerId, deleted_at: null },
+    where: { provider_id: providerId, is_deleted: { not: true } },
     include: {
       Room_Types: {
-        where: { deleted_at: null },
+        where: { is_deleted: { not: true } },
         include: {
           Rooms: {
-            where: { deleted_at: null },
+            where: { is_deleted: { not: true } },
           },
         },
       },
@@ -43,13 +44,13 @@ export const getPropertiesByProvider = async (providerId) => {
 
 export const getPropertyById = async (id) => {
   const property = await prisma.properties.findFirst({
-    where: { id, deleted_at: null },
+    where: { id, is_deleted: { not: true } },
     include: {
       Room_Types: {
-        where: { deleted_at: null },
+        where: { is_deleted: { not: true } },
         include: {
           Rooms: {
-            where: { deleted_at: null },
+            where: { is_deleted: { not: true } },
           },
         },
       },
@@ -94,30 +95,29 @@ export const deleteProperty = async (id, providerId) => {
     throw new ApiError(httpStatus.FORBIDDEN, 'You do not have permission to delete this property')
   }
 
-  const now = new Date()
   return prisma.$transaction(async (tx) => {
     // 1. Soft delete physical rooms nested in this property's room types
     const roomTypes = await tx.room_Types.findMany({
-      where: { property_id: id, deleted_at: null },
+      where: { property_id: id, is_deleted: { not: true } },
     })
     const roomTypeIds = roomTypes.map((rt) => rt.id)
     if (roomTypeIds.length > 0) {
       await tx.rooms.updateMany({
-        where: { room_type_id: { in: roomTypeIds }, deleted_at: null },
-        data: { deleted_at: now },
+        where: { room_type_id: { in: roomTypeIds }, is_deleted: { not: true } },
+        data: { is_deleted: true },
       })
     }
 
     // 2. Soft delete room types
     await tx.room_Types.updateMany({
-      where: { property_id: id, deleted_at: null },
-      data: { deleted_at: now },
+      where: { property_id: id, is_deleted: { not: true } },
+      data: { is_deleted: true },
     })
 
     // 3. Soft delete property itself
     return tx.properties.update({
       where: { id },
-      data: { deleted_at: now },
+      data: { is_deleted: true },
     })
   })
 }

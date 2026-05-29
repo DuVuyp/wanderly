@@ -5,7 +5,7 @@ import { getRoomTypeById } from './roomTypeService.js'
 
 export const getRoomById = async (id) => {
   const room = await prisma.rooms.findFirst({
-    where: { id, deleted_at: null },
+    where: { id, is_deleted: { not: true } },
     include: {
       Room_Types: {
         include: {
@@ -16,8 +16,8 @@ export const getRoomById = async (id) => {
   })
   if (
     !room ||
-    room.Room_Types.deleted_at !== null ||
-    room.Room_Types.Properties.deleted_at !== null
+    room.Room_Types.is_deleted ||
+    room.Room_Types.Properties.is_deleted
   ) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Room not found')
   }
@@ -34,7 +34,7 @@ export const createRoom = async (roomTypeId, providerId, roomData) => {
     where: {
       room_type_id: roomTypeId,
       room_number: roomData.room_number,
-      deleted_at: null,
+      is_deleted: { not: true },
     },
   })
 
@@ -49,6 +49,7 @@ export const createRoom = async (roomTypeId, providerId, roomData) => {
         room_type_id: roomTypeId,
         room_number: roomData.room_number,
         status: roomData.status || 'available',
+        is_deleted: false,
       },
     })
 
@@ -76,7 +77,7 @@ export const updateRoom = async (roomId, providerId, roomData) => {
       where: {
         room_type_id: room.room_type_id,
         room_number: roomData.room_number,
-        deleted_at: null,
+        is_deleted: { not: true },
       },
     })
     if (existingRoom) {
@@ -102,7 +103,7 @@ export const deleteRoom = async (roomId, providerId) => {
   return prisma.$transaction(async (tx) => {
     await tx.rooms.update({
       where: { id: roomId },
-      data: { deleted_at: new Date() },
+      data: { is_deleted: true },
     })
 
     await tx.room_Types.update({
