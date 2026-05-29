@@ -8,6 +8,9 @@ import Login from './pages/Login';
 import Home from './pages/Home';
 import ProviderDashboard from './pages/ProviderDashboard';
 import Register from './pages/Register';
+import Booking from './pages/Booking';
+import MyBookings from './pages/MyBookings';
+import ManageBookings from './pages/provider/ManageBookings';
 
 function App() {
   return (
@@ -30,9 +33,12 @@ function App() {
         <Route path="/" element={<RoleHomeRedirect />} />
         <Route element={<ProtectedRoute allowedRoles={['traveler', 'provider']} />}>
           <Route path="/home" element={<Home />} />
+          <Route path="/booking" element={<Booking />} />
+          <Route path="/my-bookings" element={<MyBookings />} />
         </Route>
         <Route element={<ProtectedRoute allowedRoles={['provider']} />}>
           <Route path="/provider" element={<ProviderDashboard />} />
+          <Route path="/provider/bookings" element={<ManageBookings />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
