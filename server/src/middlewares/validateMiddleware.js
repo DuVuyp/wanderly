@@ -1,4 +1,5 @@
 import httpStatus from 'http-status'
+
 import ApiError from '../utils/ApiError.js'
 
 const validate = (schema) => (req, res, next) => {

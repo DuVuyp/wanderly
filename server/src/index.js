@@ -2,11 +2,15 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 import express from 'express'
 import httpStatus from 'http-status'
-import authRoutes from './routes/authRoutes.js'
-import userRoutes from './routes/userRoutes.js'
-import profileRoutes from './routes/profileRoutes.js'
-import uploadRoutes from './routes/uploadRoutes.js'
+import { startCronJobs } from './utils/cronJobs.js'
+
 import { errorHandler } from './middlewares/errorMiddleware.js'
+import authRoutes from './routes/authRoutes.js'
+import bookingRoutes from './routes/bookingRoutes.js'
+import profileRoutes from './routes/profileRoutes.js'
+import propertyRoutes from './routes/propertyRoutes.js'
+import uploadRoutes from './routes/uploadRoutes.js'
+import userRoutes from './routes/userRoutes.js'
 import ApiError from './utils/ApiError.js'
 
 // Load env vars
@@ -54,6 +58,8 @@ app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ limit: '10mb', extended: true }))
 
 app.use('/api/auth', authRoutes)
+app.use('/api/bookings', bookingRoutes)
+app.use('/api/properties', propertyRoutes)
 app.use('/api/users', userRoutes)
 app.use('/api/profile', profileRoutes)
 app.use('/api/upload', uploadRoutes)
@@ -75,6 +81,9 @@ app.use(errorHandler)
 
 // Start server
 const PORT = process.env.PORT || 8000
+
+// Initialize cron jobs
+startCronJobs()
 
 app.listen(PORT, () => {
   console.log(`Server API is running!`)

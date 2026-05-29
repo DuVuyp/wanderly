@@ -1,6 +1,7 @@
+import httpStatus from 'http-status'
 import jwt from 'jsonwebtoken'
 import moment from 'moment'
-import httpStatus from 'http-status'
+
 import prisma from '../config/prisma.js'
 import ApiError from '../utils/ApiError.js'
 
