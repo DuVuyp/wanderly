@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import PublicOnlyRoute from './components/routing/PublicOnlyRoute';
@@ -8,6 +7,7 @@ import Login from './pages/Login';
 import Home from './pages/Home';
 import ProviderDashboard from './pages/ProviderDashboard';
 import Register from './pages/Register';
+import Services from './pages/Services';
 import Booking from './pages/Booking';
 import MyBookings from './pages/MyBookings';
 import ManageBookings from './pages/provider/ManageBookings';
@@ -34,7 +34,8 @@ function App() {
         <Route path="/" element={<RoleHomeRedirect />} />
         <Route element={<ProtectedRoute allowedRoles={['traveler', 'provider']} />}>
           <Route path="/home" element={<Home />} />
-          <Route path="/booking" element={<Booking />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/services/:id" element={<Booking />} />
           <Route path="/my-bookings" element={<MyBookings />} />
           <Route path="/profile" element={<Profile />} />
         </Route>

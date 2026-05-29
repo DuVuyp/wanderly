@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import {
   CalendarDays,
@@ -38,8 +38,9 @@ function ManageBookings() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
   const [confirmModal, setConfirmModal] = useState(null);
+  const [stats, setStats] = useState({ total: 0, pending: 0, confirmed: 0, completed: 0, cancelled: 0 });
 
-  const fetchBookings = async (page = 1) => {
+  const fetchBookings = useCallback(async (page = 1) => {
     setLoading(true);
     try {
       const params = { page, limit: 10 };
@@ -47,16 +48,22 @@ function ManageBookings() {
       const res = await getProviderBookings(params);
       setBookings(res.data?.bookings || []);
       setPagination(res.data?.pagination || { page: 1, limit: 10, total: 0, totalPages: 0 });
+      if (res.data?.stats) {
+        setStats(res.data.stats);
+      }
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to load bookings');
     } finally {
       setLoading(false);
     }
-  };
+  }, [statusFilter]);
 
   useEffect(() => {
-    fetchBookings(1);
-  }, [statusFilter]);
+    const timer = setTimeout(() => {
+      fetchBookings(1);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [fetchBookings]);
 
   const handleStatusUpdate = async (bookingId, status) => {
     setActionLoading(bookingId);
@@ -106,10 +113,10 @@ function ManageBookings() {
           {/* Stats Row */}
           <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
             {[
-              { label: 'Total', value: pagination.total, color: 'text-on-surface' },
-              { label: 'Pending', value: bookings.filter(b => b.status === 'pending').length, color: 'text-yellow-600' },
-              { label: 'Confirmed', value: bookings.filter(b => b.status === 'confirmed').length, color: 'text-green-600' },
-              { label: 'Cancelled', value: bookings.filter(b => b.status === 'cancelled').length, color: 'text-red-600' },
+              { label: 'Total', value: stats.total, color: 'text-on-surface' },
+              { label: 'Pending', value: stats.pending, color: 'text-yellow-600' },
+              { label: 'Confirmed', value: stats.confirmed, color: 'text-green-600' },
+              { label: 'Cancelled', value: stats.cancelled, color: 'text-red-600' },
             ].map((stat) => (
               <div
                 key={stat.label}

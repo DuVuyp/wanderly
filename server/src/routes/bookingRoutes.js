@@ -1,5 +1,6 @@
 import express from 'express'
 
+import USER_ROLES from '../constants/roles.js'
 import {
   createBooking,
   getMyBookings,
@@ -7,9 +8,8 @@ import {
   getBookingDetail,
   updateBookingStatus,
 } from '../controllers/bookingController.js'
-import validate from '../middlewares/validateMiddleware.js'
 import auth from '../middlewares/authMiddleware.js'
-import USER_ROLES from '../constants/roles.js'
+import validate from '../middlewares/validateMiddleware.js'
 import { createBookingSchema, updateBookingStatusSchema } from '../validations/bookingValidation.js'
 
 const router = express.Router()

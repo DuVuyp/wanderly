@@ -1,8 +1,8 @@
 import httpStatus from 'http-status'
 
-import ApiError from '../utils/ApiError.js'
 import prisma from '../config/prisma.js'
 import USER_ROLES from '../constants/roles.js'
+import ApiError from '../utils/ApiError.js'
 
 /**
  * Tính số đêm giữa 2 ngày
@@ -27,82 +27,80 @@ const calculateNights = (checkIn, checkOut) => {
 const createBooking = async (userId, bookingData) => {
   const { property_id, check_in_date, check_out_date, rooms } = bookingData
 
-  // 1. Kiểm tra property tồn tại
-  const property = await prisma.properties.findUnique({
-    where: { id: property_id },
-    include: { Room_Types: true },
-  })
-
-  if (!property) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Property not found')
-  }
-
   // Tính số đêm
   const nights = calculateNights(check_in_date, check_out_date)
   if (nights <= 0) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Check-out date must be after check-in date')
   }
 
-  // 2. Kiểm tra từng room_type và tính giá
-  let totalPrice = 0
-  const bookingDetails = []
-
-  for (const room of rooms) {
-    const roomType = property.Room_Types.find((rt) => rt.id === room.room_type_id)
-
-    if (!roomType) {
-      throw new ApiError(
-        httpStatus.BAD_REQUEST,
-        `Room type with ID ${room.room_type_id} does not belong to this property`
-      )
-    }
-
-    // 3. Kiểm tra phòng khả dụng
-    // Đếm số phòng available của room_type
-    const totalRooms = await prisma.rooms.count({
-      where: {
-        room_type_id: room.room_type_id,
-        status: 'available',
-      },
-    })
-
-    // Đếm số phòng đã bị booking (pending/confirmed) trong khoảng ngày overlap
-    const overlappingBookings = await prisma.booking_Details.aggregate({
-      _sum: { quantity: true },
-      where: {
-        room_type_id: room.room_type_id,
-        Bookings: {
-          status: { in: ['pending', 'confirmed'] },
-          // Overlap: booking.check_in < our check_out AND booking.check_out > our check_in
-          check_in_date: { lt: new Date(check_out_date) },
-          check_out_date: { gt: new Date(check_in_date) },
-        },
-      },
-    })
-
-    const bookedQuantity = overlappingBookings._sum.quantity || 0
-    const availableQuantity = totalRooms - bookedQuantity
-
-    if (room.quantity > availableQuantity) {
-      throw new ApiError(
-        httpStatus.BAD_REQUEST,
-        `Not enough rooms available for "${roomType.name}". Requested: ${room.quantity}, Available: ${Math.max(0, availableQuantity)}`
-      )
-    }
-
-    // Tính giá cho room type này
-    const priceForThisType = Number(roomType.base_price) * room.quantity * nights
-    totalPrice += priceForThisType
-
-    bookingDetails.push({
-      room_type_id: room.room_type_id,
-      quantity: room.quantity,
-      price_at_booking: Number(roomType.base_price),
-    })
-  }
-
-  // 5. Tạo Booking + Booking_Details trong 1 transaction
+  // Thực hiện tất cả các bước bên trong 1 transaction để tránh Race Condition (kẹt phòng)
   const booking = await prisma.$transaction(async (tx) => {
+    // 1. Kiểm tra property tồn tại
+    const property = await tx.properties.findUnique({
+      where: { id: property_id },
+      include: { Room_Types: true },
+    })
+
+    if (!property) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'Property not found')
+    }
+
+    // 2. Kiểm tra từng room_type và tính giá
+    let totalPrice = 0
+    const bookingDetails = []
+
+    for (const room of rooms) {
+      const roomType = property.Room_Types.find((rt) => rt.id === room.room_type_id)
+
+      if (!roomType) {
+        throw new ApiError(
+          httpStatus.BAD_REQUEST,
+          `Room type with ID ${room.room_type_id} does not belong to this property`
+        )
+      }
+
+      // 3. Kiểm tra phòng khả dụng
+      const totalRooms = await tx.rooms.count({
+        where: {
+          room_type_id: room.room_type_id,
+          status: 'available',
+        },
+      })
+
+      const overlappingBookings = await tx.booking_Details.aggregate({
+        _sum: { quantity: true },
+        where: {
+          room_type_id: room.room_type_id,
+          Bookings: {
+            status: { in: ['pending', 'confirmed'] },
+            check_in_date: { lt: new Date(check_out_date) },
+            check_out_date: { gt: new Date(check_in_date) },
+          },
+        },
+      })
+
+      const bookedQuantity = overlappingBookings._sum.quantity || 0
+      const availableQuantity = totalRooms - bookedQuantity
+
+      if (room.quantity > availableQuantity) {
+        throw new ApiError(
+          httpStatus.BAD_REQUEST,
+          `Not enough rooms available for "${roomType.name}". Requested: ${room.quantity}, Available: ${Math.max(0, availableQuantity)}`
+        )
+      }
+
+      // Tính giá cho room type này
+      const priceForThisType = Number(roomType.base_price) * room.quantity * nights
+      totalPrice += priceForThisType
+
+      bookingDetails.push({
+        room_type_id: room.room_type_id,
+        quantity: room.quantity,
+        price_at_booking: Number(roomType.base_price),
+      })
+    }
+
+    // 4. Tạo Booking + Booking_Details
     const newBooking = await tx.bookings.create({
       data: {
         user_id: userId,
@@ -224,6 +222,26 @@ const getProviderBookings = async (providerId, query = {}) => {
     prisma.bookings.count({ where }),
   ])
 
+  // Calculate stats for all bookings of this provider (ignoring current status filter)
+  const statsGroup = await prisma.bookings.groupBy({
+    by: ['status'],
+    where: { Properties: { provider_id: providerId } },
+    _count: { id: true },
+  })
+
+  const stats = {
+    total: 0,
+    pending: 0,
+    confirmed: 0,
+    completed: 0,
+    cancelled: 0,
+  }
+
+  statsGroup.forEach(group => {
+    stats[group.status] = group._count.id
+    stats.total += group._count.id
+  })
+
   return {
     bookings,
     pagination: {
@@ -232,6 +250,7 @@ const getProviderBookings = async (providerId, query = {}) => {
       total,
       totalPages: Math.ceil(total / limit),
     },
+    stats,
   }
 }
 

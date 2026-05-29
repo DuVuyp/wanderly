@@ -18,7 +18,11 @@ export const getProfile = async (userId) => {
     throw new ApiError(httpStatus.NOT_FOUND, 'User not found')
   }
 
-  const { password_hash, verify_token, reset_pass_token, token_expiry, ...safeUser } = user
+  const safeUser = { ...user }
+  delete safeUser.password_hash
+  delete safeUser.verify_token
+  delete safeUser.reset_pass_token
+  delete safeUser.token_expiry
   return safeUser
 }
 
@@ -34,7 +38,11 @@ export const updateProfile = async (userId, updateBody) => {
     data: updateBody,
   })
 
-  const { password_hash, verify_token, reset_pass_token, token_expiry, ...safeUser } = user
+  const safeUser = { ...user }
+  delete safeUser.password_hash
+  delete safeUser.verify_token
+  delete safeUser.reset_pass_token
+  delete safeUser.token_expiry
   return safeUser
 }
 

@@ -7,8 +7,8 @@ import {
   refreshTokens,
   logoutUser,
 } from '../controllers/authController.js'
-import validate from '../middlewares/validateMiddleware.js'
 import auth from '../middlewares/authMiddleware.js'
+import validate from '../middlewares/validateMiddleware.js'
 import { createUserSchema, loginSchema, refreshTokenSchema } from '../validations/userValidation.js'
 
 const router = express.Router()

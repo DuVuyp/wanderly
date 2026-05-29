@@ -1,6 +1,7 @@
 import httpStatus from 'http-status'
-import catchAsync from '../utils/catchAsync.js'
+
 import * as bookingService from '../services/bookingService.js'
+import catchAsync from '../utils/catchAsync.js'
 
 /**
  * POST /api/bookings

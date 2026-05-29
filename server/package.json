@@ -48,6 +48,7 @@
     "mongoose": "8.17.1",
     "mssql": "10.0.2",
     "multer": "^2.0.2",
+    "node-cron": "^4.2.1",
     "nodemailer": "7.0.5",
     "streamifier": "^0.1.1"
   },
