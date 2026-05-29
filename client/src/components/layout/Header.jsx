@@ -117,6 +117,16 @@ function Header() {
                     <p className="truncate font-semibold text-on-surface">{user.full_name || 'Traveler'}</p>
                     <p className="truncate text-sm text-on-surface-variant">{user.email || ''}</p>
                   </div>
+                  <div className="p-2 border-b border-outline-variant">
+                    <Link
+                      to="/profile"
+                      onClick={() => setIsDropdownOpen(false)}
+                      className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-on-surface transition hover:bg-surface-variant"
+                    >
+                      <UserCircle className="h-4 w-4 text-on-surface-variant" />
+                      Account Settings
+                    </Link>
+                  </div>
                   <div className="p-2">
                     <button
                       type="button"
@@ -171,14 +181,24 @@ function Header() {
               </NavLink>
             ))}
             {user ? (
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="mt-2 flex items-center justify-center gap-2 rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-600"
-              >
-                <LogOut className="h-4 w-4" />
-                Log out
-              </button>
+              <>
+                <Link
+                  to="/profile"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="mt-2 flex items-center justify-center gap-2 rounded-2xl border border-outline-variant bg-surface-variant/30 px-4 py-3 text-sm font-semibold text-on-surface transition hover:bg-surface-variant"
+                >
+                  <UserCircle className="h-4 w-4" />
+                  Account Settings
+                </Link>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="mt-2 flex items-center justify-center gap-2 rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-600"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Log out
+                </button>
+              </>
             ) : (
               <div className="mt-2 grid grid-cols-2 gap-2">
                 <Link

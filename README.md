@@ -306,7 +306,7 @@ Admin chạy tại `http://localhost:5173`.
 
 | Task (Việc cần làm) | Vị trí file cần thao tác | Hướng dẫn triển khai chi tiết |
 | :--- | :--- | :--- |
-| **1. Backend: API Properties** | `server/src/controllers/propertyController.js`<br>`server/src/services/propertyService.js`<br>`server/src/routes/propertyRoutes.js` | **POST, GET, PUT, DELETE /api/properties**: Quản lý khách sạn/resort. Bắt buộc nhận tọa độ (-90 đến 90 cho lat, -180 đến 180 cho lng), tên, địa chỉ. Provider không sửa được của người khác. |
+| **1. Backend: API Properties** | `server/src/controllers/propertyController.js`<br>`server/src/services/propertyService.js`<br>`server/src/routes/propertyRoutes.js` | **POST, GET, PUT, DELETE /api/properties**: Quản lý khách sạn/resort. Bắt buộc nhận tọa độ (-90 đến 90 cho lat, -180 đến 180 cho lng), tên, địa chỉ. Provider không sửa được của người khác. **Lưu ý: API DELETE phải áp dụng xóa mềm (`is_deleted = true`).** |
 | **2. Backend: API Room Types** | `server/src/controllers/roomTypeController.js`<br>`server/src/services/...` | **POST /api/properties/:propertyId/room-types**: Tạo loại phòng (đơn, đôi). Ràng buộc `max_guests` > 0, `base_price` > 0. |
 | **3. Backend: API Rooms** | `server/src/controllers/roomController.js`<br>`server/src/services/...` | **POST /api/room-types/:roomTypeId/rooms**: Tạo các phòng vật lý (P101, P102). Quản lý status (available, maintenance). |
 | **4. Frontend: Provider Dashboard** | `client/src/pages/provider/...` | Xây dựng khu vực quản lý riêng cho Provider (Traveler không vào được). Danh sách các Property của họ. |
@@ -320,7 +320,7 @@ Admin chạy tại `http://localhost:5173`.
 
 | Task (Việc cần làm) | Vị trí file cần thao tác | Hướng dẫn triển khai chi tiết |
 | :--- | :--- | :--- |
-| **1. Backend: API Users (Admin)** | `server/src/controllers/userController.js`<br>`server/src/services/userService.js`<br>`server/src/routes/userRoutes.js` | **GET /api/users**: Trả danh sách user (không kèm `password_hash`), có phân trang, tìm kiếm, lọc role.<br>**GET /api/users/:id**: Xem chi tiết.<br>**PUT /api/users/:id/role**: Đổi role (Traveler <-> Provider).<br>**DELETE /api/users/:id**: Xóa user. Bọc bằng middleware `authorizeRoles('admin')`. |
+| **1. Backend: API Users (Admin)** | `server/src/controllers/userController.js`<br>`server/src/services/userService.js`<br>`server/src/routes/userRoutes.js` | **GET /api/users**: Trả danh sách user (không kèm `password_hash`), có phân trang, tìm kiếm, lọc role.<br>**GET /api/users/:id**: Xem chi tiết.<br>**PUT /api/users/:id/role**: Đổi role (Traveler <-> Provider).<br>**DELETE /api/users/:id**: Xóa user **(áp dụng xóa mềm `is_deleted = true`)**. Bọc bằng middleware `authorizeRoles('admin')`. |
 | **2. Frontend: Admin Layout** | `admin/src/App.jsx`<br>`admin/src/components/...` | Khởi tạo Layout cho Admin trên project `admin/` riêng biệt. Thêm Navbar, Sidebar. Kiểm tra token admin, không có quyền thì văng ra. |
 | **3. Frontend: Quản lý Danh sách** | `admin/src/pages/UsersManagement.jsx` | Hiển thị bảng User. Gắn bộ lọc (Role) và thanh tìm kiếm (Email, Tên). Tích hợp phân trang (Pagination). |
 | **4. Frontend: Thao tác User** | `admin/src/pages/UsersManagement.jsx` | Thêm cột "Hành động" (Actions). Nút Xóa (bật popup confirm trước khi gọi API DELETE). Nút Đổi Role (Mở modal dropdown chọn role mới). |

@@ -11,6 +11,7 @@ import Register from './pages/Register';
 import Booking from './pages/Booking';
 import MyBookings from './pages/MyBookings';
 import ManageBookings from './pages/provider/ManageBookings';
+import Profile from './pages/Profile';
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
           <Route path="/home" element={<Home />} />
           <Route path="/booking" element={<Booking />} />
           <Route path="/my-bookings" element={<MyBookings />} />
+          <Route path="/profile" element={<Profile />} />
         </Route>
         <Route element={<ProtectedRoute allowedRoles={['provider']} />}>
           <Route path="/provider" element={<ProviderDashboard />} />
