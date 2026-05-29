@@ -79,6 +79,7 @@ model Properties {
   check_in_time       DateTime              @db.Time
   check_out_time      DateTime              @db.Time
   created_at          DateTime?             @default(now(), map: "DF__Propertie__creat__5165187F") @db.DateTime
+  deleted_at          DateTime?             @db.DateTime
   Bookings            Bookings[]
   Itinerary_Locations Itinerary_Locations[]
   Users               Users                 @relation(fields: [provider_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Properties_Users")
@@ -94,6 +95,7 @@ model Room_Types {
   total_quantity  Int
   amenities       String?           @db.NVarChar(Max)
   created_at      DateTime?         @default(now(), map: "DF__Room_Type__creat__5535A963") @db.DateTime
+  deleted_at      DateTime?         @db.DateTime
   Booking_Details Booking_Details[]
   Properties      Properties        @relation(fields: [property_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_RoomTypes_Properties")
   Rooms           Rooms[]
@@ -105,6 +107,7 @@ model Rooms {
   room_number  String     @db.VarChar(50)
   status       String?    @default("available", map: "DF__Rooms__status__59063A47") @db.VarChar(20)
   created_at   DateTime?  @default(now(), map: "DF__Rooms__created_a__5AEE82B9") @db.DateTime
+  deleted_at   DateTime?  @db.DateTime
   Room_Types   Room_Types @relation(fields: [room_type_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Rooms_RoomTypes")
 }
 

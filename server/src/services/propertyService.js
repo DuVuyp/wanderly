@@ -24,11 +24,14 @@ export const createProperty = async (providerId, propertyData) => {
 
 export const getPropertiesByProvider = async (providerId) => {
   return prisma.properties.findMany({
-    where: { provider_id: providerId },
+    where: { provider_id: providerId, deleted_at: null },
     include: {
       Room_Types: {
+        where: { deleted_at: null },
         include: {
-          Rooms: true,
+          Rooms: {
+            where: { deleted_at: null },
+          },
         },
       },
     },
@@ -39,12 +42,15 @@ export const getPropertiesByProvider = async (providerId) => {
 }
 
 export const getPropertyById = async (id) => {
-  const property = await prisma.properties.findUnique({
-    where: { id },
+  const property = await prisma.properties.findFirst({
+    where: { id, deleted_at: null },
     include: {
       Room_Types: {
+        where: { deleted_at: null },
         include: {
-          Rooms: true,
+          Rooms: {
+            where: { deleted_at: null },
+          },
         },
       },
     },
@@ -88,7 +94,30 @@ export const deleteProperty = async (id, providerId) => {
     throw new ApiError(httpStatus.FORBIDDEN, 'You do not have permission to delete this property')
   }
 
-  return prisma.properties.delete({
-    where: { id },
+  const now = new Date()
+  return prisma.$transaction(async (tx) => {
+    // 1. Soft delete physical rooms nested in this property's room types
+    const roomTypes = await tx.room_Types.findMany({
+      where: { property_id: id, deleted_at: null },
+    })
+    const roomTypeIds = roomTypes.map((rt) => rt.id)
+    if (roomTypeIds.length > 0) {
+      await tx.rooms.updateMany({
+        where: { room_type_id: { in: roomTypeIds }, deleted_at: null },
+        data: { deleted_at: now },
+      })
+    }
+
+    // 2. Soft delete room types
+    await tx.room_Types.updateMany({
+      where: { property_id: id, deleted_at: null },
+      data: { deleted_at: now },
+    })
+
+    // 3. Soft delete property itself
+    return tx.properties.update({
+      where: { id },
+      data: { deleted_at: now },
+    })
   })
 }

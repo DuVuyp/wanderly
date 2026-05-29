@@ -4,8 +4,8 @@ import ApiError from '../utils/ApiError.js'
 import { getRoomTypeById } from './roomTypeService.js'
 
 export const getRoomById = async (id) => {
-  const room = await prisma.rooms.findUnique({
-    where: { id },
+  const room = await prisma.rooms.findFirst({
+    where: { id, deleted_at: null },
     include: {
       Room_Types: {
         include: {
@@ -14,7 +14,11 @@ export const getRoomById = async (id) => {
       },
     },
   })
-  if (!room) {
+  if (
+    !room ||
+    room.Room_Types.deleted_at !== null ||
+    room.Room_Types.Properties.deleted_at !== null
+  ) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Room not found')
   }
   return room
@@ -30,6 +34,7 @@ export const createRoom = async (roomTypeId, providerId, roomData) => {
     where: {
       room_type_id: roomTypeId,
       room_number: roomData.room_number,
+      deleted_at: null,
     },
   })
 
@@ -71,6 +76,7 @@ export const updateRoom = async (roomId, providerId, roomData) => {
       where: {
         room_type_id: room.room_type_id,
         room_number: roomData.room_number,
+        deleted_at: null,
       },
     })
     if (existingRoom) {
@@ -94,8 +100,9 @@ export const deleteRoom = async (roomId, providerId) => {
   }
 
   return prisma.$transaction(async (tx) => {
-    await tx.rooms.delete({
+    await tx.rooms.update({
       where: { id: roomId },
+      data: { deleted_at: new Date() },
     })
 
     await tx.room_Types.update({
