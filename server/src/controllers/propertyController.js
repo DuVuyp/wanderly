@@ -32,7 +32,7 @@ const getProperties = catchAsync(async (req, res) => {
           providerId = user.id
         }
       }
-    } catch (err) {
+    } catch {
       // ignore token verification errors, treat as guest/traveler search
     }
   }
