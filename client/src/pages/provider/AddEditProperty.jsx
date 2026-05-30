@@ -76,7 +76,11 @@ function AddEditProperty() {
 
   const validateForm = () => {
     const newErrors = {}
-    if (!formData.name.trim()) newErrors.name = 'Property name is required'
+    if (!formData.name.trim()) {
+      newErrors.name = 'Property name is required'
+    } else if (formData.name.trim().length > 100) {
+      newErrors.name = 'Property name cannot exceed 100 characters'
+    }
     if (!formData.address.trim()) newErrors.address = 'Address is required'
 
     const lat = Number(formData.latitude)
@@ -191,6 +195,7 @@ function AddEditProperty() {
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="e.g. Majestic Hotel & Resort"
+                  maxLength={100}
                   className={[
                     'w-full rounded-2xl border bg-white/60 px-4 py-3.5 text-sm transition focus:outline-none focus:ring-2 focus:ring-primary/20',
                     errors.name ? 'border-red-500 focus:border-red-500' : 'border-outline-variant focus:border-primary',

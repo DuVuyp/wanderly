@@ -1,9 +1,10 @@
 import Joi from 'joi'
 
 export const createRoomSchema = Joi.object({
-  room_number: Joi.string().required().trim().messages({
+  room_number: Joi.string().pattern(/^\d{1,3}$/).required().trim().messages({
     'any.required': 'Room number is required',
     'string.empty': 'Room number is required',
+    'string.pattern.base': 'Room number must be digits only and maximum 3 characters (e.g. 101 to 999)',
   }),
   status: Joi.string()
     .valid('available', 'occupied', 'maintenance')
@@ -14,7 +15,9 @@ export const createRoomSchema = Joi.object({
 })
 
 export const updateRoomSchema = Joi.object({
-  room_number: Joi.string().trim(),
+  room_number: Joi.string().pattern(/^\d{1,3}$/).trim().messages({
+    'string.pattern.base': 'Room number must be digits only and maximum 3 characters (e.g. 101 to 999)',
+  }),
   status: Joi.string()
     .valid('available', 'occupied', 'maintenance')
     .messages({

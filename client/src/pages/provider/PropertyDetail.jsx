@@ -49,9 +49,15 @@ function PropertyDetail() {
     e.preventDefault()
     // Validation
     const errors = {}
-    if (!newRoomType.name.trim()) errors.name = 'Name is required'
+    if (!newRoomType.name.trim()) {
+      errors.name = 'Name is required'
+    } else if (newRoomType.name.trim().length > 50) {
+      errors.name = 'Room type name cannot exceed 50 characters'
+    }
     if (!newRoomType.base_price || Number(newRoomType.base_price) <= 0) errors.base_price = 'Base price must be greater than 0'
-    if (!newRoomType.max_guests || Number(newRoomType.max_guests) <= 0) errors.max_guests = 'Max guests must be greater than 0'
+    if (!newRoomType.max_guests || Number(newRoomType.max_guests) <= 0 || Number(newRoomType.max_guests) > 20) {
+      errors.max_guests = 'Max guests must be between 1 and 20'
+    }
 
     if (Object.keys(errors).length > 0) {
       setRoomTypeErrors(errors)
@@ -79,14 +85,19 @@ function PropertyDetail() {
   }
 
   const handleCreateRoom = async (roomTypeId) => {
-    if (!newRoomNumber.trim()) {
+    const trimmedNumber = newRoomNumber.trim()
+    if (!trimmedNumber) {
       setRoomError('Room number is required')
+      return
+    }
+    if (!/^\d{1,3}$/.test(trimmedNumber)) {
+      setRoomError('Room number must be digits only and maximum 3 characters (e.g. 101 to 999)')
       return
     }
 
     try {
       const res = await createRoom(roomTypeId, {
-        room_number: newRoomNumber.trim(),
+        room_number: trimmedNumber,
         status: 'available',
       })
 
@@ -278,6 +289,7 @@ function PropertyDetail() {
                         placeholder="e.g. Deluxe Double Room"
                         value={newRoomType.name}
                         onChange={(e) => setNewRoomType({ ...newRoomType, name: e.target.value })}
+                        maxLength={50}
                         className="w-full rounded-xl border border-outline-variant bg-white/50 px-3.5 py-2.5 text-sm focus:border-primary focus:outline-none"
                       />
                       {roomTypeErrors.name && <p className="mt-1 text-xs text-red-500 font-bold">{roomTypeErrors.name}</p>}
@@ -287,6 +299,7 @@ function PropertyDetail() {
                       <input
                         type="number"
                         min="1"
+                        max="20"
                         value={newRoomType.max_guests}
                         onChange={(e) => setNewRoomType({ ...newRoomType, max_guests: Number(e.target.value) })}
                         className="w-full rounded-xl border border-outline-variant bg-white/50 px-3.5 py-2.5 text-sm focus:border-primary focus:outline-none"
@@ -402,6 +415,7 @@ function PropertyDetail() {
                                 setNewRoomNumber(e.target.value)
                                 setRoomError('')
                               }}
+                              maxLength={3}
                               className="w-full sm:max-w-xs rounded-xl border border-outline-variant bg-white px-3.5 py-2.5 text-xs focus:border-primary focus:outline-none"
                             />
                             {roomError && <p className="mt-1 text-[10px] text-red-500 font-bold">{roomError}</p>}

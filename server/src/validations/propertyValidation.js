@@ -1,9 +1,10 @@
 import Joi from 'joi'
 
 export const createPropertySchema = Joi.object({
-  name: Joi.string().required().trim().messages({
+  name: Joi.string().max(100).required().trim().messages({
     'any.required': 'Property name is required',
     'string.empty': 'Property name is required',
+    'string.max': 'Property name cannot exceed 100 characters',
   }),
   property_type: Joi.string()
     .valid('hotel', 'homestay', 'resort', 'villa')
@@ -45,7 +46,9 @@ export const createPropertySchema = Joi.object({
 })
 
 export const updatePropertySchema = Joi.object({
-  name: Joi.string().trim(),
+  name: Joi.string().max(100).trim().messages({
+    'string.max': 'Property name cannot exceed 100 characters',
+  }),
   property_type: Joi.string().valid('hotel', 'homestay', 'resort', 'villa'),
   address: Joi.string().trim(),
   latitude: Joi.number().min(-90).max(90),
