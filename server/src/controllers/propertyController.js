@@ -4,6 +4,7 @@ import prisma from '../config/prisma.js'
 import USER_ROLES from '../constants/roles.js'
 import catchAsync from '../utils/catchAsync.js'
 import * as propertyService from '../services/propertyService.js'
+import ApiError from '../utils/ApiError.js'
 
 const createProperty = catchAsync(async (req, res) => {
   const property = await propertyService.createProperty(req.user.id, req.body)
@@ -21,19 +22,30 @@ const getProperties = catchAsync(async (req, res) => {
   
   const authHeader = req.headers.authorization
   if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.split(' ')[1]
+    const secret = process.env.JWT_SECRET
+    let payload
     try {
-      const token = authHeader.split(' ')[1]
-      const secret = process.env.JWT_SECRET
-      const payload = jwt.verify(token, secret)
-      if (payload && payload.type === 'ACCESS') {
-        const user = await prisma.users.findUnique({ where: { id: payload.id } })
-        if (user && user.role === USER_ROLES.PROVIDER) {
-          isProvider = true
-          providerId = user.id
-        }
+      payload = jwt.verify(token, secret)
+    } catch (error) {
+      if (error.name === 'TokenExpiredError') {
+        throw new ApiError(httpStatus.UNAUTHORIZED, 'Access token has expired')
       }
-    } catch {
-      // ignore token verification errors, treat as guest/traveler search
+      throw new ApiError(httpStatus.UNAUTHORIZED, 'Invalid access token')
+    }
+
+    if (payload.type !== 'ACCESS') {
+      throw new ApiError(httpStatus.UNAUTHORIZED, 'Invalid token type')
+    }
+
+    const user = await prisma.users.findUnique({ where: { id: payload.id } })
+    if (!user) {
+      throw new ApiError(httpStatus.UNAUTHORIZED, 'User not found')
+    }
+
+    if (user.role === USER_ROLES.PROVIDER) {
+      isProvider = true
+      providerId = user.id
     }
   }
 
