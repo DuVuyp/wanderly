@@ -297,12 +297,12 @@ function PropertyDetail() {
 
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
-                      <label className="block text-xs font-bold text-on-surface mb-2 font-display">Base Price ($)</label>
+                      <label className="block text-xs font-bold text-on-surface mb-2 font-display">Base Price (VND)</label>
                       <input
                         type="number"
-                        min="0.01"
-                        step="0.01"
-                        placeholder="e.g. 120"
+                        min="1000"
+                        step="1000"
+                        placeholder="e.g. 500000"
                         value={newRoomType.base_price}
                         onChange={(e) => setNewRoomType({ ...newRoomType, base_price: e.target.value })}
                         className="w-full rounded-xl border border-outline-variant bg-white/50 px-3.5 py-2.5 text-sm focus:border-primary focus:outline-none"
@@ -363,7 +363,7 @@ function PropertyDetail() {
                           <h3 className="text-xl font-bold tracking-tight text-on-surface font-display">{rt.name}</h3>
                           <div className="flex flex-wrap items-center gap-x-3.5 gap-y-1.5 mt-2 text-xs text-on-surface-variant font-bold">
                             <span className="bg-surface-dim/40 px-2.5 py-1 rounded-lg border border-outline-variant/40">Max guests: {rt.max_guests}</span>
-                            <span className="text-primary font-extrabold bg-primary/5 px-2.5 py-1 rounded-lg border border-primary/10">${Number(rt.base_price).toFixed(2)} / night</span>
+                            <span className="text-primary font-extrabold bg-primary/5 px-2.5 py-1 rounded-lg border border-primary/10">{Number(rt.base_price).toLocaleString('vi-VN')} VND / night</span>
                             {rt.amenities && (
                               <span className="flex items-center gap-1.5 text-secondary bg-secondary/5 px-2.5 py-1 rounded-lg border border-secondary/10">
                                 <Sparkles className="h-3.5 w-3.5 shrink-0" />
