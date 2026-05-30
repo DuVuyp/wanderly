@@ -1,6 +1,6 @@
 import 'dotenv/config'
-import { PrismaClient } from '@prisma/client'
 import { PrismaMssql } from '@prisma/adapter-mssql'
+import { PrismaClient } from '@prisma/client'
 
 const parseBoolean = (value, defaultValue) => {
   if (value === undefined) return defaultValue

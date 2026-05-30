@@ -42,10 +42,73 @@ export const getPropertiesByProvider = async (providerId) => {
   })
 }
 
-export const getPropertyById = async (id) => {
+/**
+ * Get all properties (paginated)
+ * @param {Object} query
+ * @returns {Promise<Object>}
+ */
+export const getAllProperties = async (query = {}) => {
+  const page = Number(query.page) > 0 ? Number(query.page) : 1
+  const limit = Number(query.limit) > 0 ? Number(query.limit) : 10
+  const skip = (page - 1) * limit
+
+  const where = { is_deleted: { not: true } }
+  
+  if (query.keyword) {
+    where.name = { contains: query.keyword }
+  }
+  
+  if (query.property_type) {
+    where.property_type = query.property_type
+  }
+  
+  if (query.location) {
+    where.address = { contains: query.location }
+  }
+
+  const [properties, total] = await Promise.all([
+    prisma.properties.findMany({
+      where,
+      include: {
+        Room_Types: {
+          where: { is_deleted: { not: true } },
+          select: { id: true, name: true, base_price: true, max_guests: true },
+        },
+      },
+      orderBy: { created_at: 'desc' },
+      take: limit,
+      skip,
+    }),
+    prisma.properties.count({ where }),
+  ])
+
+  return {
+    properties,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+  }
+}
+
+/**
+ * Get property by ID
+ * @param {number} propertyId
+ * @returns {Promise<Object>}
+ */
+export const getPropertyById = async (propertyId) => {
   const property = await prisma.properties.findFirst({
-    where: { id, is_deleted: { not: true } },
+    where: { id: propertyId, is_deleted: { not: true } },
     include: {
+      Users: {
+        select: {
+          id: true,
+          full_name: true,
+          email: true,
+        },
+      },
       Room_Types: {
         where: { is_deleted: { not: true } },
         include: {
@@ -56,9 +119,11 @@ export const getPropertyById = async (id) => {
       },
     },
   })
+
   if (!property) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Property not found')
   }
+
   return property
 }
 
@@ -120,4 +185,58 @@ export const deleteProperty = async (id, providerId) => {
       data: { is_deleted: true },
     })
   })
+}
+
+/**
+ * Get room types for a property
+ * @param {number} propertyId
+ * @param {Object} query
+ * @returns {Promise<Array>}
+ */
+export const getPropertyRoomTypes = async (propertyId, query = {}) => {
+  // First check if property exists
+  const property = await prisma.properties.findFirst({
+    where: { id: propertyId, is_deleted: { not: true } },
+  })
+
+  if (!property) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Property not found')
+  }
+
+  const roomTypes = await prisma.room_Types.findMany({
+    where: { property_id: propertyId, is_deleted: { not: true } },
+    orderBy: { base_price: 'asc' },
+  })
+
+  const { check_in_date, check_out_date } = query
+  if (check_in_date && check_out_date) {
+    const start = new Date(check_in_date)
+    const end = new Date(check_out_date)
+
+    // Calculate available rooms for each room type
+    for (const rt of roomTypes) {
+      const totalRooms = await prisma.rooms.count({
+        where: { room_type_id: rt.id, status: 'available', is_deleted: { not: true } },
+      })
+
+      const overlappingBookings = await prisma.booking_Details.aggregate({
+        _sum: { quantity: true },
+        where: {
+          room_type_id: rt.id,
+          is_deleted: { not: true },
+          Bookings: {
+            status: { in: ['pending', 'confirmed'] },
+            is_deleted: { not: true },
+            check_in_date: { lt: end },
+            check_out_date: { gt: start },
+          },
+        },
+      })
+
+      const bookedQuantity = overlappingBookings._sum.quantity || 0
+      rt.available_quantity = Math.max(0, totalRooms - bookedQuantity)
+    }
+  }
+
+  return roomTypes
 }

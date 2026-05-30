@@ -1,7 +1,9 @@
-import catchAsync from '../utils/catchAsync.js'
+import httpStatus from 'http-status'
+
 import * as userService from '../services/userService.js'
 import ApiError from '../utils/ApiError.js'
-import httpStatus from 'http-status'
+import catchAsync from '../utils/catchAsync.js'
+
 
 export const getUsersAdmin = catchAsync(async (req, res) => {
   const { page, limit, role, search } = req.query

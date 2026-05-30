@@ -1,7 +1,8 @@
 import httpStatus from 'http-status'
-import catchAsync from '../utils/catchAsync.js'
+
 import * as uploadService from '../services/uploadService.js'
 import ApiError from '../utils/ApiError.js'
+import catchAsync from '../utils/catchAsync.js'
 
 const uploadImage = catchAsync(async (req, res) => {
   if (!req.file) {

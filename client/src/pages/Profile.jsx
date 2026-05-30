@@ -1,12 +1,12 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
 import { 
-  User, Lock, Shield, Bell, Settings as SettingsIcon, LogOut, Menu, X,
-  Mail, Phone, Camera, Save, Edit2, XCircle, Info, Loader2
+  User, Lock, Shield, Bell, LogOut, Menu, X,
+  Mail, Phone, Camera, Save, Edit2, XCircle, Loader2
 } from "lucide-react"
 import { getProfile, updateProfile, changePassword, uploadAvatar } from '../api/profile'
 import { logout } from '../api/auth'
@@ -63,7 +63,6 @@ export default function Profile() {
   const [activeTab, setActiveTab] = useState("account")
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
-  const fileInputRef = useRef(null)
 
   const { data: profileData, isLoading: isProfileLoading } = useQuery({
     queryKey: ['profile'],
@@ -129,7 +128,8 @@ export default function Profile() {
   const handleLogout = async () => {
     try {
       await logout()
-    } catch {
+    } catch (error) {
+      console.error('Logout failed:', error)
     } finally {
       clearAuthStorage()
       navigate('/login', { replace: true })

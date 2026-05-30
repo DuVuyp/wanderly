@@ -108,7 +108,9 @@ export default function Register() {
   const onSubmit = async (data) => {
     try {
       setLoading(true);
-      const { confirmPassword, fullName, agreeTerms, ...rest } = data;
+      const { fullName, ...rest } = data;
+      delete rest.confirmPassword;
+      delete rest.agreeTerms;
       const response = await registerUser({ full_name: fullName, ...rest });
       toast.success(response.message || 'Registration successful');
       navigate('/login');

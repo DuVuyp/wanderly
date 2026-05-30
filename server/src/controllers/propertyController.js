@@ -1,8 +1,9 @@
 import httpStatus from 'http-status'
-import catchAsync from '../utils/catchAsync.js'
-import * as propertyService from '../services/propertyService.js'
+import jwt from 'jsonwebtoken'
 import prisma from '../config/prisma.js'
 import USER_ROLES from '../constants/roles.js'
+import catchAsync from '../utils/catchAsync.js'
+import * as propertyService from '../services/propertyService.js'
 
 const createProperty = catchAsync(async (req, res) => {
   const property = await propertyService.createProperty(req.user.id, req.body)
@@ -14,28 +15,45 @@ const createProperty = catchAsync(async (req, res) => {
 })
 
 const getProperties = catchAsync(async (req, res) => {
-  let properties
-  if (req.user.role === USER_ROLES.PROVIDER) {
-    properties = await propertyService.getPropertiesByProvider(req.user.id)
-  } else {
-    properties = await prisma.properties.findMany({
-      include: {
-        Room_Types: {
-          include: {
-            Rooms: true,
-          },
-        },
-      },
-      orderBy: {
-        created_at: 'desc',
-      },
+  // Try to authenticate optionally to see if it's a provider calling their dashboard
+  let isProvider = false
+  let providerId = null
+  
+  const authHeader = req.headers.authorization
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    try {
+      const token = authHeader.split(' ')[1]
+      const secret = process.env.JWT_SECRET
+      const payload = jwt.verify(token, secret)
+      if (payload && payload.type === 'ACCESS') {
+        const user = await prisma.users.findUnique({ where: { id: payload.id } })
+        if (user && user.role === USER_ROLES.PROVIDER) {
+          isProvider = true
+          providerId = user.id
+        }
+      }
+    } catch (err) {
+      // ignore token verification errors, treat as guest/traveler search
+    }
+  }
+
+  // If they are a provider and didn't specify typical search query parameters,
+  // return their managed properties list (array format expected by provider dashboard)
+  if (isProvider && !req.query.keyword && !req.query.property_type && !req.query.location && !req.query.page) {
+    const properties = await propertyService.getPropertiesByProvider(providerId)
+    return res.status(httpStatus.OK).json({
+      success: true,
+      message: 'Provider properties retrieved successfully',
+      data: properties,
     })
   }
 
-  res.status(httpStatus.OK).json({
+  // Otherwise, retrieve all properties (paginated, traveler search view)
+  const result = await propertyService.getAllProperties(req.query)
+  return res.status(httpStatus.OK).json({
     success: true,
     message: 'Properties retrieved successfully',
-    data: properties,
+    data: result,
   })
 })
 
@@ -65,4 +83,28 @@ const deleteProperty = catchAsync(async (req, res) => {
   })
 })
 
-export { createProperty, getProperties, getProperty, updateProperty, deleteProperty }
+const getPropertyRoomTypes = catchAsync(async (req, res) => {
+  const propertyId = Number(req.params.id)
+  const roomTypes = await propertyService.getPropertyRoomTypes(propertyId, req.query)
+
+  res.status(httpStatus.OK).json({
+    success: true,
+    message: 'Room types retrieved successfully',
+    data: roomTypes,
+  })
+})
+
+// Aliases for compatibility
+const getAllProperties = getProperties
+const getPropertyById = getProperty
+
+export {
+  createProperty,
+  getProperties,
+  getProperty,
+  updateProperty,
+  deleteProperty,
+  getPropertyRoomTypes,
+  getAllProperties,
+  getPropertyById,
+}

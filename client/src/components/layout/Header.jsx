@@ -1,14 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { Compass, LogOut, Menu, UserCircle, X, LayoutDashboard } from 'lucide-react'
+import { Compass, LogOut, Menu, UserCircle, X, LayoutDashboard, ClipboardList, CalendarDays } from 'lucide-react'
 import { logout } from '../../api/auth'
 import { clearAuthStorage, getDefaultRouteByRole, getStoredUser } from '../../utils/auth'
 
 const navLinks = [
   { to: '/home', label: 'Home' },
-  { to: '/home#destinations', label: 'Destinations' },
-  { to: '/home#services', label: 'Services' },
-  { to: '/home#planner', label: 'Trip Planner' },
+  { to: '/services', label: 'Services' },
+  { to: '/my-bookings', label: 'My Bookings' },
 ]
 
 function Header() {
@@ -43,7 +42,8 @@ function Header() {
   const handleLogout = async () => {
     try {
       await logout()
-    } catch {
+    } catch (error) {
+      console.error('Logout error:', error)
     } finally {
       clearAuthStorage()
       setUser(null)
@@ -118,24 +118,53 @@ function Header() {
                     <p className="truncate text-sm text-on-surface-variant">{user.email || ''}</p>
                   </div>
                   <div className="p-2 flex flex-col gap-1 border-b border-outline-variant">
+                    {user.role === 'provider' ? (
+                      <>
+                        <Link
+                          to="/provider"
+                          onClick={() => setIsDropdownOpen(false)}
+                          className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-medium text-on-surface transition hover:bg-surface-variant"
+                        >
+                          <LayoutDashboard className="h-4 w-4 text-on-surface-variant" />
+                          Dashboard
+                        </Link>
+                        <Link
+                          to="/provider/bookings"
+                          onClick={() => setIsDropdownOpen(false)}
+                          className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-medium text-on-surface transition hover:bg-surface-variant"
+                        >
+                          <ClipboardList className="h-4 w-4 text-on-surface-variant" />
+                          Manage Bookings
+                        </Link>
+                      </>
+                    ) : (
+                      <>
+                        <Link
+                          to="/services"
+                          onClick={() => setIsDropdownOpen(false)}
+                          className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-medium text-on-surface transition hover:bg-surface-variant"
+                        >
+                          <CalendarDays className="h-4 w-4 text-on-surface-variant" />
+                          Services
+                        </Link>
+                        <Link
+                          to="/my-bookings"
+                          onClick={() => setIsDropdownOpen(false)}
+                          className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-medium text-on-surface transition hover:bg-surface-variant"
+                        >
+                          <ClipboardList className="h-4 w-4 text-on-surface-variant" />
+                          My Bookings
+                        </Link>
+                      </>
+                    )}
                     <Link
                       to="/profile"
                       onClick={() => setIsDropdownOpen(false)}
-                      className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-on-surface transition hover:bg-surface-variant"
+                      className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-medium text-on-surface transition hover:bg-surface-variant"
                     >
                       <UserCircle className="h-4 w-4 text-on-surface-variant" />
                       Account Settings
                     </Link>
-                    {user.role === 'provider' && (
-                      <Link
-                        to="/provider"
-                        onClick={() => setIsDropdownOpen(false)}
-                        className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-on-surface transition hover:bg-primary/5 hover:text-primary"
-                      >
-                        <LayoutDashboard className="h-4 w-4" />
-                        Provider Dashboard
-                      </Link>
-                    )}
                   </div>
                   <div className="p-2">
                     <button
@@ -192,6 +221,45 @@ function Header() {
             ))}
             {user ? (
               <>
+                {user.role === 'provider' ? (
+                  <>
+                    <Link
+                      to="/provider"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="mt-2 flex items-center justify-center gap-2 rounded-2xl border border-outline-variant bg-surface-variant/30 px-4 py-3 text-sm font-semibold text-on-surface transition hover:bg-surface-variant"
+                    >
+                      <LayoutDashboard className="h-4 w-4" />
+                      Dashboard
+                    </Link>
+                    <Link
+                      to="/provider/bookings"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="mt-2 flex items-center justify-center gap-2 rounded-2xl border border-outline-variant bg-surface-variant/30 px-4 py-3 text-sm font-semibold text-on-surface transition hover:bg-surface-variant"
+                    >
+                      <ClipboardList className="h-4 w-4" />
+                      Manage Bookings
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      to="/services"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="mt-2 flex items-center justify-center gap-2 rounded-2xl border border-outline-variant bg-surface-variant/30 px-4 py-3 text-sm font-semibold text-on-surface transition hover:bg-surface-variant"
+                    >
+                      <CalendarDays className="h-4 w-4" />
+                      Services
+                    </Link>
+                    <Link
+                      to="/my-bookings"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="mt-2 flex items-center justify-center gap-2 rounded-2xl border border-outline-variant bg-surface-variant/30 px-4 py-3 text-sm font-semibold text-on-surface transition hover:bg-surface-variant"
+                    >
+                      <ClipboardList className="h-4 w-4" />
+                      My Bookings
+                    </Link>
+                  </>
+                )}
                 <Link
                   to="/profile"
                   onClick={() => setIsMenuOpen(false)}

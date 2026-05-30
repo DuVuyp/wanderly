@@ -1,7 +1,8 @@
 import httpStatus from 'http-status'
+
+import * as tokenService from '../services/tokenService.js'
 import { createUser, loginUserWithEmail } from '../services/userService.js'
 import catchAsync from '../utils/catchAsync.js'
-import * as tokenService from '../services/tokenService.js'
 
 const registerUser = catchAsync(async (req, res) => {
   const { full_name, password, email, role } = req.body

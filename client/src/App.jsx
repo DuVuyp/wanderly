@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import PublicOnlyRoute from './components/routing/PublicOnlyRoute';
@@ -10,6 +9,10 @@ import ProviderDashboard from './pages/provider/ProviderDashboard';
 import AddEditProperty from './pages/provider/AddEditProperty';
 import PropertyDetail from './pages/provider/PropertyDetail';
 import Register from './pages/Register';
+import Services from './pages/Services';
+import Booking from './pages/Booking';
+import MyBookings from './pages/MyBookings';
+import ManageBookings from './pages/provider/ManageBookings';
 import Profile from './pages/Profile';
 
 function App() {
@@ -33,6 +36,9 @@ function App() {
         <Route path="/" element={<RoleHomeRedirect />} />
         <Route element={<ProtectedRoute allowedRoles={['traveler', 'provider']} />}>
           <Route path="/home" element={<Home />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/services/:id" element={<Booking />} />
+          <Route path="/my-bookings" element={<MyBookings />} />
           <Route path="/profile" element={<Profile />} />
         </Route>
         <Route element={<ProtectedRoute allowedRoles={['provider']} />}>
@@ -40,6 +46,7 @@ function App() {
           <Route path="/provider/properties/new" element={<AddEditProperty />} />
           <Route path="/provider/properties/edit/:id" element={<AddEditProperty />} />
           <Route path="/provider/properties/:id" element={<PropertyDetail />} />
+          <Route path="/provider/bookings" element={<ManageBookings />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

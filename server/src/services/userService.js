@@ -1,12 +1,16 @@
 import bcrypt from 'bcryptjs'
 import httpStatus from 'http-status'
 
-import ApiError from '../utils/ApiError.js'
 import prisma from '../config/prisma.js'
+import ApiError from '../utils/ApiError.js'
 
 const sanitizeUser = (user) => {
   if (!user) return user
-  const { password_hash, verify_token, reset_pass_token, token_expiry, ...safeUser } = user
+  const safeUser = { ...user }
+  delete safeUser.password_hash
+  delete safeUser.verify_token
+  delete safeUser.reset_pass_token
+  delete safeUser.token_expiry
   return safeUser
 }
 

@@ -1,6 +1,7 @@
 import express from 'express'
-import multer from 'multer'
 import httpStatus from 'http-status'
+import multer from 'multer'
+
 import * as uploadController from '../controllers/uploadController.js'
 import auth from '../middlewares/authMiddleware.js'
 import ApiError from '../utils/ApiError.js'

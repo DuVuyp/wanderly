@@ -54,7 +54,8 @@ const auth = (...allowedRoles) => {
       }
 
       // 6. Attach user to request (without password)
-      const { password_hash, ...safeUser } = user
+      const safeUser = { ...user }
+      delete safeUser.password_hash
       req.user = safeUser
 
       next()
