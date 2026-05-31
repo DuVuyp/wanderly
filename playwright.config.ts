@@ -3,6 +3,7 @@ import { defineConfig } from '@playwright/test';
 export default defineConfig({
   testDir: './tests',
   fullyParallel: true,
+  reporter: 'html',
   use: {
     baseURL: process.env.BASE_URL || 'http://localhost:3000', // Port client
     trace: 'on-first-retry',

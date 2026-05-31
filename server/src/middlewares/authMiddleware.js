@@ -41,8 +41,8 @@ const auth = (...allowedRoles) => {
         where: { id: payload.id },
       })
 
-      if (!user) {
-        throw new ApiError(httpStatus.UNAUTHORIZED, 'User not found')
+      if (!user || user.is_deleted) {
+        throw new ApiError(httpStatus.UNAUTHORIZED, 'User not found or deactivated')
       }
 
       // 5. Check role authorization (if roles specified)

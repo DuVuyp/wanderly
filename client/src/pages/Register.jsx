@@ -101,8 +101,11 @@ const schema = z.object({
 export default function Register() {
   const navigate = useNavigate();
   const [loading, setLoading] = React.useState(false);
+  const [showPassword, setShowPassword] = React.useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
   const { register, handleSubmit, formState: { errors } } = useForm({
-    resolver: zodResolver(schema)
+    resolver: zodResolver(schema),
+    mode: 'onChange'
   });
 
   const onSubmit = async (data) => {
@@ -240,11 +243,21 @@ export default function Register() {
                   lock
                 </span>
                 <input
-                  className="w-full h-13 pl-12 pr-4 bg-white/60 border border-outline-variant rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-sans text-sm text-on-surface placeholder:text-outline"
+                  className="w-full h-13 pl-12 pr-12 bg-white/60 border border-outline-variant rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-sans text-sm text-on-surface placeholder:text-outline"
                   placeholder="Password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   {...register("password")}
                 />
+                <button
+                  type="button"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors"
+                  onClick={() => setShowPassword(!showPassword)}
+                  tabIndex={-1}
+                >
+                  <span className="material-symbols-outlined text-xl">
+                    {showPassword ? 'visibility_off' : 'visibility'}
+                  </span>
+                </button>
               </div>
               {errors.password && (
                 <p className="text-error text-xs mt-1 ml-1 font-sans">{errors.password.message}</p>
@@ -258,11 +271,21 @@ export default function Register() {
                   lock_reset
                 </span>
                 <input
-                  className="w-full h-13 pl-12 pr-4 bg-white/60 border border-outline-variant rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-sans text-sm text-on-surface placeholder:text-outline"
+                  className="w-full h-13 pl-12 pr-12 bg-white/60 border border-outline-variant rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-sans text-sm text-on-surface placeholder:text-outline"
                   placeholder="Confirm Password"
-                  type="password"
+                  type={showConfirmPassword ? 'text' : 'password'}
                   {...register("confirmPassword")}
                 />
+                <button
+                  type="button"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  tabIndex={-1}
+                >
+                  <span className="material-symbols-outlined text-xl">
+                    {showConfirmPassword ? 'visibility_off' : 'visibility'}
+                  </span>
+                </button>
               </div>
               {errors.confirmPassword && (
                 <p className="text-error text-xs mt-1 ml-1 font-sans">{errors.confirmPassword.message}</p>

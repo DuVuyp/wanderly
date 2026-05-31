@@ -37,9 +37,11 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const [loading, setLoading] = React.useState(false);
+  const [showPassword, setShowPassword] = React.useState(false);
   const hasShownRedirectNotice = React.useRef(false);
   const { register, handleSubmit, formState: { errors } } = useForm({
-    resolver: zodResolver(schema)
+    resolver: zodResolver(schema),
+    mode: 'onChange'
   });
 
   React.useEffect(() => {
@@ -170,11 +172,21 @@ export default function Login() {
                   lock
                 </span>
                 <input
-                  className="w-full h-14 pl-12 pr-4 bg-white/60 border border-outline-variant rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-sans text-sm text-on-surface placeholder:text-outline"
+                  className="w-full h-14 pl-12 pr-12 bg-white/60 border border-outline-variant rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-sans text-sm text-on-surface placeholder:text-outline"
                   placeholder="Password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   {...register("password")}
                 />
+                <button
+                  type="button"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors"
+                  onClick={() => setShowPassword(!showPassword)}
+                  tabIndex={-1}
+                >
+                  <span className="material-symbols-outlined text-xl">
+                    {showPassword ? 'visibility_off' : 'visibility'}
+                  </span>
+                </button>
               </div>
               {errors.password && (
                 <p className="text-error text-xs mt-1.5 ml-1 font-sans">{errors.password.message}</p>
