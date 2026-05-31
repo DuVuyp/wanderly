@@ -30,12 +30,12 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen, isDark }) {
   };
 
   const navItems = [
-    { path: '/admin/dashboard', label: 'Bảng điều khiển', icon: 'dashboard' },
-    { path: '/admin/users', label: 'Người dùng', icon: 'group' },
-    { path: '/admin/locations', label: 'Địa điểm', icon: 'location_on' },
-    { path: '/admin/categories', label: 'Danh mục', icon: 'category' },
-    { path: '/admin/features', label: 'Tiện ích', icon: 'star' },
-    { path: '/admin/backup', label: 'Sao lưu & Phục hồi', icon: 'backup' },
+    { path: '/admin/dashboard', label: 'Dashboard', icon: 'dashboard' },
+    { path: '/admin/users', label: 'Users', icon: 'group' },
+    { path: '/admin/locations', label: 'Locations', icon: 'location_on' },
+    { path: '/admin/categories', label: 'Categories', icon: 'category' },
+    { path: '/admin/features', label: 'Features', icon: 'star' },
+    { path: '/admin/backup', label: 'Backup & Restore', icon: 'backup' },
   ];
 
   return (

@@ -35,7 +35,7 @@ export default function UsersManagement() {
         setPagination(res.data.data.pagination);
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Lỗi khi tải danh sách người dùng');
+      toast.error(err.response?.data?.message || 'Error loading users');
     } finally {
       setLoading(false);
     }
@@ -77,11 +77,11 @@ export default function UsersManagement() {
       await axios.delete(`/api/users/${deleteModal.userId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      toast.success('Xóa người dùng thành công');
+      toast.success('User deleted successfully');
       setDeleteModal({ isOpen: false, userId: null });
       fetchUsers();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Xóa thất bại');
+      toast.error(err.response?.data?.message || 'Delete failed');
     }
   };
 
@@ -92,11 +92,11 @@ export default function UsersManagement() {
       await axios.put(`/api/users/${roleModal.userId}/role`, { role: newRole }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      toast.success('Cập nhật vai trò thành công');
+      toast.success('Role updated successfully');
       setRoleModal({ isOpen: false, userId: null, currentRole: '' });
       fetchUsers();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Cập nhật vai trò thất bại');
+      toast.error(err.response?.data?.message || 'Role update failed');
     }
   };
 
@@ -109,16 +109,16 @@ export default function UsersManagement() {
   };
 
   return (
-    <AdminLayout title="Quản lý Người Dùng">
+    <AdminLayout title="Users Management">
       <ToastContainer position="top-right" autoClose={3000} />
       <div className="p-6 max-w-7xl mx-auto w-full">
         {/* Header Section */}
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <UserCog className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
-            Quản lý Người Dùng
+            Users Management
           </h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">Xem, tìm kiếm và phân quyền thành viên trong hệ thống</p>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">View, search, and manage system users</p>
         </div>
 
         {/* Filters and Search */}
@@ -130,7 +130,7 @@ export default function UsersManagement() {
             <input
               type="text"
               className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-              placeholder="Tìm theo email hoặc tên..."
+              placeholder="Search by email or name..."
               value={search}
               onChange={handleSearchChange}
             />
@@ -145,7 +145,7 @@ export default function UsersManagement() {
               value={roleFilter}
               onChange={handleRoleFilterChange}
             >
-              <option value="">Tất cả vai trò</option>
+              <option value="">All roles</option>
               <option value="admin">Admin</option>
               <option value="provider">Provider</option>
               <option value="traveler">Traveler</option>
@@ -160,16 +160,16 @@ export default function UsersManagement() {
               <thead className="bg-gray-50 dark:bg-gray-900/50">
                 <tr>
                   <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Người dùng
+                    User
                   </th>
                   <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Vai trò
+                    Role
                   </th>
                   <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Ngày tham gia
+                    Joined Date
                   </th>
                   <th scope="col" className="px-6 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Hành động
+                    Actions
                   </th>
                 </tr>
               </thead>
@@ -180,13 +180,13 @@ export default function UsersManagement() {
                       <div className="flex justify-center">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
                       </div>
-                      <p className="mt-2">Đang tải dữ liệu...</p>
+                      <p className="mt-2">Loading data...</p>
                     </td>
                   </tr>
                 ) : users.length === 0 ? (
                   <tr>
                     <td colSpan="4" className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                      Không tìm thấy người dùng nào phù hợp.
+                      No users found.
                     </td>
                   </tr>
                 ) : (
@@ -218,14 +218,14 @@ export default function UsersManagement() {
                             setRoleModal({ isOpen: true, userId: user.id, currentRole: user.role });
                           }}
                           className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 mr-4 transition-colors"
-                          title="Đổi vai trò"
+                          title="Change role"
                         >
                           <Edit className="h-5 w-5 inline" />
                         </button>
                         <button
                           onClick={() => setDeleteModal({ isOpen: true, userId: user.id })}
                           className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors"
-                          title="Xóa người dùng"
+                          title="Delete user"
                         >
                           <Trash2 className="h-5 w-5 inline" />
                         </button>
@@ -241,8 +241,8 @@ export default function UsersManagement() {
           {!loading && users.length > 0 && (
             <div className="bg-white dark:bg-gray-800 px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
               <div className="text-sm text-gray-500 dark:text-gray-400">
-                Hiển thị trang <span className="font-medium">{pagination.page}</span> / <span className="font-medium">{pagination.totalPages}</span> 
-                {' '}(Tổng số <span className="font-medium">{pagination.total}</span> người dùng)
+                Showing page <span className="font-medium">{pagination.page}</span> of <span className="font-medium">{pagination.totalPages}</span> 
+                {' '}(Total <span className="font-medium">{pagination.total}</span> users)
               </div>
               <div className="flex gap-2">
                 <button
@@ -273,22 +273,22 @@ export default function UsersManagement() {
               <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 mx-auto mb-4">
                 <ShieldAlert className="h-6 w-6 text-red-600 dark:text-red-400" />
               </div>
-              <h3 className="text-xl font-bold text-center text-gray-900 dark:text-white mb-2">Xác nhận xóa người dùng</h3>
+              <h3 className="text-xl font-bold text-center text-gray-900 dark:text-white mb-2">Confirm User Deletion</h3>
               <p className="text-center text-gray-500 dark:text-gray-400 mb-6">
-                Bạn có chắc chắn muốn xóa người dùng này? Hành động này sẽ thực hiện cơ chế xóa mềm trên hệ thống.
+                Are you sure you want to delete this user? This will perform a soft delete on the system.
               </p>
               <div className="flex gap-3">
                 <button
                   onClick={() => setDeleteModal({ isOpen: false, userId: null })}
                   className="flex-1 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors"
                 >
-                  Hủy bỏ
+                  Cancel
                 </button>
                 <button
                   onClick={confirmDelete}
                   className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
                 >
-                  Xóa ngay
+                  Delete
                 </button>
               </div>
             </div>
@@ -303,7 +303,7 @@ export default function UsersManagement() {
             <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
               <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <BadgeCheck className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-                Cập nhật vai trò
+                Update Role
               </h3>
               <button 
                 onClick={() => setRoleModal({ isOpen: false, userId: null, currentRole: '' })}
@@ -314,16 +314,16 @@ export default function UsersManagement() {
             </div>
             <div className="p-6">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Chọn vai trò mới cho người dùng
+                Select a new role for the user
               </label>
               <select
                 value={newRole}
                 onChange={(e) => setNewRole(e.target.value)}
                 className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
               >
-                <option value="traveler">Traveler (Người du lịch)</option>
-                <option value="provider">Provider (Nhà cung cấp)</option>
-                <option value="admin">Admin (Quản trị viên)</option>
+                <option value="traveler">Traveler</option>
+                <option value="provider">Provider</option>
+                <option value="admin">Admin</option>
               </select>
               
               <div className="mt-6 flex justify-end gap-3">
@@ -331,14 +331,14 @@ export default function UsersManagement() {
                   onClick={() => setRoleModal({ isOpen: false, userId: null, currentRole: '' })}
                   className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors"
                 >
-                  Hủy
+                  Cancel
                 </button>
                 <button
                   onClick={confirmRoleChange}
                   disabled={newRole === roleModal.currentRole}
                   className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Cập nhật
+                  Update
                 </button>
               </div>
             </div>
