@@ -32,9 +32,9 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen, isDark }) {
   const navItems = [
     { path: '/admin/dashboard', label: 'Dashboard', icon: 'dashboard' },
     { path: '/admin/users', label: 'Users', icon: 'group' },
-    { path: '/admin/locations', label: 'Locations', icon: 'location_on' },
-    { path: '/admin/categories', label: 'Categories', icon: 'category' },
-    { path: '/admin/features', label: 'Features', icon: 'star' },
+    { path: '/admin/properties', label: 'Properties', icon: 'domain' },
+    { path: '/admin/room-types', label: 'Room Types', icon: 'bed' },
+    { path: '/admin/bookings', label: 'Bookings', icon: 'book_online' },
     { path: '/admin/backup', label: 'Backup & Restore', icon: 'backup' },
   ];
 
