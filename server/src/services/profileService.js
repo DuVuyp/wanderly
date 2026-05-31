@@ -33,6 +33,15 @@ export const getProfile = async (userId) => {
  * @returns {Promise<Object>}
  */
 export const updateProfile = async (userId, updateBody) => {
+  if (updateBody.phone_number) {
+    const existingUser = await prisma.users.findFirst({
+      where: { phone_number: updateBody.phone_number, id: { not: userId } }
+    });
+    if (existingUser) {
+      throw new ApiError(httpStatus.CONFLICT, 'Phone number already in use');
+    }
+  }
+
   const user = await prisma.users.update({
     where: { id: userId },
     data: updateBody,
@@ -62,6 +71,10 @@ export const changePassword = async (userId, oldPassword, newPassword) => {
   const isPasswordMatch = await bcrypt.compare(oldPassword, user.password_hash)
   if (!isPasswordMatch) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Incorrect old password')
+  }
+
+  if (oldPassword === newPassword) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'New password cannot be the same as the old password')
   }
 
   const newPasswordHash = await bcrypt.hash(newPassword, 10)

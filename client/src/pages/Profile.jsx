@@ -6,7 +6,7 @@ import { z } from 'zod'
 import { toast } from 'sonner'
 import { 
   User, Lock, Shield, Bell, LogOut, Menu, X,
-  Mail, Phone, Camera, Save, Edit2, XCircle, Loader2
+  Mail, Phone, Camera, Save, Edit2, XCircle, Loader2, ArrowLeft
 } from "lucide-react"
 import { getProfile, updateProfile, changePassword, uploadAvatar } from '../api/profile'
 import { logout } from '../api/auth'
@@ -63,6 +63,8 @@ export default function Profile() {
   const [activeTab, setActiveTab] = useState("account")
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
+  const [avatarFile, setAvatarFile] = useState(null)
+  const [avatarPreview, setAvatarPreview] = useState(null)
 
   const { data: profileData, isLoading: isProfileLoading } = useQuery({
     queryKey: ['profile'],
@@ -99,9 +101,6 @@ export default function Profile() {
 
   const uploadMutation = useMutation({
     mutationFn: uploadAvatar,
-    onSuccess: (data) => {
-      updateMutation.mutate({ avatar: data.data.url })
-    },
     onError: (error) => toast.error(error.response?.data?.message || 'Failed to upload avatar')
   })
 
@@ -121,7 +120,8 @@ export default function Profile() {
         toast.error('Image must be less than 5MB')
         return
       }
-      uploadMutation.mutate(file)
+      setAvatarFile(file)
+      setAvatarPreview(URL.createObjectURL(file))
     }
   }
 
@@ -160,7 +160,15 @@ export default function Profile() {
         {/* Mobile Header */}
         <div className="lg:hidden mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="font-display text-3xl font-extrabold text-on-surface">Settings</h1>
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={() => navigate(-1)}
+                className="p-2 rounded-lg bg-white shadow-sm hover:bg-surface-variant transition-colors border border-outline-variant"
+              >
+                <ArrowLeft className="w-5 h-5 text-on-surface" />
+              </button>
+              <h1 className="font-display text-3xl font-extrabold text-on-surface">Settings</h1>
+            </div>
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="p-2 rounded-lg bg-white shadow-md hover:bg-surface-variant/30 transition-colors border border-outline-variant"
@@ -171,9 +179,17 @@ export default function Profile() {
         </div>
 
         {/* Desktop Header */}
-        <h1 className="hidden lg:block font-display text-4xl md:text-5xl font-extrabold text-on-surface mb-8 md:mb-12 text-center">
-          Settings & Profile
-        </h1>
+        <div className="hidden lg:flex items-center justify-center relative mb-8 md:mb-12">
+          <button 
+            onClick={() => navigate(-1)}
+            className="absolute left-0 p-3 rounded-xl bg-white shadow-md hover:shadow-lg hover:-translate-x-1 transition-all border border-outline-variant group"
+          >
+            <ArrowLeft className="w-6 h-6 text-on-surface group-hover:text-primary transition-colors" />
+          </button>
+          <h1 className="font-display text-4xl md:text-5xl font-extrabold text-on-surface text-center">
+            Settings & Profile
+          </h1>
+        </div>
 
         <div className="flex flex-col lg:flex-row gap-4 md:gap-6 lg:gap-8">
           {/* SIDEBAR */}
@@ -266,7 +282,7 @@ export default function Profile() {
                     <div className="flex flex-col items-center space-y-4 mb-8">
                       <div className="relative">
                         <img
-                          src={profile.avatar || "https://ui-avatars.com/api/?name=" + encodeURIComponent(profile.full_name || "User")}
+                          src={avatarPreview || profile.avatar || "https://ui-avatars.com/api/?name=" + encodeURIComponent(profile.full_name || "User")}
                           alt="Avatar preview"
                           className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-xl"
                         />
@@ -279,7 +295,18 @@ export default function Profile() {
                       </div>
                     </div>
 
-                    <form onSubmit={handleSubmitProfile((data) => updateMutation.mutate(data))}>
+                    <form onSubmit={handleSubmitProfile(async (data) => {
+                      try {
+                        let finalData = { ...data };
+                        if (avatarFile) {
+                          const uploadRes = await uploadMutation.mutateAsync(avatarFile);
+                          finalData.avatar = uploadRes.data.url;
+                        }
+                        await updateMutation.mutateAsync(finalData);
+                      } catch (error) {
+                        console.error('Error saving profile:', error);
+                      }
+                    })}>
                       <div className="space-y-5">
                         <InputField
                           label="Full Name"
@@ -308,17 +335,17 @@ export default function Profile() {
                           <>
                             <button
                               type="button"
-                              onClick={() => { setIsEditing(false); resetProfile() }}
+                              onClick={() => { setIsEditing(false); resetProfile(); setAvatarFile(null); setAvatarPreview(null) }}
                               className="px-6 py-3 rounded-xl font-medium text-on-surface-variant bg-surface-variant/50 hover:bg-surface-variant transition duration-300 shadow-sm flex items-center gap-2"
                             >
                               <XCircle className="inline mr-2 w-4 h-4" /> Cancel
                             </button>
                             <button
                               type="submit"
-                              disabled={updateMutation.isPending}
+                              disabled={updateMutation.isPending || uploadMutation.isPending}
                               className={`px-6 py-3 rounded-xl font-semibold text-white ${PRIMARY_COLOR_CLASSES} shadow-lg flex items-center justify-center gap-2 disabled:opacity-50`}
                             >
-                              {updateMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="mr-2 w-4 h-4" />} 
+                              {updateMutation.isPending || uploadMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="mr-2 w-4 h-4" />} 
                               Save Changes
                             </button>
                           </>
