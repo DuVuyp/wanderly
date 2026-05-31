@@ -81,3 +81,33 @@ Quy trình test 4 API theo thứ tự kịch bản chuẩn trên Postman:
     *   Gọi lại `PUT /api/users/<id>/role` -> Trả về `404 Not Found`.
     *   Gọi lại `DELETE /api/users/<id>` -> Trả về `404 Not Found`.
     *   Gọi lại `GET /api/users` -> Kiểm tra danh sách tổng, user đó đã biến mất hoàn toàn.
+
+---
+
+## 5. Kết Quả Triển Khai Frontend Admin (Đồng bộ & Tối ưu UI/UX)
+
+Các cải tiến và sửa lỗi trên giao diện Admin (`admin/`):
+
+### 5.1. Đồng bộ hóa API & Sửa lỗi Đăng nhập
+*   **Sửa Endpoint Đăng nhập:** Thay đổi endpoint gọi API từ `/api/auths/admin/login` (không tồn tại) về đúng `/api/auth/login` của Backend.
+*   **Mapping Dữ liệu:** Định cấu hình lại parser để đọc đúng cấu trúc phản hồi `{ user, tokens }` từ `res.data.data`. Áp dụng thuộc tính `full_name`, `email`, và `role` để lưu trữ thông tin phiên đăng nhập một cách chính xác.
+*   **Phân quyền chặt chẽ:** Chỉ cho phép tài khoản có `role: 'admin'` truy cập vào trang quản trị.
+
+### 5.2. Giải quyết lỗi Vòng lặp Định tuyến (Redirect Loop)
+*   **Tệp tin:** `admin/src/components/ProtectedRoute.jsx`
+*   **Chi tiết sửa:** Thay đổi đường dẫn điều hướng fallback khi không có token từ `/login` thành `/admin/login` để tránh xung đột với các router bên phía client, loại bỏ hiện tượng crash màn hình trắng (White Screen of Death).
+
+### 5.3. Tái thiết kế Giao diện Đăng nhập (Admin Login UI/UX)
+*   **Cấu trúc 2 cột hiện đại:** Học hỏi từ giao diện đăng nhập của User, chia màn hình làm 2 cột:
+    *   *Cột Trái (Hình ảnh thương hiệu):* Hiển thị hình ảnh du lịch cao cấp được mix màu gradient thương hiệu (`Xanh Mint #7FFFD4` và `Hồng #FF6B6B`) cùng khẩu hiệu "Wanderly Workspace".
+    *   *Cột Phải (Form đăng nhập):* Đặt form đăng nhập dạng Card kính mờ (Glassmorphism) vô cùng sang trọng.
+*   **Khắc phục lỗi chói mắt ở Light Mode:**
+    *   Thay thế nền xám/trắng phẳng bằng dải màu gradient cực nhẹ (`from-[#7FFFD4]/10 via-gray-50 to-[#FF6B6B]/10`) giúp làm dịu mắt người dùng.
+    *   Thêm các bóng đèn màu (blobs) mờ ở góc để lấp đầy khoảng trống trải của màn hình Light Mode.
+*   **Đường viền Gradient nổi bật:** Bao quanh Card đăng nhập và vạch phân tách cột bằng đường viền gradient chuyển màu từ Mint sang Pink mềm mại để tăng nhận diện thương hiệu.
+
+### 5.4. Đồng bộ màu sắc giao diện Dashboard
+*   **Tệp tin:** `admin/src/pages/Dashboard/AdminDashboard.jsx`
+*   **Cải tiến:**
+    *   Chuyển đổi toàn bộ màu nhấn mặc định (Xanh dương, Xanh lá cây) sang dải màu gradient `Mint (#7FFFD4)` - `Pink (#FF6B6B)` trên các thẻ thống kê và nút hành động (ví dụ: nút "Manage Users").
+    *   Áp dụng hiệu ứng kính mờ `bg-white/80 dark:bg-gray-800/90 backdrop-blur-md` lên toàn bộ Card Dashboard để tạo tính đồng nhất thẩm mỹ với trang Login.
