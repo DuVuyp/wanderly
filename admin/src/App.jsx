@@ -3,6 +3,10 @@ import AdminLogin from './pages/auth/AdminLogin';
 import AdminDashboard from './pages/Dashboard/AdminDashboard';
 import UsersManagement from './pages/UsersManagement';
 import AdminProtectedRoute from './components/ProtectedRoute';
+import AdminLocations from './pages/Locations/AdminLocations';
+import AdminCategories from './pages/Categories/AdminCategories';
+import AdminFeatures from './pages/Features/AdminFeatures';
+import AdminBackup from './pages/Backup/AdminBackup';
 
 function App() {
   return (
@@ -16,6 +20,10 @@ function App() {
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="users" element={<UsersManagement />} />
+          <Route path="locations" element={<AdminLocations />} />
+          <Route path="categories" element={<AdminCategories />} />
+          <Route path="features" element={<AdminFeatures />} />
+          <Route path="backup" element={<AdminBackup />} />
         </Route>
         
         {/* Fallback route */}
