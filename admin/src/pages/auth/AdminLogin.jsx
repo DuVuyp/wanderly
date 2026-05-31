@@ -102,12 +102,17 @@ export default function AdminLogin() {
                 </section>
 
                 {/* Right Side - Form */}
-                <section className="w-full md:w-1/2 flex items-center justify-center p-6 sm:p-10 lg:p-16 z-20 relative bg-gradient-to-br from-[#7FFFD4]/10 via-gray-50 to-[#FF6B6B]/10 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
-                    {/* Decorative blobs for light mode */}
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-[#7FFFD4]/20 rounded-full blur-3xl dark:hidden pointer-events-none"></div>
-                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#FF6B6B]/20 rounded-full blur-3xl dark:hidden pointer-events-none"></div>
+                <section className="w-full md:w-1/2 flex items-center justify-center p-6 sm:p-10 lg:p-16 z-20 relative bg-gray-50/50 dark:bg-gray-900 overflow-hidden">
+                    {/* Gradient left border to separate left and right visually */}
+                    <div className="hidden md:block absolute left-0 top-0 bottom-0 w-[2px] bg-gradient-to-b from-[#7FFFD4] via-transparent to-[#FF6B6B]"></div>
 
-                    <div className="w-full max-w-[440px] bg-white/70 dark:bg-gray-800/90 backdrop-blur-xl rounded-3xl p-8 sm:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-white/60 dark:border-gray-700 transition-all z-10">
+                    {/* Decorative blobs for light mode */}
+                    <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-[#7FFFD4]/15 rounded-full blur-[80px] dark:hidden pointer-events-none"></div>
+                    <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-[#FF6B6B]/15 rounded-full blur-[80px] dark:hidden pointer-events-none"></div>
+
+                    {/* Gradient Border Wrapper for Card */}
+                    <div className="w-full max-w-[440px] z-10 p-[2px] rounded-3xl bg-gradient-to-br from-[#7FFFD4] to-[#FF6B6B] shadow-[0_8px_40px_rgba(127,255,212,0.2)] dark:shadow-[0_8px_40px_rgba(255,107,107,0.1)] hover:scale-[1.01] transition-transform duration-300">
+                        <div className="w-full h-full bg-white/95 dark:bg-gray-800/95 backdrop-blur-2xl rounded-[22px] p-8 sm:p-10">
                         <div className="flex flex-col items-center mb-10 text-center">
                             <div className="md:hidden w-16 h-16 mb-5 rounded-2xl bg-gradient-to-br from-[#7FFFD4]/20 to-[#FF6B6B]/20 flex items-center justify-center shadow-sm">
                                 <span className="material-symbols-outlined text-3xl text-transparent bg-clip-text bg-gradient-to-r from-[#7FFFD4] to-[#FF6B6B]">
@@ -193,6 +198,7 @@ export default function AdminLogin() {
                             <p className="text-xs text-gray-400 dark:text-gray-500">
                                 Protected by Wanderly Security System
                             </p>
+                        </div>
                         </div>
                     </div>
                 </section>
