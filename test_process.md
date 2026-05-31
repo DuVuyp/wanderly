@@ -23,8 +23,8 @@ Module là nhóm chức năng/feature. Ví dụ:
 
 ### 2.2 Chọn loại test
 
-Chỉ dùng UI test:
 - `ui`: test giao diện với Playwright (page, click, expect)
+- `integration`: test API backend với Jest và Supertest (gửi request, kiểm tra response)
 
 ## 3) Cấu trúc thư mục (bắt buộc)
 
@@ -34,6 +34,7 @@ Dùng chung một cấu trúc cho tất cả module:
 tests/
   <module>/
     ui/
+    integration/
 ```
 
 Ví dụ nếu tạo test cho module `auth`:
@@ -42,16 +43,15 @@ Ví dụ nếu tạo test cho module `auth`:
 tests/
   auth/
     ui/
+    integration/
 ```
 
 ## 4) Đặt tên file test
 
 Quy ước đặt tên:
-- Định dạng: `<ten-tinh-nang>.spec.ts`
+- UI test: `<ten-tinh-nang>.spec.ts` (ví dụ: `tests/auth/ui/login.spec.ts`)
+- API test: `<ten-api>.test.js` hoặc `<ten-api>.test.ts` (ví dụ: `tests/auth/integration/login.test.js`)
 - Tên tính năng viết thường, có gạch ngang nếu cần.
-
-Ví dụ:
-- `tests/auth/ui/login.spec.ts`
 
 ## 5) Tạo file và viết code (mẫu chung)
 
@@ -87,6 +87,28 @@ Ghi chú:
 - `<route>` là route tương ứng (ví dụ: `/login`).
 - Ưu tiên `getByRole`, `getByLabel`, `getByText` để test ổn định.
 
+### 5.2 Mẫu file API test (Integration test)
+
+Tạo file: `tests/<module>/integration/<feature>.test.js`
+
+```javascript
+const request = require('supertest');
+const app = require('../../../server/src/index'); // Đảm bảo server export 'app'
+
+describe('<MODULE> API - <FEATURE>', () => {
+  it('Nên trả về 200 khi gọi thành công', async () => {
+    const response = await request(app)
+      .post('/api/<route>')
+      .send({ key: 'value' });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty('success', true);
+  });
+});
+```
+
+Ghi chú:
+- API test được chạy bằng Jest, gọi HTTP request trực tiếp vào backend qua Supertest.
 
 ## 6) Quy trình tạo test cho module mới (từng bước)
 
@@ -107,18 +129,29 @@ Ví dụ module `booking` (UI test):
 
 ## 7) Chạy test (lệnh thông dụng)
 
+### UI Test (Playwright)
 Chạy 1 file:
 - `npx playwright test tests/<module>/ui/<feature>.spec.ts --headed`
 
 Chạy 1 thư mục:
 - `npx playwright test tests/<module>/ui`
 
-Chạy tất cả:
+Chạy tất cả UI test:
 - `npx playwright test`
 
 Đổi base URL (nếu cần):
 - Windows PowerShell: `$env:BASE_URL="http://localhost:5173"; npx playwright test ...`
 - Bash: `BASE_URL=http://localhost:5173 npx playwright test ...`
+
+### API Test (Jest)
+Mở terminal ở thư mục `server/`:
+- `cd server`
+
+Chạy tất cả API test:
+- `npm run test` (hoặc `npx jest`)
+
+Chạy 1 file API test cụ thể:
+- `npx jest ../tests/<module>/integration/<feature>.test.js`
 
 ## 8) Quy ước dữ liệu test
 
