@@ -14,6 +14,7 @@ router.use(auth(USER_ROLES.ADMIN))
 router.get('/', userController.getUsersAdmin)
 router.get('/:id', userController.getUserById)
 router.put('/:id/role', validate(updateUserRoleSchema), userController.updateUserRole)
+router.post('/:id/reset-password', userController.resetUserPassword)
 router.delete('/:id', userController.deleteUser)
 
 export default router
