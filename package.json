@@ -1,0 +1,30 @@
+{
+  "name": "wanderly",
+  "version": "1.0.0",
+  "description": "- **Tên ứng dụng:** Wanderly\r - **Mô tả:** Nền tảng du lịch cho phép người dùng tìm kiếm & đặt phòng khách sạn, lên lịch trình du lịch, và quản lý chỗ nghỉ (dành cho chủ nhà/provider).\r - **Đối tượng:** Khách du lịch (Traveler), Chủ khách sạn/Homestay (Provider), Quản trị viên (Admin).\r - **Kiến trúc:** Monorepo gồm 3 phần — `server/` (Backend API), `client/` (Giao diện người dùng), `admin/` (Giao diện quản trị).",
+  "main": "index.js",
+  "scripts": {
+    "dev:client": "cd client && npm run dev",
+    "dev:server": "cd server && npm run dev",
+    "test:e2e": "npx playwright test",
+    "test:ui": "npx playwright test --ui",
+    "test:report": "npx playwright show-report",
+    "test:e2e:full": "concurrently -k -s first \"npm run dev:client\" \"npm run dev:server\" \"wait-on http://localhost:3000 && npx playwright test\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DuVuyp/wanderly.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DuVuyp/wanderly/issues"
+  },
+  "homepage": "https://github.com/DuVuyp/wanderly#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.60.0",
+    "@types/node": "^25.9.1",
+    "concurrently": "^10.0.0"
+  }
+}

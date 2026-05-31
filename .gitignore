@@ -54,3 +54,10 @@ server/prisma/*.db-journal
 # Misc
 *.local
 .eslintcache
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
