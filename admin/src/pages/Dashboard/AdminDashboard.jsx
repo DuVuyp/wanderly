@@ -68,7 +68,7 @@ export default function AdminDashboard() {
 
   const statCards = [
     {
-      title: 'Tổng Địa điểm',
+      title: 'Total Locations',
       value: stats.totalLocations,
       icon: 'location_on',
       color: 'from-blue-500 to-cyan-500',
@@ -77,7 +77,7 @@ export default function AdminDashboard() {
       link: '/admin/locations',
     },
     {
-      title: 'Tổng Danh mục',
+      title: 'Total Categories',
       value: stats.totalCategories,
       icon: 'category',
       color: 'from-purple-500 to-pink-500',
@@ -86,7 +86,7 @@ export default function AdminDashboard() {
       link: '/admin/categories',
     },
     {
-      title: 'Tổng Tiện ích',
+      title: 'Total Features',
       value: stats.totalFeatures,
       icon: 'star',
       color: 'from-amber-500 to-orange-500',
@@ -95,7 +95,7 @@ export default function AdminDashboard() {
       link: '/admin/features',
     },
     {
-      title: 'Tổng Người dùng',
+      title: 'Total Users',
       value: stats.totalUsers,
       icon: 'group',
       color: 'from-green-500 to-emerald-500',
@@ -106,18 +106,18 @@ export default function AdminDashboard() {
   ];
 
   const quickActions = [
-    { label: 'Thêm Địa điểm', icon: 'add_location', path: '/admin/locations/create', color: 'bg-blue-500 hover:bg-blue-600' },
-    { label: 'Thêm Danh mục', icon: 'add_circle', path: '/admin/categories/create', color: 'bg-purple-500 hover:bg-purple-600' },
-    { label: 'Thêm Tiện ích', icon: 'add', path: '/admin/features/create', color: 'bg-amber-500 hover:bg-amber-600' },
+    { label: 'Add Location', icon: 'add_location', path: '/admin/locations/create', color: 'bg-blue-500 hover:bg-blue-600' },
+    { label: 'Add Category', icon: 'add_circle', path: '/admin/categories/create', color: 'bg-purple-500 hover:bg-purple-600' },
+    { label: 'Add Feature', icon: 'add', path: '/admin/features/create', color: 'bg-amber-500 hover:bg-amber-600' },
   ];
 
   return (
-    <AdminLayout title="Bảng điều khiển">
+    <AdminLayout title="Dashboard">
       <div className="flex-1 overflow-y-auto p-6 bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
         {/* Welcome Section */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">Chào mừng đến với Bảng điều khiển</h1>
-          <p className="text-gray-600 dark:text-gray-400">Quản lý nền tảng du lịch của bạn từ đây</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">Welcome to Admin Dashboard</h1>
+          <p className="text-gray-600 dark:text-gray-400">Manage your travel platform from here</p>
         </div>
 
         {/* Stats Cards */}
@@ -148,7 +148,7 @@ export default function AdminDashboard() {
 
         {/* Quick Actions */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Thao tác nhanh</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Quick Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {quickActions.map((action, index) => (
               <button
@@ -169,21 +169,21 @@ export default function AdminDashboard() {
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
             <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
               <span className="material-symbols-outlined text-[#7FFFD4]">info</span>
-              Thông tin hệ thống
+              System Information
             </h2>
             <div className="space-y-3">
               <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700">
-                <span className="text-gray-600 dark:text-gray-400">Nền tảng</span>
+                <span className="text-gray-600 dark:text-gray-400">Platform</span>
                 <span className="font-semibold text-gray-900 dark:text-gray-100">Wanderly Travel Planner</span>
               </div>
               <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700">
-                <span className="text-gray-600 dark:text-gray-400">Phiên bản</span>
+                <span className="text-gray-600 dark:text-gray-400">Version</span>
                 <span className="font-semibold text-gray-900 dark:text-gray-100">1.0.0</span>
               </div>
               <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700">
-                <span className="text-gray-600 dark:text-gray-400">Trạng thái</span>
+                <span className="text-gray-600 dark:text-gray-400">Status</span>
                 <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full text-sm font-semibold">
-                  Hoạt động
+                  Active
                 </span>
               </div>
             </div>
@@ -193,13 +193,13 @@ export default function AdminDashboard() {
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
             <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
               <span className="material-symbols-outlined text-[#FF6B6B]">settings</span>
-              Quản lý
+              Management
             </h2>
             <div className="space-y-2">
               {[
-                { label: 'Quản lý Địa điểm', path: '/admin/locations', icon: 'location_on' },
-                { label: 'Quản lý Danh mục', path: '/admin/categories', icon: 'category' },
-                { label: 'Quản lý Tiện ích', path: '/admin/features', icon: 'star' },
+                { label: 'Locations Management', path: '/admin/locations', icon: 'location_on' },
+                { label: 'Categories Management', path: '/admin/categories', icon: 'category' },
+                { label: 'Features Management', path: '/admin/features', icon: 'star' },
               ].map((item, index) => (
                 <button
                   key={index}
