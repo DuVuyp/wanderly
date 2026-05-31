@@ -17,37 +17,44 @@ export const createUserSchema = Joi.object({
   password: Joi.string()
     .required()
     .custom((value, helpers) => {
-      if (value.length < 8) {
+      const trimmed = value.trim()
+
+      if (/\s/.test(trimmed)) {
+        return helpers.error('password.spaces')
+      }
+
+      if (trimmed.length < 8) {
         return helpers.error('password.min')
       }
 
       if (
-        !/[a-z]/.test(value) ||
-        !/[A-Z]/.test(value) ||
-        !/\d/.test(value) ||
-        !/[^A-Za-z\d]/.test(value)
+        !/[a-z]/.test(trimmed) ||
+        !/[A-Z]/.test(trimmed) ||
+        !/\d/.test(trimmed) ||
+        !/[^A-Za-z\d]/.test(trimmed)
       ) {
         return helpers.error('password.weak')
       }
 
-      return value
+      return trimmed
     })
     .messages({
       'any.required': 'Password is required',
       'string.empty': 'Password is required',
+      'password.spaces': 'Password must not contain spaces',
       'password.min': 'Password must be at least 8 characters',
       'password.weak': 'Password must include uppercase, lowercase, number, and special character',
     }),
   role: Joi.string()
-    .valid(...Object.values(USER_ROLES))
+    .valid(USER_ROLES.TRAVELER, USER_ROLES.PROVIDER)
     .default(USER_ROLES.TRAVELER)
     .messages({
-      'any.only': 'Role is invalid',
+      'any.only': 'Role is invalid (must be traveler or provider)',
     }),
 })
 
 export const loginSchema = Joi.object({
-  email: Joi.string().email().required().messages({
+  email: Joi.string().email().required().lowercase().trim().messages({
     'string.empty': 'Email is required',
     'any.required': 'Email is required',
     'string.email': 'Email must be a valid email address',

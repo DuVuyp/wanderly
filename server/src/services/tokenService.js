@@ -80,8 +80,8 @@ export const refreshAuthTokens = async (refreshToken) => {
     where: { id: payload.id },
   })
 
-  if (!user) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'User not found')
+  if (!user || user.is_deleted) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'User not found or deactivated')
   }
 
   return generateAuthTokens(user)
