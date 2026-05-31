@@ -5,10 +5,8 @@ import AdminLayout from '@/components/admin/Layout/AdminLayout';
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const [stats, setStats] = useState({
-    totalProperties: 0,
-    totalRoomTypes: 0,
-    totalBookings: 0,
     totalUsers: 0,
+    totalProperties: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -28,43 +26,28 @@ export default function AdminDashboard() {
       }
 
       // Load stats from multiple endpoints
-      const [propertiesRes, roomTypesRes, bookingsRes, usersRes] = await Promise.all([
-        fetch('/api/properties', { headers }).catch(() => null),
-        fetch('/api/room-types', { headers }).catch(() => null),
-        fetch('/api/bookings', { headers }).catch(() => null),
+      // Admin has access to users list, and properties list is public
+      const [usersRes, propertiesRes] = await Promise.all([
         fetch('/api/users?page=1&limit=1', { headers }).catch(() => null),
+        fetch('/api/properties', { headers }).catch(() => null),
       ]);
 
-      let totalProperties = 0;
-      let totalRoomTypes = 0;
-      let totalBookings = 0;
       let totalUsers = 0;
-
-      if (propertiesRes?.ok) {
-        const data = await propertiesRes.json();
-        totalProperties = data.data?.totalCount || data.totalCount || (Array.isArray(data.data) ? data.data.length : 0);
-      }
-
-      if (roomTypesRes?.ok) {
-        const data = await roomTypesRes.json();
-        totalRoomTypes = data.data?.totalCount || data.totalCount || (Array.isArray(data.data) ? data.data.length : 0);
-      }
-
-      if (bookingsRes?.ok) {
-        const data = await bookingsRes.json();
-        totalBookings = data.data?.totalCount || data.totalCount || (Array.isArray(data.data) ? data.data.length : 0);
-      }
+      let totalProperties = 0;
 
       if (usersRes?.ok) {
         const data = await usersRes.json();
         totalUsers = data.data?.pagination?.total || data.totalCount || 0;
       }
 
+      if (propertiesRes?.ok) {
+        const data = await propertiesRes.json();
+        totalProperties = data.data?.totalCount || data.totalCount || (Array.isArray(data.data) ? data.data.length : 0);
+      }
+
       setStats({
-        totalProperties,
-        totalRoomTypes,
-        totalBookings,
         totalUsers,
+        totalProperties,
       });
     } catch (error) {
       console.error('Error loading dashboard data:', error);
@@ -75,33 +58,6 @@ export default function AdminDashboard() {
 
   const statCards = [
     {
-      title: 'Total Properties',
-      value: stats.totalProperties,
-      icon: 'domain',
-      color: 'from-blue-500 to-cyan-500',
-      bgColor: 'bg-blue-50',
-      iconColor: 'text-blue-600',
-      link: '/admin/properties',
-    },
-    {
-      title: 'Total Room Types',
-      value: stats.totalRoomTypes,
-      icon: 'bed',
-      color: 'from-purple-500 to-pink-500',
-      bgColor: 'bg-purple-50',
-      iconColor: 'text-purple-600',
-      link: '/admin/room-types',
-    },
-    {
-      title: 'Total Bookings',
-      value: stats.totalBookings,
-      icon: 'book_online',
-      color: 'from-amber-500 to-orange-500',
-      bgColor: 'bg-amber-50',
-      iconColor: 'text-amber-600',
-      link: '/admin/bookings',
-    },
-    {
       title: 'Total Users',
       value: stats.totalUsers,
       icon: 'group',
@@ -110,12 +66,19 @@ export default function AdminDashboard() {
       iconColor: 'text-green-600',
       link: '/admin/users',
     },
+    {
+      title: 'Total Properties',
+      value: stats.totalProperties,
+      icon: 'domain',
+      color: 'from-blue-500 to-cyan-500',
+      bgColor: 'bg-blue-50',
+      iconColor: 'text-blue-600',
+      link: '#', // No admin properties page yet
+    },
   ];
 
   const quickActions = [
-    { label: 'Add Property', icon: 'add_business', path: '/admin/properties/create', color: 'bg-blue-500 hover:bg-blue-600' },
-    { label: 'Add Room Type', icon: 'add_circle', path: '/admin/room-types/create', color: 'bg-purple-500 hover:bg-purple-600' },
-    { label: 'View Bookings', icon: 'visibility', path: '/admin/bookings', color: 'bg-amber-500 hover:bg-amber-600' },
+    { label: 'Manage Users', icon: 'manage_accounts', path: '/admin/users', color: 'bg-blue-500 hover:bg-blue-600' },
   ];
 
   return (
@@ -204,9 +167,7 @@ export default function AdminDashboard() {
             </h2>
             <div className="space-y-2">
               {[
-                { label: 'Properties Management', path: '/admin/properties', icon: 'domain' },
-                { label: 'Room Types Management', path: '/admin/room-types', icon: 'bed' },
-                { label: 'Bookings Management', path: '/admin/bookings', icon: 'book_online' },
+                { label: 'Users Management', path: '/admin/users', icon: 'group' },
               ].map((item, index) => (
                 <button
                   key={index}
