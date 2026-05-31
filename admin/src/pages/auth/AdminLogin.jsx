@@ -18,15 +18,25 @@ export default function AdminLogin() {
         setLoading(true);
 
         try {
-            // Try admin-specific endpoint first, fallback to regular login if needed
-            const res = await axios.post("/api/auths/admin/login", formData, { withCredentials: true });
+            // Standard auth endpoint
+            const res = await axios.post("/api/auth/login", formData, { withCredentials: true });
 
-            const { message, user, accessToken } = res.data;
-            const saveUser = {
-                FullName: user.FullName,
-                Email: user.Email,
-                Role: user.Role || 'admin'
+            const { message } = res.data;
+            const { user, tokens } = res.data.data;
+            const accessToken = tokens.access.token;
+            
+            // Check if user is admin
+            if (user.role !== 'admin') {
+                toast.error("You do not have admin privileges.");
+                setLoading(false);
+                return;
             }
+
+            const saveUser = {
+                FullName: user.full_name || 'Admin',
+                Email: user.email,
+                Role: user.role
+            };
 
             localStorage.setItem('accessToken', accessToken);
             localStorage.setItem("adminUser", JSON.stringify(saveUser));
@@ -55,59 +65,59 @@ export default function AdminLogin() {
                 pauseOnHover
                 theme="colored"
             />
-            <div className="bg-gray-50 dark:bg-gray-900 min-h-screen flex items-center justify-center px-4 py-10 transition-colors">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 w-full max-w-md p-8">
+            <div className="bg-gradient-to-br from-[#7FFFD4]/20 to-[#FF6B6B]/20 dark:from-[#7FFFD4]/10 dark:to-[#FF6B6B]/10 min-h-screen flex items-center justify-center px-4 py-10 transition-colors">
+            <div className="bg-white/80 dark:bg-gray-800/90 backdrop-blur-xl rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white/20 dark:border-gray-700 w-full max-w-md p-8">
                 <div className="text-center mb-8">
-                    <div className="w-20 h-20 mx-auto mb-4 flex items-center justify-center bg-blue-50 dark:bg-gray-700 rounded-full">
-                        <span className="material-symbols-outlined text-4xl text-blue-600 dark:text-cyan-400">
+                    <div className="w-20 h-20 mx-auto mb-4 flex items-center justify-center bg-gradient-to-r from-[#7FFFD4]/20 to-[#FF6B6B]/20 rounded-full">
+                        <span className="material-symbols-outlined text-4xl text-transparent bg-clip-text bg-gradient-to-r from-[#7FFFD4] to-[#FF6B6B]">
                             admin_panel_settings
                         </span>
                     </div>
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent mb-2">
+                    <h1 className="text-3xl font-bold bg-gradient-to-r from-[#7FFFD4] to-[#FF6B6B] bg-clip-text text-transparent mb-2">
                         Admin Panel
                     </h1>
-                    <p className="text-gray-500 dark:text-gray-400">Sign in to access the admin dashboard</p>
+                    <p className="text-gray-500 dark:text-gray-400 font-medium">Sign in to access the admin dashboard</p>
                 </div>
 
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="space-y-5">
                     <div>
-                        <label className="block text-gray-700 dark:text-gray-300 font-semibold mb-1">Email</label>
+                        <label className="block text-gray-700 dark:text-gray-300 font-semibold mb-2">Email</label>
                         <input
                             type="email"
                             name="email"
                             value={formData.email}
                             onChange={handleChange}
                             required
-                            className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-100 transition-colors"
+                            className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7FFFD4] text-gray-900 dark:text-gray-100 transition-all shadow-sm"
                             placeholder="Enter admin email"
                         />
                     </div>
 
                     <div>
-                        <label className="block text-gray-700 dark:text-gray-300 font-semibold mb-1">Password</label>
+                        <label className="block text-gray-700 dark:text-gray-300 font-semibold mb-2">Password</label>
                         <input
                             type="password"
                             name="password"
                             value={formData.password}
                             onChange={handleChange}
                             required
-                            className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-100 transition-colors"
+                            className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FF6B6B] text-gray-900 dark:text-gray-100 transition-all shadow-sm"
                             placeholder="Enter password"
                         />
                     </div>
 
                     <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:border-gray-600" />
-                            <span>Remember Me</span>
+                        <label className="flex items-center gap-2 cursor-pointer group">
+                            <input type="checkbox" className="rounded border-gray-300 text-[#7FFFD4] focus:ring-[#7FFFD4] bg-white dark:bg-gray-700 dark:border-gray-600 w-4 h-4 cursor-pointer" />
+                            <span className="group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors">Remember Me</span>
                         </label>
-                        <a href="#" className="text-blue-600 dark:text-cyan-400 hover:underline transition">
+                        <a href="#" className="text-gray-500 hover:text-[#FF6B6B] transition-colors font-medium">
                             Forgot password?
                         </a>
                     </div>
 
-                    <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors shadow-md disabled:opacity-50 mt-4" disabled={loading}>
+                    <button type="submit" className="w-full bg-gradient-to-r from-[#7FFFD4] to-[#FF6B6B] hover:opacity-90 text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none mt-6" disabled={loading}>
                         {loading ? "Signing In..." : "Sign In"}
                     </button>
                 </form>
