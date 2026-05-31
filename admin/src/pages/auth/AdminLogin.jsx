@@ -65,7 +65,7 @@ export default function AdminLogin() {
                 pauseOnHover
                 theme="colored"
             />
-            <div className="min-h-screen flex flex-col md:flex-row overflow-hidden relative bg-gray-50 dark:bg-gray-900 transition-colors">
+            <div className="min-h-screen flex flex-col md:flex-row overflow-hidden relative transition-colors">
                 {/* Left Side - Image/Branding */}
                 <section className="hidden md:flex md:w-1/2 relative overflow-hidden items-center justify-center p-12 lg:p-16">
                     {/* Background Image */}
@@ -102,8 +102,12 @@ export default function AdminLogin() {
                 </section>
 
                 {/* Right Side - Form */}
-                <section className="w-full md:w-1/2 flex items-center justify-center p-6 sm:p-10 lg:p-16 z-20">
-                    <div className="w-full max-w-[440px] bg-white dark:bg-gray-800 rounded-3xl p-8 sm:p-10 shadow-2xl border border-gray-100 dark:border-gray-700 transition-colors">
+                <section className="w-full md:w-1/2 flex items-center justify-center p-6 sm:p-10 lg:p-16 z-20 relative bg-gradient-to-br from-[#7FFFD4]/10 via-gray-50 to-[#FF6B6B]/10 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
+                    {/* Decorative blobs for light mode */}
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-[#7FFFD4]/20 rounded-full blur-3xl dark:hidden pointer-events-none"></div>
+                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#FF6B6B]/20 rounded-full blur-3xl dark:hidden pointer-events-none"></div>
+
+                    <div className="w-full max-w-[440px] bg-white/70 dark:bg-gray-800/90 backdrop-blur-xl rounded-3xl p-8 sm:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-white/60 dark:border-gray-700 transition-all z-10">
                         <div className="flex flex-col items-center mb-10 text-center">
                             <div className="md:hidden w-16 h-16 mb-5 rounded-2xl bg-gradient-to-br from-[#7FFFD4]/20 to-[#FF6B6B]/20 flex items-center justify-center shadow-sm">
                                 <span className="material-symbols-outlined text-3xl text-transparent bg-clip-text bg-gradient-to-r from-[#7FFFD4] to-[#FF6B6B]">
@@ -130,7 +134,7 @@ export default function AdminLogin() {
                                         value={formData.email}
                                         onChange={handleChange}
                                         required
-                                        className="w-full h-14 pl-12 pr-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:border-[#7FFFD4] focus:ring-2 focus:ring-[#7FFFD4]/20 transition-all text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400"
+                                        className="w-full h-14 pl-12 pr-4 bg-white/60 dark:bg-gray-900/50 border border-gray-200/80 dark:border-gray-700 rounded-xl focus:border-[#7FFFD4] focus:ring-2 focus:ring-[#7FFFD4]/30 transition-all text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 shadow-sm"
                                         placeholder="Admin Email"
                                     />
                                 </div>
@@ -147,7 +151,7 @@ export default function AdminLogin() {
                                         value={formData.password}
                                         onChange={handleChange}
                                         required
-                                        className="w-full h-14 pl-12 pr-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:border-[#7FFFD4] focus:ring-2 focus:ring-[#7FFFD4]/20 transition-all text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400"
+                                        className="w-full h-14 pl-12 pr-4 bg-white/60 dark:bg-gray-900/50 border border-gray-200/80 dark:border-gray-700 rounded-xl focus:border-[#FF6B6B] focus:ring-2 focus:ring-[#FF6B6B]/30 transition-all text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 shadow-sm"
                                         placeholder="Password"
                                     />
                                 </div>

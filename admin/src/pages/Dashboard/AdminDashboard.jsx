@@ -61,29 +61,29 @@ export default function AdminDashboard() {
       title: 'Total Users',
       value: stats.totalUsers,
       icon: 'group',
-      color: 'from-green-500 to-emerald-500',
-      bgColor: 'bg-green-50',
-      iconColor: 'text-green-600',
+      color: 'from-[#7FFFD4] to-[#4facfe]',
+      bgColor: 'bg-[#7FFFD4]/10',
+      iconColor: 'text-[#4facfe]',
       link: '/admin/users',
     },
     {
       title: 'Total Properties',
       value: stats.totalProperties,
       icon: 'domain',
-      color: 'from-blue-500 to-cyan-500',
-      bgColor: 'bg-blue-50',
-      iconColor: 'text-blue-600',
+      color: 'from-[#FF6B6B] to-[#ffb199]',
+      bgColor: 'bg-[#FF6B6B]/10',
+      iconColor: 'text-[#FF6B6B]',
       link: '#', // No admin properties page yet
     },
   ];
 
   const quickActions = [
-    { label: 'Manage Users', icon: 'manage_accounts', path: '/admin/users', color: 'bg-blue-500 hover:bg-blue-600' },
+    { label: 'Manage Users', icon: 'manage_accounts', path: '/admin/users', color: 'bg-gradient-to-r from-[#7FFFD4] to-[#FF6B6B] hover:opacity-90 shadow-md hover:shadow-lg' },
   ];
 
   return (
     <AdminLayout title="Dashboard">
-      <div className="flex-1 overflow-y-auto p-6 bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+      <div className="flex-1 overflow-y-auto p-6 bg-gradient-to-br from-[#7FFFD4]/5 via-slate-50 to-[#FF6B6B]/5 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 transition-colors duration-200">
         {/* Welcome Section */}
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">Welcome to Admin Dashboard</h1>
@@ -96,7 +96,7 @@ export default function AdminDashboard() {
             <div
               key={index}
               onClick={() => navigate(card.link)}
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 cursor-pointer hover:shadow-md transition-all duration-300 hover:scale-105"
+              className="bg-white/80 dark:bg-gray-800/90 backdrop-blur-md rounded-2xl shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-white/60 dark:border-gray-700 p-6 cursor-pointer hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 hover:-translate-y-1"
             >
               <div className="flex items-center justify-between mb-4">
                 <div className={`p-3 rounded-lg ${card.bgColor} dark:opacity-80`}>
@@ -117,7 +117,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
+        <div className="bg-white/80 dark:bg-gray-800/90 backdrop-blur-md rounded-2xl shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-white/60 dark:border-gray-700 p-6 mb-6">
           <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Quick Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {quickActions.map((action, index) => (
@@ -136,9 +136,9 @@ export default function AdminDashboard() {
         {/* Recent Activity / Info Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* System Info */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <div className="bg-white/80 dark:bg-gray-800/90 backdrop-blur-md rounded-2xl shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-white/60 dark:border-gray-700 p-6">
             <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
-              <span className="material-symbols-outlined text-[#7FFFD4]">info</span>
+              <span className="material-symbols-outlined text-transparent bg-clip-text bg-gradient-to-r from-[#7FFFD4] to-[#4facfe]">info</span>
               System Information
             </h2>
             <div className="space-y-3">
@@ -152,7 +152,7 @@ export default function AdminDashboard() {
               </div>
               <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700">
                 <span className="text-gray-600 dark:text-gray-400">Status</span>
-                <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full text-sm font-semibold">
+                <span className="px-3 py-1 bg-[#7FFFD4]/10 dark:bg-[#7FFFD4]/20 text-teal-600 dark:text-[#7FFFD4] rounded-full text-sm font-semibold border border-[#7FFFD4]/20">
                   Active
                 </span>
               </div>
@@ -160,9 +160,9 @@ export default function AdminDashboard() {
           </div>
 
           {/* Management Links */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <div className="bg-white/80 dark:bg-gray-800/90 backdrop-blur-md rounded-2xl shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-white/60 dark:border-gray-700 p-6">
             <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
-              <span className="material-symbols-outlined text-[#FF6B6B]">settings</span>
+              <span className="material-symbols-outlined text-transparent bg-clip-text bg-gradient-to-r from-[#FF6B6B] to-[#ffb199]">settings</span>
               Management
             </h2>
             <div className="space-y-2">
