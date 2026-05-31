@@ -65,68 +65,134 @@ export default function AdminLogin() {
                 pauseOnHover
                 theme="colored"
             />
-            <div className="bg-gradient-to-br from-[#7FFFD4]/20 to-[#FF6B6B]/20 dark:from-[#7FFFD4]/10 dark:to-[#FF6B6B]/10 min-h-screen flex items-center justify-center px-4 py-10 transition-colors">
-            <div className="bg-white/80 dark:bg-gray-800/90 backdrop-blur-xl rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white/20 dark:border-gray-700 w-full max-w-md p-8">
-                <div className="text-center mb-8">
-                    <div className="w-20 h-20 mx-auto mb-4 flex items-center justify-center bg-gradient-to-r from-[#7FFFD4]/20 to-[#FF6B6B]/20 rounded-full">
-                        <span className="material-symbols-outlined text-4xl text-transparent bg-clip-text bg-gradient-to-r from-[#7FFFD4] to-[#FF6B6B]">
-                            admin_panel_settings
-                        </span>
-                    </div>
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-[#7FFFD4] to-[#FF6B6B] bg-clip-text text-transparent mb-2">
-                        Admin Panel
-                    </h1>
-                    <p className="text-gray-500 dark:text-gray-400 font-medium">Sign in to access the admin dashboard</p>
-                </div>
-
-                {/* Form */}
-                <form onSubmit={handleSubmit} className="space-y-5">
-                    <div>
-                        <label className="block text-gray-700 dark:text-gray-300 font-semibold mb-2">Email</label>
-                        <input
-                            type="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            required
-                            className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7FFFD4] text-gray-900 dark:text-gray-100 transition-all shadow-sm"
-                            placeholder="Enter admin email"
+            <div className="min-h-screen flex flex-col md:flex-row overflow-hidden relative bg-gray-50 dark:bg-gray-900 transition-colors">
+                {/* Left Side - Image/Branding */}
+                <section className="hidden md:flex md:w-1/2 relative overflow-hidden items-center justify-center p-12 lg:p-16">
+                    {/* Background Image */}
+                    <div className="absolute inset-0 z-0">
+                        <img 
+                            src="https://images.unsplash.com/photo-1455587734955-081b22074882?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80" 
+                            alt="Admin Hotel Management" 
+                            className="w-full h-full object-cover"
                         />
+                        {/* Overlay with brand gradient */}
+                        <div className="absolute inset-0 bg-gray-900/60 mix-blend-multiply"></div>
+                        <div className="absolute inset-0 bg-gradient-to-br from-[#7FFFD4]/30 to-[#FF6B6B]/30 mix-blend-overlay"></div>
                     </div>
 
-                    <div>
-                        <label className="block text-gray-700 dark:text-gray-300 font-semibold mb-2">Password</label>
-                        <input
-                            type="password"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            required
-                            className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FF6B6B] text-gray-900 dark:text-gray-100 transition-all shadow-sm"
-                            placeholder="Enter password"
-                        />
+                    {/* Content over image */}
+                    <div className="relative z-10 w-full max-w-xl text-white">
+                        <div className="mb-10 backdrop-blur-sm bg-black/20 p-8 rounded-3xl border border-white/10">
+                            <div className="w-16 h-16 mb-6 rounded-2xl bg-white/10 flex items-center justify-center backdrop-blur-md border border-white/20">
+                                <span className="material-symbols-outlined text-4xl text-white">
+                                    admin_panel_settings
+                                </span>
+                            </div>
+                            <h1 className="text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+                                Wanderly <br />
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#7FFFD4] to-[#FF6B6B]">
+                                    Workspace
+                                </span>
+                            </h1>
+                            <p className="text-lg text-white/90 leading-relaxed max-w-md">
+                                Empowering your journey. Manage properties, track bookings, and oversee the entire travel ecosystem with precision and elegance.
+                            </p>
+                        </div>
                     </div>
+                </section>
 
-                    <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
-                        <label className="flex items-center gap-2 cursor-pointer group">
-                            <input type="checkbox" className="rounded border-gray-300 text-[#7FFFD4] focus:ring-[#7FFFD4] bg-white dark:bg-gray-700 dark:border-gray-600 w-4 h-4 cursor-pointer" />
-                            <span className="group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors">Remember Me</span>
-                        </label>
-                        <a href="#" className="text-gray-500 hover:text-[#FF6B6B] transition-colors font-medium">
-                            Forgot password?
-                        </a>
+                {/* Right Side - Form */}
+                <section className="w-full md:w-1/2 flex items-center justify-center p-6 sm:p-10 lg:p-16 z-20">
+                    <div className="w-full max-w-[440px] bg-white dark:bg-gray-800 rounded-3xl p-8 sm:p-10 shadow-2xl border border-gray-100 dark:border-gray-700 transition-colors">
+                        <div className="flex flex-col items-center mb-10 text-center">
+                            <div className="md:hidden w-16 h-16 mb-5 rounded-2xl bg-gradient-to-br from-[#7FFFD4]/20 to-[#FF6B6B]/20 flex items-center justify-center shadow-sm">
+                                <span className="material-symbols-outlined text-3xl text-transparent bg-clip-text bg-gradient-to-r from-[#7FFFD4] to-[#FF6B6B]">
+                                    admin_panel_settings
+                                </span>
+                            </div>
+                            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                                Welcome Back
+                            </h2>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                Sign in to access the administrator dashboard
+                            </p>
+                        </div>
+
+                        <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
+                            <div>
+                                <div className="relative">
+                                    <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-xl">
+                                        mail
+                                    </span>
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        value={formData.email}
+                                        onChange={handleChange}
+                                        required
+                                        className="w-full h-14 pl-12 pr-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:border-[#7FFFD4] focus:ring-2 focus:ring-[#7FFFD4]/20 transition-all text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400"
+                                        placeholder="Admin Email"
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <div className="relative">
+                                    <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-xl">
+                                        lock
+                                    </span>
+                                    <input
+                                        type="password"
+                                        name="password"
+                                        value={formData.password}
+                                        onChange={handleChange}
+                                        required
+                                        className="w-full h-14 pl-12 pr-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:border-[#7FFFD4] focus:ring-2 focus:ring-[#7FFFD4]/20 transition-all text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400"
+                                        placeholder="Password"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-between mt-2">
+                                <label className="flex items-center gap-2 cursor-pointer group">
+                                    <input 
+                                        type="checkbox" 
+                                        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-[#7FFFD4] focus:ring-[#7FFFD4]/30 bg-white dark:bg-gray-900 cursor-pointer" 
+                                    />
+                                    <span className="text-sm text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors">
+                                        Remember me
+                                    </span>
+                                </label>
+                                <a href="#" className="text-sm text-[#FF6B6B] hover:text-[#ff4e4e] font-medium hover:underline transition-colors">
+                                    Forgot password?
+                                </a>
+                            </div>
+
+                            <button 
+                                type="submit" 
+                                className="w-full h-14 mt-2 rounded-xl text-white font-semibold text-base shadow-lg shadow-[#FF6B6B]/20 hover:shadow-[#FF6B6B]/40 hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none bg-gradient-to-r from-[#7FFFD4] to-[#FF6B6B]" 
+                                disabled={loading}
+                            >
+                                {loading ? (
+                                    <span className="flex items-center justify-center gap-2">
+                                        <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                        </svg>
+                                        Signing In...
+                                    </span>
+                                ) : "Sign In"}
+                            </button>
+                        </form>
+
+                        <div className="mt-8 text-center border-t border-gray-100 dark:border-gray-700 pt-6">
+                            <p className="text-xs text-gray-400 dark:text-gray-500">
+                                Protected by Wanderly Security System
+                            </p>
+                        </div>
                     </div>
-
-                    <button type="submit" className="w-full bg-gradient-to-r from-[#7FFFD4] to-[#FF6B6B] hover:opacity-90 text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none mt-6" disabled={loading}>
-                        {loading ? "Signing In..." : "Sign In"}
-                    </button>
-                </form>
-
-                <p className="text-center text-gray-500 dark:text-gray-400 mt-8 text-sm">
-                    Need help? Contact system administrator
-                </p>
+                </section>
             </div>
-        </div>
         </>
     );
 }
