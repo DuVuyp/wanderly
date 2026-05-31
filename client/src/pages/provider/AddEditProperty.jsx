@@ -195,7 +195,6 @@ function AddEditProperty() {
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="e.g. Majestic Hotel & Resort"
-                  maxLength={100}
                   className={[
                     'w-full rounded-2xl border bg-white/60 px-4 py-3.5 text-sm transition focus:outline-none focus:ring-2 focus:ring-primary/20',
                     errors.name ? 'border-red-500 focus:border-red-500' : 'border-outline-variant focus:border-primary',
