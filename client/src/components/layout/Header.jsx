@@ -117,7 +117,7 @@ function Header() {
                     <p className="truncate font-semibold text-on-surface">{user.full_name || 'Traveler'}</p>
                     <p className="truncate text-sm text-on-surface-variant">{user.email || ''}</p>
                   </div>
-                  <div className="p-2 border-b border-outline-variant space-y-1">
+                  <div className="p-2 flex flex-col gap-1 border-b border-outline-variant">
                     {user.role === 'provider' ? (
                       <>
                         <Link

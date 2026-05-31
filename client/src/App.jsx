@@ -5,7 +5,9 @@ import ProtectedRoute from './components/routing/ProtectedRoute';
 import RoleHomeRedirect from './components/routing/RoleHomeRedirect';
 import Login from './pages/Login';
 import Home from './pages/Home';
-import ProviderDashboard from './pages/ProviderDashboard';
+import ProviderDashboard from './pages/provider/ProviderDashboard';
+import AddEditProperty from './pages/provider/AddEditProperty';
+import PropertyDetail from './pages/provider/PropertyDetail';
 import Register from './pages/Register';
 import Services from './pages/Services';
 import Booking from './pages/Booking';
@@ -41,6 +43,9 @@ function App() {
         </Route>
         <Route element={<ProtectedRoute allowedRoles={['provider']} />}>
           <Route path="/provider" element={<ProviderDashboard />} />
+          <Route path="/provider/properties/new" element={<AddEditProperty />} />
+          <Route path="/provider/properties/edit/:id" element={<AddEditProperty />} />
+          <Route path="/provider/properties/:id" element={<PropertyDetail />} />
           <Route path="/provider/bookings" element={<ManageBookings />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
