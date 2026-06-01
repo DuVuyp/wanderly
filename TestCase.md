@@ -160,7 +160,7 @@
 | PROV-037 | Create Room (Phòng vật lý) - Trùng số phòng | Trùng room_number | 1. POST `/api/room-types/1/rooms` (nếu có API) | **TD1:** room_number=101 (đã tồn tại)<br>**TD2:** 102 (đã có)<br>**TD3:** 103 (đã có) | Hệ thống chặn và báo lỗi 400/409 "Room number already exists" | Không tạo | | | Ghi nhận nếu chưa implement logic check trùng | [ ] | Bổ sung logic check trùng room_number cho cùng 1 property/room_type | [x] |
 | PROV-038 | Update Room - Sai trạng thái | Cập nhật status sai | 1. PUT `/api/rooms/1` (nếu có API) | **TD1:** status="unknown"<br>**TD2:** status="booked" (không có trong enum)<br>**TD3:** status="clean" | Status 400, "Invalid status" (chỉ nhận available, maintenance, occupied) | Không đổi | | | Ghi nhận nếu chưa implement | [x] | | [x] |
 | PROV-039 | Logic Upload - Xử lý ảnh Property | Giới hạn dung lượng/số lượng | 1. POST upload ảnh property | **TD1:** Upload 11 ảnh (quá limit 10)<br>**TD2:** Upload ảnh 10MB (quá limit 5MB)<br>**TD3:** Upload file .exe | Status 400 báo lỗi limit hoặc format | | | | Ghi nhận API upload | [ ] | Bổ sung validate file (size/count) cho middleware upload ảnh property | [x] |
-
+| PROV-040 | UI Create Property - Kéo thả bản đồ | UX kéo marker | 1. Mở Create Property 2. Kéo thả marker trên Map | **TD1:** Kéo ra Biển Đông (Lat: 14.123, Lon: 110.123)<br>**TD2:** Kéo vào TPHCM (Lat: 10.762, Lon: 106.660)<br>**TD3:** Kéo sang Paris (Lat: 48.856, Lon: 2.352) | Lat/Long tự động update vào form tương ứng vị trí marker | | | |  | [ ] | Tích hợp Leaflet / Google Maps cho UI chọn tọa độ | [x] |
 
 ---
 ---
