@@ -1,4 +1,5 @@
 import httpStatus from 'http-status'
+import { Prisma } from '@prisma/client'
 
 import prisma from '../config/prisma.js'
 import USER_ROLES from '../constants/roles.js'
@@ -34,103 +35,117 @@ const createBooking = async (userId, bookingData) => {
   }
 
   // Thực hiện tất cả các bước bên trong 1 transaction để tránh Race Condition (kẹt phòng)
-  const booking = await prisma.$transaction(async (tx) => {
-    // 1. Kiểm tra property tồn tại
-    const property = await tx.properties.findUnique({
-      where: { id: property_id },
-      include: { Room_Types: true },
-    })
+  const maxRetries = 3
+  for (let attempt = 0; attempt < maxRetries; attempt += 1) {
+    try {
+      const booking = await prisma.$transaction(
+        async (tx) => {
+          // 1. Kiểm tra property tồn tại
+          const property = await tx.properties.findUnique({
+            where: { id: property_id },
+            include: { Room_Types: true },
+          })
 
-    if (!property) {
-      throw new ApiError(httpStatus.NOT_FOUND, 'Property not found')
-    }
+          if (!property) {
+            throw new ApiError(httpStatus.NOT_FOUND, 'Property not found')
+          }
 
-    // 2. Kiểm tra từng room_type và tính giá
-    let totalPrice = 0
-    const bookingDetails = []
+          // 2. Kiểm tra từng room_type và tính giá
+          let totalPrice = 0
+          const bookingDetails = []
 
-    for (const room of rooms) {
-      const roomType = property.Room_Types.find((rt) => rt.id === room.room_type_id)
+          for (const room of rooms) {
+            const roomType = property.Room_Types.find((rt) => rt.id === room.room_type_id)
 
-      if (!roomType) {
-        throw new ApiError(
-          httpStatus.BAD_REQUEST,
-          `Room type with ID ${room.room_type_id} does not belong to this property`
-        )
-      }
+            if (!roomType) {
+              throw new ApiError(
+                httpStatus.BAD_REQUEST,
+                `Room type with ID ${room.room_type_id} does not belong to this property`
+              )
+            }
 
-      // 3. Kiểm tra phòng khả dụng
-      const totalRooms = await tx.rooms.count({
-        where: {
-          room_type_id: room.room_type_id,
-          status: 'available',
-        },
-      })
+            // 3. Kiểm tra phòng khả dụng
+            const totalRooms = await tx.rooms.count({
+              where: {
+                room_type_id: room.room_type_id,
+                status: 'available',
+              },
+            })
 
-      const overlappingBookings = await tx.booking_Details.aggregate({
-        _sum: { quantity: true },
-        where: {
-          room_type_id: room.room_type_id,
-          Bookings: {
-            status: { in: ['pending', 'confirmed'] },
-            check_in_date: { lt: new Date(check_out_date) },
-            check_out_date: { gt: new Date(check_in_date) },
-          },
-        },
-      })
+            const overlappingBookings = await tx.booking_Details.aggregate({
+              _sum: { quantity: true },
+              where: {
+                room_type_id: room.room_type_id,
+                Bookings: {
+                  status: { in: ['pending', 'confirmed'] },
+                  check_in_date: { lt: new Date(check_out_date) },
+                  check_out_date: { gt: new Date(check_in_date) },
+                },
+              },
+            })
 
-      const bookedQuantity = overlappingBookings._sum.quantity || 0
-      const availableQuantity = totalRooms - bookedQuantity
+            const bookedQuantity = overlappingBookings._sum.quantity || 0
+            const availableQuantity = totalRooms - bookedQuantity
 
-      if (room.quantity > availableQuantity) {
-        throw new ApiError(
-          httpStatus.BAD_REQUEST,
-          `Not enough rooms available for "${roomType.name}". Requested: ${room.quantity}, Available: ${Math.max(0, availableQuantity)}`
-        )
-      }
+            if (room.quantity > availableQuantity) {
+              throw new ApiError(
+                httpStatus.BAD_REQUEST,
+                `Not enough rooms available for "${roomType.name}". Requested: ${room.quantity}, Available: ${Math.max(0, availableQuantity)}`
+              )
+            }
 
-      // Tính giá cho room type này
-      const priceForThisType = Number(roomType.base_price) * room.quantity * nights
-      totalPrice += priceForThisType
+            // Tính giá cho room type này
+            const priceForThisType = Number(roomType.base_price) * room.quantity * nights
+            totalPrice += priceForThisType
 
-      bookingDetails.push({
-        room_type_id: room.room_type_id,
-        quantity: room.quantity,
-        price_at_booking: Number(roomType.base_price),
-      })
-    }
+            bookingDetails.push({
+              room_type_id: room.room_type_id,
+              quantity: room.quantity,
+              price_at_booking: Number(roomType.base_price),
+            })
+          }
 
-    // 4. Tạo Booking + Booking_Details
-    const newBooking = await tx.bookings.create({
-      data: {
-        user_id: userId,
-        property_id,
-        check_in_date: new Date(check_in_date),
-        check_out_date: new Date(check_out_date),
-        total_price: totalPrice,
-        status: 'pending',
-        Booking_Details: {
-          create: bookingDetails,
-        },
-      },
-      include: {
-        Booking_Details: {
-          include: {
-            Room_Types: {
-              select: { id: true, name: true, base_price: true, max_guests: true },
+          // 4. Tạo Booking + Booking_Details
+          const newBooking = await tx.bookings.create({
+            data: {
+              user_id: userId,
+              property_id,
+              check_in_date: new Date(check_in_date),
+              check_out_date: new Date(check_out_date),
+              total_price: totalPrice,
+              status: 'pending',
+              Booking_Details: {
+                create: bookingDetails,
+              },
             },
-          },
-        },
-        Properties: {
-          select: { id: true, name: true, address: true, property_type: true },
-        },
-      },
-    })
+            include: {
+              Booking_Details: {
+                include: {
+                  Room_Types: {
+                    select: { id: true, name: true, base_price: true, max_guests: true },
+                  },
+                },
+              },
+              Properties: {
+                select: { id: true, name: true, address: true, property_type: true },
+              },
+            },
+          })
 
-    return newBooking
-  })
+          return newBooking
+        },
+        { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
+      )
 
-  return booking
+      return booking
+    } catch (error) {
+      if (error?.code === 'P2034' && attempt < maxRetries - 1) {
+        continue
+      }
+
+      throw error
+    }
+  }
 }
 
 /**
@@ -237,7 +252,7 @@ const getProviderBookings = async (providerId, query = {}) => {
     cancelled: 0,
   }
 
-  statsGroup.forEach(group => {
+  statsGroup.forEach((group) => {
     stats[group.status] = group._count.id
     stats.total += group._count.id
   })

@@ -297,7 +297,7 @@ function Booking() {
                       </label>
                       <input
                         type="date"
-                        min={today}
+                        min={new Date().toISOString().split('T')[0]}
                         value={checkInDate}
                         onChange={(e) => {
                           setCheckInDate(e.target.value);

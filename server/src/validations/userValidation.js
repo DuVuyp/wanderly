@@ -17,11 +17,11 @@ export const createUserSchema = Joi.object({
   password: Joi.string()
     .required()
     .custom((value, helpers) => {
-      const trimmed = value.trim()
-
-      if (/\s/.test(trimmed)) {
+      if (/\s/.test(value)) {
         return helpers.error('password.spaces')
       }
+      
+      const trimmed = value.trim()
 
       if (trimmed.length < 8) {
         return helpers.error('password.min')
