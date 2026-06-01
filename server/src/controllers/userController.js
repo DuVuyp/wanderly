@@ -54,3 +54,14 @@ export const deleteUser = catchAsync(async (req, res) => {
     data: null
   })
 })
+
+export const resetUserPassword = catchAsync(async (req, res) => {
+  const { id } = req.params
+  const result = await userService.resetUserPassword(id)
+
+  res.status(200).json({
+    success: true,
+    message: 'Password reset successfully',
+    data: result
+  })
+})

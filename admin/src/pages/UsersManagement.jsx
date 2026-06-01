@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
-import { Search, Filter, Trash2, Edit, ChevronLeft, ChevronRight, X, UserCog, User, ShieldAlert, BadgeCheck } from 'lucide-react';
+import { Search, Filter, Trash2, Edit, ChevronLeft, ChevronRight, X, UserCog, User, ShieldAlert, BadgeCheck, KeyRound } from 'lucide-react';
 import AdminLayout from '../components/Layout/AdminLayout';
 
 export default function UsersManagement() {
@@ -14,6 +14,7 @@ export default function UsersManagement() {
   // Modals state
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, userId: null });
   const [roleModal, setRoleModal] = useState({ isOpen: false, userId: null, currentRole: '' });
+  const [resetPassModal, setResetPassModal] = useState({ isOpen: false, userId: null, newPassword: '' });
   const [newRole, setNewRole] = useState('');
 
   // Fetch users
@@ -97,6 +98,19 @@ export default function UsersManagement() {
       fetchUsers();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Role update failed');
+    }
+  };
+
+  const confirmResetPassword = async () => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      const res = await axios.post(`/api/users/${resetPassModal.userId}/reset-password`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setResetPassModal({ ...resetPassModal, newPassword: res.data.data.temporaryPassword });
+      toast.success('Password reset successfully');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Password reset failed');
     }
   };
 
@@ -223,6 +237,13 @@ export default function UsersManagement() {
                           <Edit className="h-5 w-5 inline" />
                         </button>
                         <button
+                          onClick={() => setResetPassModal({ isOpen: true, userId: user.id, newPassword: '' })}
+                          className="text-amber-600 dark:text-amber-400 hover:text-amber-900 dark:hover:text-amber-300 mr-4 transition-colors"
+                          title="Force reset password"
+                        >
+                          <KeyRound className="h-5 w-5 inline" />
+                        </button>
+                        <button
                           onClick={() => setDeleteModal({ isOpen: true, userId: user.id })}
                           className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors"
                           title="Delete user"
@@ -341,6 +362,64 @@ export default function UsersManagement() {
                   Update
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Reset Password Modal */}
+      {resetPassModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md overflow-hidden animate-fadeIn">
+            <div className="p-6">
+              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-900/30 mx-auto mb-4">
+                <KeyRound className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+              </div>
+              <h3 className="text-xl font-bold text-center text-gray-900 dark:text-white mb-2">Reset User Password</h3>
+              {!resetPassModal.newPassword ? (
+                <>
+                  <p className="text-center text-gray-500 dark:text-gray-400 mb-6">
+                    Are you sure you want to force reset this user's password? A new temporary password will be generated.
+                  </p>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setResetPassModal({ isOpen: false, userId: null, newPassword: '' })}
+                      className="flex-1 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={confirmResetPassword}
+                      className="flex-1 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-medium transition-colors"
+                    >
+                      Reset Password
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="text-center text-gray-500 dark:text-gray-400 mb-4">
+                    Password has been reset successfully. Please copy the new temporary password below:
+                  </p>
+                  <div className="bg-gray-100 dark:bg-gray-900 p-3 rounded-lg flex items-center justify-between mb-6 border border-gray-200 dark:border-gray-700">
+                    <code className="text-lg font-mono text-gray-900 dark:text-white">{resetPassModal.newPassword}</code>
+                    <button 
+                      onClick={() => {
+                        navigator.clipboard.writeText(resetPassModal.newPassword);
+                        toast.success("Copied to clipboard");
+                      }}
+                      className="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 text-sm font-medium"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => setResetPassModal({ isOpen: false, userId: null, newPassword: '' })}
+                    className="w-full px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg font-medium transition-colors hover:bg-gray-300 dark:hover:bg-gray-600"
+                  >
+                    Close
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

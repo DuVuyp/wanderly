@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs'
+import crypto from 'crypto'
 import httpStatus from 'http-status'
 
 import prisma from '../config/prisma.js'
@@ -173,4 +174,45 @@ const deleteUser = async (id) => {
   })
 }
 
-export { getUsers, createUser, loginUserWithEmail, getUsersAdmin, getUserById, updateUserRole, deleteUser }
+const resetUserPassword = async (id) => {
+  const user = await prisma.users.findUnique({
+    where: { id: Number(id) }
+  })
+
+  if (!user || user.is_deleted) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found')
+  }
+
+  // Generate a random temporary password with guaranteed complexity
+  const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+  const lower = 'abcdefghijklmnopqrstuvwxyz'
+  const digits = '0123456789'
+  const special = '!@#$%&*'
+  const all = upper + lower + digits + special
+
+  // Ensure at least one of each required type
+  let tempPassword = ''
+  tempPassword += upper[crypto.randomInt(upper.length)]
+  tempPassword += lower[crypto.randomInt(lower.length)]
+  tempPassword += digits[crypto.randomInt(digits.length)]
+  tempPassword += special[crypto.randomInt(special.length)]
+
+  // Fill remaining 8 chars randomly
+  for (let i = 0; i < 8; i++) {
+    tempPassword += all[crypto.randomInt(all.length)]
+  }
+
+  // Shuffle the password
+  tempPassword = tempPassword.split('').sort(() => crypto.randomInt(3) - 1).join('')
+
+  const hashedPassword = await bcrypt.hash(tempPassword, 10)
+
+  await prisma.users.update({
+    where: { id: Number(id) },
+    data: { password_hash: hashedPassword }
+  })
+
+  return { temporaryPassword: tempPassword, user: sanitizeUser(user) }
+}
+
+export { getUsers, createUser, loginUserWithEmail, getUsersAdmin, getUserById, updateUserRole, deleteUser, resetUserPassword }
