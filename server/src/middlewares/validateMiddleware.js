@@ -3,6 +3,7 @@ import httpStatus from 'http-status'
 import ApiError from '../utils/ApiError.js'
 
 const validate = (schema) => (req, res, next) => {
+  if (!req.body) req.body = {}
   const { value, error } = schema.validate(req.body, {
     abortEarly: false,
     allowUnknown: true,

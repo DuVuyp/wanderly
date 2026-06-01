@@ -6,10 +6,11 @@ export const createBookingSchema = Joi.object({
     'number.base': 'Property ID must be a number',
     'number.positive': 'Property ID must be a positive number',
   }),
-  check_in_date: Joi.date().iso().required().messages({
+  check_in_date: Joi.date().iso().min('now').required().messages({
     'any.required': 'Check-in date is required',
     'date.base': 'Check-in date must be a valid date',
     'date.format': 'Check-in date must be in ISO format (YYYY-MM-DD)',
+    'date.min': 'Check-in date cannot be in the past',
   }),
   check_out_date: Joi.date().iso().greater(Joi.ref('check_in_date')).required().messages({
     'any.required': 'Check-out date is required',

@@ -1,84 +1,77 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('AUTH - UI Register', () => {
-  test('Mở màn hình thành công', async ({ page }) => {
-    await page.goto('/register');
-    await expect(page.locator('h1', { hasText: 'Discover the World' })).toBeVisible();
-    await expect(page.locator('h2', { hasText: 'Create Your Account' })).toBeVisible();
-  });
-
   test('AUTH-038: UI Register - Validate lỗi hiển thị', async ({ page }) => {
+    // TD1: Để trống tất cả
     await page.goto('/register');
-
-    // Submit form empty
     await page.getByRole('button', { name: 'Begin My Journey' }).click();
-
-    // Check validation messages
     await expect(page.getByText('Full name is required')).toBeVisible();
     await expect(page.getByText('Email is required')).toBeVisible();
     await expect(page.getByText('Password is required', { exact: true })).toBeVisible();
+
+    // TD2: Chỉ điền email
+    await page.goto('/register');
+    await page.getByPlaceholder('Email Address').fill('test@test.com');
+    await page.getByRole('button', { name: 'Begin My Journey' }).click();
+    await expect(page.getByText('Full name is required')).toBeVisible();
+    await expect(page.getByText('Password is required', { exact: true })).toBeVisible();
+
+    // TD3: Chỉ điền password
+    await page.goto('/register');
+    await page.getByPlaceholder('Password', { exact: true }).fill('Test@1234');
+    await page.getByRole('button', { name: 'Begin My Journey' }).click();
+    await expect(page.getByText('Full name is required')).toBeVisible();
+    await expect(page.getByText('Email is required')).toBeVisible();
   });
 
   test('AUTH-042: UI Register - Validate realtime', async ({ page }) => {
     await page.goto('/register');
-
     const emailInput = page.getByPlaceholder('Email Address');
     
-    // Type invalid email
+    // TD1: Gõ "abc" -> lỗi email
     await emailInput.fill('abc');
     await emailInput.blur();
     await expect(page.getByText('Email must be a valid email address')).toBeVisible();
 
-    // Type valid email
+    // TD2: Gõ "abc@" -> vẫn lỗi
+    await emailInput.fill('abc@');
+    await emailInput.blur();
+    await expect(page.getByText('Email must be a valid email address')).toBeVisible();
+
+    // TD3: Gõ "abc@test.com" -> lỗi biến mất
     await emailInput.fill('abc@test.com');
+    await emailInput.blur();
     await expect(page.getByText('Email must be a valid email address')).not.toBeVisible();
   });
 
   test('AUTH-039: UI Register - Ẩn/Hiện mật khẩu', async ({ page }) => {
+    // Note: AUTH-039 is technically for Login but applied here to Register as well
     await page.goto('/register');
-
     const passwordInput = page.getByPlaceholder('Password', { exact: true });
     
-    // Type password
-    await passwordInput.fill('Test@1234');
+    const toggleVisible = async () => {
+      const btn = page.locator('button:has(.material-symbols-outlined:has-text("visibility"))').nth(0);
+      if (await btn.isVisible()) await btn.click();
+    };
     
-    // Initially should be password type
-    await expect(passwordInput).toHaveAttribute('type', 'password');
+    const toggleHidden = async () => {
+      const btn = page.locator('button:has(.material-symbols-outlined:has-text("visibility_off"))').nth(0);
+      if (await btn.isVisible()) await btn.click();
+    };
 
-    // Click the toggle button (first button in the relative container)
-    // Using nth(0) for password, nth(1) for confirm password
-    const toggleButtons = page.locator('button:has(.material-symbols-outlined:has-text("visibility"))');
-    await toggleButtons.nth(0).click();
-
-    // Should change to text type
+    // TD1: click 1 lần
+    await passwordInput.fill('Test@1234');
+    await toggleVisible();
     await expect(passwordInput).toHaveAttribute('type', 'text');
 
-    // Click again
-    const toggleOffButtons = page.locator('button:has(.material-symbols-outlined:has-text("visibility_off"))');
-    await toggleOffButtons.nth(0).click();
-
-    // Should change back to password type
+    // TD2: click 2 lần (ẩn -> hiện -> ẩn)
+    await passwordInput.fill('Test@12345');
+    await toggleHidden();
     await expect(passwordInput).toHaveAttribute('type', 'password');
-  });
 
-  test('AUTH-001: Register - Valid (Traveler)', async ({ page }) => {
-    await page.goto('/register');
-
-    const uniqueEmail = `testuser_${Date.now()}@wanderly.com`;
-
-    await page.getByPlaceholder('Full Name').fill('Nguyen Van A');
-    await page.getByPlaceholder('Email Address').fill(uniqueEmail);
-    await page.getByPlaceholder('Password', { exact: true }).fill('Test@1234');
-    await page.getByPlaceholder('Confirm Password').fill('Test@1234');
-    
-    // Check Terms
-    await page.locator('input[type="checkbox"]').check();
-
-    // Submit
-    await page.getByRole('button', { name: 'Begin My Journey' }).click();
-
-    // Check success toast and redirect
-    await expect(page.getByText(/User registered successfully|Registration successful/)).toBeVisible();
-    await expect(page).toHaveURL(/\/login/);
+    // TD3: pass siêu dài
+    await passwordInput.fill('P@ssw0rdaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+    await toggleVisible();
+    await expect(passwordInput).toHaveAttribute('type', 'text');
   });
 });

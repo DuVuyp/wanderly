@@ -3,7 +3,7 @@ import Joi from 'joi'
 const updateProfile = Joi.object({
   full_name: Joi.string().min(2).max(255),
   phone_number: Joi.string().max(20).allow('', null),
-  avatar: Joi.string().uri().allow('', null),
+  avatar: Joi.string().uri({ scheme: ['http', 'https'] }).allow('', null),
 })
 
 const changePassword = Joi.object({
