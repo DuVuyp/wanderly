@@ -62,6 +62,8 @@
 
 ---
 
+| AUTH-033(*) | Login - Rate Limit | Chặn IP/Khóa acc sau 5 lần sai | 1. POST /api/auth/login sai 5 lần | **TD1:** Sai pass 5 lần liên tục<br>**TD2:** Tạm khóa 15p<br>**TD3:** Trả Status 429 | Status 429, Too many login attempts | | | | | [ ] | Thêm Rate Limit / Cơ chế Lock account | [ ] |
+
 ## Module 2: Profile
 
 **Module Name:** Module_Profile
@@ -105,6 +107,8 @@
 | PROF-028 | Ngoại lệ - Upload error (Cloudinary) | API upload ảnh lỗi | 1. Upload avatar 2. Cloudinary trả 500 | **TD1:** Server Cloudinary 500<br>**TD2:** Timeout<br>**TD3:** File quá lớn (>10MB) | Backend xử lý an toàn, UI báo "Cannot upload image at this time" | | | |  | [x] | | [x] |
 
 ---
+
+| PROF-029(*) | Update Profile - Duplicate phone | Ràng buộc DB UNIQUE phone_number | 1. Cập nhật SDT đã tồn tại | **TD1:** Trùng SDT user khác | Status 409, Phone number already in use | | | | | [ ] | Thêm @unique cho phone_number ở schema.prisma và migrate DB | [ ] |
 
 ## Module 3: Provider Management
 
@@ -165,6 +169,10 @@
 ---
 ---
 
+| PROV-041(*) | UI Create Property - Map marker | Kéo marker lấy tọa độ (Thay nhập tay) | 1. Kéo thả marker trên UI | **TD1:** Kéo sang vị trí A<br>**TD2:** Kéo sang vị trí B<br>**TD3:** Lat/Lng tự điền | Tọa độ trên ô input tự động nhảy | | | | | [ ] | Tích hợp Leaflet / Google Maps vào form Create Property | [ ] |
+| PROV-042(*) | UI Upload - Progress Bar & Preview | Upload ảnh hiển thị % và xem trước | 1. Chọn 3 ảnh upload | **TD1:** Upload thành công 3 ảnh<br>**TD2:** Ảnh preview rõ nét | Hiển thị % tiến độ và ảnh thu nhỏ (preview) | | | | | [ ] | Code UI Progress bar và Object URL Preview ảnh | [ ] |
+| PROV-043(*) | Upload - Logic Constraint | Giới hạn dung lượng, định dạng, max ảnh | 1. Upload ảnh sai điều kiện | **TD1:** File > 5MB<br>**TD2:** File .txt<br>**TD3:** Upload > 10 ảnh | Status 400 Validation Error | | | | | [ ] | Bổ sung fileFilter, maxSize, maxCount vào Multer Middleware | [ ] |
+
 ## Module 4: Admin Management
 
 **Module Name:** Module_AdminManagement
@@ -212,6 +220,8 @@
 | ADM-031 | Logic - Luồng cấp lại mật khẩu | Admin force reset password | 1. Admin bấm Reset Pass cho user | **TD1:** Reset cho traveler<br>**TD2:** Reset cho provider<br>**TD3:** Reset cho admin khác | Trả về mật khẩu ngẫu nhiên hoặc link reset | Mật khẩu mới được update | | | Ghi nhận nếu chưa implement tính năng này | [x] | | [x] |
 
 ---
+
+| ADM-032(*) | UI Admin - Debounce & Pagination | Bảng dữ liệu real-time search & Modal | 1. Gõ ô search 2. Phân trang 3. Tương tác Modal xóa | **TD1:** Debounce 500ms<br>**TD2:** Pagination động<br>**TD3:** Màu sắc Modal hợp lý | UX mượt mà, API gọi đúng số lần, UI thân thiện | | | | | [ ] | Thêm Lodash.debounce, Fix màu modal Delete | [ ] |
 
 ## Module 5: Booking
 
@@ -262,3 +272,5 @@
 | BOOK-032 | Logic - Race Condition | Đặt cùng lúc phòng cuối | 1. 2 user gọi API tạo booking cùng lúc | **TD1:** UserA và UserB gọi cho room cuối (qty=1)<br>**TD2:** 3 User cùng gọi<br>**TD3:** User C gọi room có qty=2 | Request 1 pass (201), Request 2 tạch (400 - hết phòng) | Không bị overbooking | | | DB Transaction test | [x] | | [x] |
 
 ---
+
+| BOOK-034(*) | UI Booking - Race Condition | Thông báo thân thiện khi phòng bị lấy mất | 1. API trả về 400 Not enough rooms | **TD1:** Đặt phòng cuối cùng bị người khác giành | UI hiện Toast "Rất tiếc, phòng vừa bị đặt..." | | | | | [ ] | Bắt error code và làm Toast UI thân thiện | [ ] |
