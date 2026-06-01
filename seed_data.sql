@@ -1,8 +1,3 @@
--- Chạy 3 dòng dưới đây để reset dữ liệu database
-EXEC sp_MSforeachtable 'ALTER TABLE ? NOCHECK CONSTRAINT ALL';
-EXEC sp_MSforeachtable 'DELETE FROM ?';
-EXEC sp_MSforeachtable 'ALTER TABLE ? WITH CHECK CHECK CONSTRAINT ALL';
-
 USE wanderly;
 GO
 

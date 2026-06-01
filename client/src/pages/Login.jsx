@@ -48,8 +48,11 @@ export default function Login() {
     if (location.state?.authRequired && !hasShownRedirectNotice.current) {
       hasShownRedirectNotice.current = true;
       toast.error(location.state.message || 'Please sign in to continue.');
+      
+      // Xóa state để khi user ấn F5 (reload), thông báo không bị hiện lại
+      navigate(location.pathname, { replace: true, state: {} });
     }
-  }, [location.state]);
+  }, [location.state, location.pathname, navigate]);
 
   const onSubmit = async (data) => {
     try {
