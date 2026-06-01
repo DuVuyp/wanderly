@@ -2,9 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('MODULE 3: Provider Management UI', () => {
   test('PROV-040: UI Create Property - Kéo thả bản đồ', async ({ page }) => {
-    // Sử dụng test.fail() vì tính năng Map chưa được implement theo đúng tinh thần TDD
-    // Playwright sẽ mong đợi test này FAIL. Nếu nó vô tình PASS, Playwright sẽ báo lỗi.
-    test.fail(true, 'Tính năng kéo thả bản đồ (Leaflet/Google Maps) chưa được tích hợp vào UI');
+    // Tính năng Map chưa được implement, test sẽ tự động Timeout (FAIL) và hiện màu đỏ.
 
     // Mở trang tạo Property
     // Lưu ý: Cần login bằng role provider trước, nhưng vì test này chắc chắn fail ở bước map 
